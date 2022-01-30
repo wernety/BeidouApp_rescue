@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_chat.xml" value="0.25" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_login.xml" value="0.21822916666666667" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/contact_item.xml" value="0.24583333333333332" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/fragment_home.xml" value="0.21875" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/fragment_relation.xml" value="0.21875" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_chat_receive_text.xml" value="0.21041666666666667" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_chat_send_text.xml" value="0.21041666666666667" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_tree.xml" value="0.24583333333333332" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/other_loc.xml" value="0.21875" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.16666666666666666" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/btn_multi_bg.xml" value="0.21822916666666667" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/btn_send_bg_disable.xml" value="0.21822916666666667" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/btn_voice_or_text.xml" value="0.21822916666666667" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/edit_background.xml" value="0.19895833333333332" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.10462962962962963" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/jmui_back_btn_bg.xml" value="0.21822916666666667" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/jmui_msg_send_bg.xml" value="0.21822916666666667" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/msg_list_divider.xml" value="0.20104166666666667" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/selector.xml" value="0.16666666666666666" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/activity_activitypermission.xml" value="0.1828125" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/activity_bluetooth.xml" value="0.1828125" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/activity_chat.xml" value="0.1828125" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/activity_login.xml" value="0.25" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/activity_safe.xml" value="0.1828125" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/activity_user.xml" value="0.1828125" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/contact_item.xml" value="0.18489583333333334" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_dashboard.xml" value="0.20208333333333334" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_home.xml" value="0.1" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_message.xml" value="0.18697916666666667" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_message_contact_item.xml" value="0.18229166666666666" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_news.xml" value="0.2015625" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_notifications.xml" value="0.20208333333333334" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_pos_manage.xml" value="0.2015625" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_relation.xml" value="0.18385416666666668" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/fragment_settings.xml" value="0.28541666666666665" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/include_contact_item.xml" value="0.18229166666666666" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/item_chat_receive_text.xml" value="0.1828125" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/item_chat_send_text.xml" value="0.20208333333333334" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/item_tree.xml" value="0.18385416666666668" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/menu.xml" value="0.34739583333333335" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/layout/view_keyboard_xhs.xml" value="0.1828125" />
+        <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/menu/main_activity_bottom.xml" value="0.20208333333333334" />
+        <entry key="..\:/开发-备份/beidou组外/BeidouApp/app/src/main/res/layout/activity_login.xml" value="0.21875" />
+        <entry key="..\:/开发-备份/beidou组外/BeidouApp/app/src/main/res/layout/activity_main.xml" value="0.21875" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

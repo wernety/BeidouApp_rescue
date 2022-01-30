@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/mainAct_bottom_home"
+        android:enabled="true"
+        android:title="首页"
+        android:icon="@drawable/home"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/mainAct_bottom_message"
+        android:enabled="true"
+        android:title="消息"
+        android:icon="@drawable/message"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/mainAct_bottom_relation"
+        android:enabled="true"
+        android:title="组织"
+        android:icon="@drawable/relation"
+        app:showAsAction="ifRoom" />
+<!--    <item android:id="@+id/mainAct_bottom_posManage"-->
+<!--        android:enabled="true"-->
+<!--        android:title="地点管理"-->
+<!--        android:icon="@drawable/ic_launcher_foreground"-->
+<!--        app:showAsAction="ifRoom" />-->
+
+    <item android:id="@+id/mainAct_bottom_settings"
+        android:enabled="true"
+        android:title="我的"
+        android:icon="@drawable/settings"
+        app:showAsAction="ifRoom" />
+</menu>
