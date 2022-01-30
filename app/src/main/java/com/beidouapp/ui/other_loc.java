@@ -91,7 +91,7 @@ public class other_loc extends AppCompatActivity {
             public void onCheckClick(View v, int pos) {
 
                 Relation relation = relationList.get(pos);
-//                String id = relation.getId();
+                String id = relation.getId();
 //                String nickname = relation.getLabel();
 //                Intent intent = new Intent(context, ChatActivity.class);
 //                intent.putExtra("uid", id);
