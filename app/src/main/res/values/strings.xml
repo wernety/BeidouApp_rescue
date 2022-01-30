@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">BeidouApp</string>
+    <string name="uname_hint">请输入用户名</string>
+    <string name="pwd_hint">请输入密码</string>
+    <string name="login">Login</string>
+    <string name="quit">Quit</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="test_frag1">test1</string>
+    <string name="test_frag2">test2</string>
+    <string name="test_frag3">test3</string>
+    <string name="test_frag4">test4</string>
+    <string name="test_frag5">test5</string>
+    <string name="my_user">用户</string>
+    <string name="Account_information">账户资料</string>
+    <string name="security_setting">安全设置</string>
+    <string name="Authority_management">权限管理</string>
+    <string name="offline_map">离线地图</string>
+    <string name="Memory_cleanup">存储清理</string>
+    <string name="Bluetooth_Settings">蓝牙设置</string>
+    <string name="Short_message_sequence">短报文队列</string>
+    <string name="Log_out">退出登录</string>
+    <string name="title_activity_1">Activity1</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+</resources>

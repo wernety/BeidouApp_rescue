@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <!--    <Button-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="50dp"-->
+    <!--        android:id="@+id/btn1"-->
+    <!--        android:text="定位更新"/>-->
+
+    <!--    <Button-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="50dp"-->
+    <!--        android:id="@+id/btn2"-->
+    <!--        android:text="下载武汉地图"/>-->
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.baidu.mapapi.map.MapView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/mMV"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/fangxiang">
+            </ImageView>
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="HH:mm:ss"
+                android:format24Hour="HH:mm:ss"
+                android:textColor="@color/info_text_color"
+                android:hint="显示时间"
+                android:textSize="40sp"/>
+            <TextView
+                android:id="@+id/temperature"
+                android:layout_width="120dp"
+                android:layout_height="47dp"
+                android:autoLink="phone"
+                android:gravity="left"
+                android:hint="28°C"
+                android:textColor="@color/info_text_color"
+                android:textSize="35sp" />
+            <TextView
+                android:id="@+id/altitude"
+                android:layout_width="120dp"
+                android:layout_height="47dp"
+                android:autoLink="phone"
+                android:gravity="left"
+                android:hint="3617米"
+                android:textColor="@color/info_text_color"
+                android:textSize="25sp" />
+            <TextView
+                android:id="@+id/pressure"
+                android:layout_width="120dp"
+                android:layout_height="47dp"
+                android:autoLink="phone"
+                android:gravity="left"
+                android:hint="101kpa"
+                android:textColor="@color/info_text_color"
+                android:textSize="25sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="right"
+            android:layout_marginTop="30dp">
+
+            <ImageButton
+                android:id="@+id/heat"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/boder"
+                android:src="@drawable/heat" />
+
+            <ImageButton
+                android:id="@+id/location"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/boder"
+                android:src="@drawable/location" />
+
+            <ImageButton
+                android:id="@+id/people"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/boder"
+                android:src="@drawable/people" />
+
+            <ImageButton
+                android:id="@+id/guiji"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/boder"
+                android:src="@drawable/guiji" />
+
+            <ImageButton
+                android:id="@+id/dingwei"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/boder"
+                android:src="@drawable/dingwei" />
+            <ImageButton
+                android:id="@+id/download"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/boder"
+                android:src="@drawable/download" />
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

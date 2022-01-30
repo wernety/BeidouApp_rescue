@@ -1,0 +1,60 @@
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent"-->
+<!--    tools:context=".ui.fragment.MessageFragment">-->
+
+<!--    &lt;!&ndash; TODO: Update blank fragment layout &ndash;&gt;-->
+<!--    <ListView-->
+<!--        android:id="@+id/msgfrag_listView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:divider="@drawable/msg_list_divider"-->
+<!--        android:dividerHeight="1.5px"-->
+<!--        android:layout_marginBottom="50dp">-->
+<!--    </ListView>-->
+
+<!--</FrameLayout>-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar1"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/more_icon"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_gravity="right"
+            android:id="@+id/toolbar_title" />
+        <EditText
+            android:id="@+id/search_et_input"
+            android:layout_gravity="center|bottom"
+            android:drawableRight="@drawable/search_icon"
+            android:paddingRight="5dp"
+            android:background="@null"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="16sp"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:hint=""/>
+
+    </androidx.appcompat.widget.Toolbar>
+    <ListView
+        android:id="@+id/msg_frag_listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/msg_list_divider"
+        android:dividerHeight="1.5px"
+        android:layout_marginBottom="50dp">
+    </ListView>
+</LinearLayout>
