@@ -90,7 +90,7 @@ public class other_loc extends AppCompatActivity {
             @Override
             public void onCheckClick(View v, int pos) {
 
-//                Relation relation = relationList.get(pos);
+                Relation relation = relationList.get(pos);
 //                String id = relation.getId();
 //                String nickname = relation.getLabel();
 //                Intent intent = new Intent(context, ChatActivity.class);
