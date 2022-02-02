@@ -13,6 +13,7 @@ public abstract class BaseTreeAdapter<T extends RecyclerView.ViewHolder,E extend
         super(list, context);
     }
     private int oldCheck = -1;
+
     public void setCheck(List<? extends BaseModel> mList, int position) {
         if (oldCheck >= 0 && mList.size() > oldCheck){
             mList.get(oldCheck).setCheck(false);
@@ -57,6 +58,27 @@ public abstract class BaseTreeAdapter<T extends RecyclerView.ViewHolder,E extend
                     removeChild(model.getId(),mList,removeIndex);
                 }
             }
+        }
+    }
+
+    public<W extends BaseModel> void checkOrUncheck(List<W> mList, int pos) {
+        W model = mList.get(pos);
+        if (model.isCheck()){
+            //如果是展开  把他关闭
+            model.setCheck(false);
+            //移除子集
+//            removeChild(model.getId(),mList,0);
+        }else {
+            //关闭状态  就是展开
+            model.setCheck(true);
+//            List<W> children = (List<W>) model.getChildren();
+//            int size = children.size();
+//            //pos是你点击的item的position
+//            int leave = model.getLeave() + 1;
+//            for (int i = 0;i < size;i++){
+//                children.get(i).setLeave(leave);
+//            }
+//            mList.addAll(pos+1,children);
         }
     }
 }

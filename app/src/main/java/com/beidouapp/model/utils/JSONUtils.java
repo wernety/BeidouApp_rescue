@@ -58,6 +58,11 @@ public class JSONUtils {
         return regist_fail;
     }
 
+    public static onlinestetusON receiveOnlinestetusONJson(String json){
+        onlinestetusON onlinestetusON = JSON.parseObject(json, com.beidouapp.model.messages.onlinestetusON.class);
+        return  onlinestetusON;
+    }
+
     public static JSONObject Receive(String json) {
         JSONObject object = JSON.parseObject(json);
         return object;

@@ -193,13 +193,6 @@ public class MainActivity extends AppCompatActivity {
     private void StartMsgService(){
         intentservice = new Intent(MainActivity.this, MsgService.class);
         intentservice.putExtra("uid", user4Login.getUsername());
-//        Log.d("zw", "StartMsgService: 传入service里面的curToken为：" + curToken);
-//        intentservice.putExtra("curToken", curToken);
-//        while(intentservice.getStringExtra("curToken") == null)
-//        {
-//            Log.d("zw", "StartMsgService: 传入service里面的curToken为：" + curToken);
-//        }
-//        Log.d("zw", "StartMsgService: 传入service里面的curToken为：" + curToken);
         bindService(intentservice, serviceConnection, BIND_AUTO_CREATE);
         startService(intentservice);
     }

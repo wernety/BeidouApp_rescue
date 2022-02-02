@@ -490,8 +490,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 Intent intent = new Intent(getActivity(), other_loc.class);
                                 intent.putExtra("token", token);
                                 intent.putExtra("curToken", curToken);
+                                intent.putExtra("status", bodyOtherLoc);
+//                                Log.d("zw", "handleMessage: post亮哥的服务器得到的数据" + bodyOtherLoc);
 //                                intent.putExtra()
-                                startActivity(intent);
+                                startActivityForResult(intent, 1); //这里注意使用的是带有回调方式的，回调代码为1
                                 break;
                             }
                             default:{break;}
@@ -503,11 +505,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/getStatus", new OkHttpUtils.MyCallback() {
+                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/getStatus1", new OkHttpUtils.MyCallback() {
                             @Override
                             public void success(Response response) throws IOException {
                                 bodyOtherLoc = response.body().string();
                                 Log.d("zw", "success: post亮哥的服务器得到的数据" + bodyOtherLoc);
+                                Message message = new Message();
+                                message.what = 1;
+                                handlerOtherloc.sendMessage(message);
                             }
 
                             @Override
@@ -516,9 +521,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             }
                         });
 
-                        Message message = new Message();
-                        message.what = 1;
-                        handlerOtherloc.sendMessage(message);
+
                     }
                 }).start();
 
@@ -824,5 +827,46 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         });
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            Log.d("zw", "onActivityResult: 回调到HomeFragment：" + requestCode);
+            Log.d("zw", "onActivityResult: 现在的resultcode是：" + resultCode);
+            if (resultCode == 2)
+            {
+                Log.d("zw", "onActivityResult: 是由other_loc Activity返回：" + resultCode);
+                Log.d("zw", "onActivityResult: 现在确定是否由other_loc返回的：" + data.getStringArrayListExtra("pos"));
+                ArrayList<String> idlist = data.getStringArrayListExtra("pos");
+                List<String> list = new ArrayList<String>(idlist);
+//                list.add("13886415060");
+                Log.d("zw", "testBDRequest: 需要获取位置的设备是：" + list);
+                posBD posBD = new posBD(list);
+                String json = JSONUtils.sendJson(posBD);
+                Log.d("zw", "testBDRequest: 准备发送给福大的json格式是：" + json);
+                try {
+                    Thread threadPos = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).postBD("http://119.3.130.87:50099/whbdApi/device/pos/getCurrent", json, new OkHttpUtils.MyCallback() {
+                                @Override
+                                public void success(Response response) throws IOException {
+                                    Log.d("zw", "success: 访问福大北斗的位置信息得到的结果："+ response.body().string());
+                                }
 
+                                @Override
+                                public void failed(IOException e) {
+                                    Log.d("zw", "failed: 访问福大北斗获取位置信息失败");
+                                }
+                            }, curToken);
+                        }
+                    });
+                    threadPos.start();
+                }catch (Exception e){
+                    Log.d("zw", "testBDRequest: 访问福大北斗位置信息线程崩溃");
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

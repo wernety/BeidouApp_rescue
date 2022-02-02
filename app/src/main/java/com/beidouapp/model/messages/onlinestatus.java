@@ -2,6 +2,8 @@ package com.beidouapp.model.messages;
 
 import java.util.List;
 
+
+//亮哥的状态数据的第一种格式（备用）
 public class onlinestatus {
 
 

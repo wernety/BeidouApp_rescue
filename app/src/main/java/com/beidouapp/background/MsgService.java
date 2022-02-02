@@ -222,17 +222,17 @@ public class MsgService extends Service {
             @Override
             public void run() {
                 cnt[0]++;
-                onHeartbeat();
+//                onHeartbeat();
                 sendLoc();
                 Log.d("zw", "run: 发送定位包");
-                if(cnt[0] == 6)
+                if(cnt[0]%6 == 0)
                 {
                     sendHeart();
                     Log.d("zw", "run: 发送状态包");
                 }
             }
         };
-        timer.schedule(heartbeatMSG, 0,1000 * 60);
+        timer.schedule(heartbeatMSG, 0,1000 * 5);
     }
 
     private void sendHeart() {
@@ -242,7 +242,8 @@ public class MsgService extends Service {
         int battery = state_request.getBattery(this);
 
         sysProperty sysProperty = new sysProperty(messageType, "北三手持终端");
-        appProperty appProperty = new appProperty("13886415060", timestamp);
+        Log.d("zw", "onHeartbeat: 在发送状态包的时候的用户是：" + uid);
+        appProperty appProperty = new appProperty(uid, timestamp);
 
         body body = new body("online", String.valueOf(battery));
 
@@ -276,7 +277,7 @@ public class MsgService extends Service {
         dataStreams.add("alarm");
 
         sysProperty sysProperty = new sysProperty(messageType, "北三手持终端");
-        appProperty appProperty = new appProperty("13886415060", timestamp, dataStreams);
+        appProperty appProperty = new appProperty(uid, timestamp, dataStreams);
 
         lonAndLat = stateRequest.loc(this);
 
@@ -316,6 +317,7 @@ public class MsgService extends Service {
         dataStreams.add("alarm");
 
         sysProperty sysProperty = new sysProperty(messageType, "北三手持终端");
+
         appProperty appProperty = new appProperty(uid, timestamp, dataStreams);
         //body body = new body("online", String.valueOf(state_request.getBattery(MsgService.this)));
 
