@@ -1,6 +1,7 @@
 package com.beidouapp.ui;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import androidx.annotation.NonNull;
@@ -37,6 +38,8 @@ import com.beidouapp.ui.fragment.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.beidouapp.model.utils.NetworkManager;
 import com.beidouapp.model.messages.regist;
+
+import org.litepal.tablemanager.Connector;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,12 +86,14 @@ public class MainActivity extends AppCompatActivity {
     private String curToken;
     private regist regist;
     private Intent intentservice;
+    private DemoApplication application;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.activity_main);
 
         Log.d("zw", "onCreate: " + "开始");
@@ -102,11 +107,18 @@ public class MainActivity extends AppCompatActivity {
             curToken = "f9bddcacc678ea185bf8158d90087fbc";
             initUserAndMsgNowang();
         }
+        iniDbForRecord();
         initUser();
         initUI();
         initListener();
         StartMsgService();
         mContext = getContext();
+    }
+
+    //LitePal数据库初始化，用于记录curtoken，组织结构以及uid，password
+    private void iniDbForRecord() {
+        application = (DemoApplication) this.getApplicationContext();
+        application.dbForRecord = Connector.getDatabase(); //这里是创库顺便创意张空表
     }
 
     private void initUserAndMsgNowang() {
@@ -257,22 +269,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void success(Response response) throws IOException {
                             Log.d("zw", "success: 成功传入福大");
-//                            String body =response.body().toString();
-//                            Log.d("zw", "success: " + response.toString());
-//                            Log.d("zw", "success: " + response.body().toString());
-//                            Log.d("zw", "success: " + response.message());
                             JSONObject object = JSON.parseObject(response.body().string());
                             Log.d("zw", "success: 福大的json对象" + object);
                             JSONObject data = object.getJSONObject("data");
                             String token1 = data.getString("token");
-//                            registToken registToken = JSONUtils.receiveTokenJson(body);
-//                            Log.d("zw", "success: " + registToken);
                             Log.d("zw", "success: " + token1);
                             bundle.putString("curToken", token1);
-//                            String token2 = token1;
-//                            Log.d("zw", "success: " + token1);
-//                            intentservice.putExtra("curToken", token1);
-//                            Log.d("zw", "success: 在子线程里面传入后，又得到的intenservice.putextra：" + intentservice.getStringExtra("curToken"));
                             
                             Message message = new Message();
                             message.what = 1;

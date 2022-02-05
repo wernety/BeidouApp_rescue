@@ -121,6 +121,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private ImageButton otherLocbtn;
     private String token;
     private String bodyOtherLoc;
+    private String uid;
 
 
     @Override
@@ -133,14 +134,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        mapView = view.findViewById(R.id.mMV);
-        btn1 = view.findViewById(R.id.dingwei);
-        btn2 = view.findViewById(R.id.download);
-        otherLocbtn = view.findViewById(R.id.people);
-        btn1.setOnClickListener(this);
-        btn2.setOnClickListener(this);
-        otherLocbtn.setOnClickListener(this);
-        mMap = mapView.getMap();
+
+        iniAll(view);
+
 
         username = "User0";
         password = "000000";
@@ -148,6 +144,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         curToken = getArguments().get("curToken").toString();
         token = getArguments().getString("token").toString();
+        uid = getArguments().getString("loginId");
+        Log.d("zw", "onCreateView: 测试用的uid是：" + uid);
         Log.d("zw", "onCreateView: 测试用的curToken是：" + token);
         Log.d("zw", "onCreateView: 测试用的curToken是：" + curToken);
 
@@ -175,14 +173,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
 
-//        Log.d("zw", "onCreateView: " + curToken.toString());
-
-
-//        String sign = GenerateTokenDemo.generate();
-
-        // Inflate the layout for this fragment
         return view;
 
+    }
+
+    private void iniAll(@NonNull View view) {
+        mapView = view.findViewById(R.id.mMV);
+        btn1 = view.findViewById(R.id.dingwei);
+        btn2 = view.findViewById(R.id.download);
+        otherLocbtn = view.findViewById(R.id.people);
+        btn1.setOnClickListener(this);
+        btn2.setOnClickListener(this);
+        otherLocbtn.setOnClickListener(this);
+        mMap = mapView.getMap();
     }
 
 
@@ -491,6 +494,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 intent.putExtra("token", token);
                                 intent.putExtra("curToken", curToken);
                                 intent.putExtra("status", bodyOtherLoc);
+                                intent.putExtra("uid", uid);
 //                                Log.d("zw", "handleMessage: post亮哥的服务器得到的数据" + bodyOtherLoc);
 //                                intent.putExtra()
                                 startActivityForResult(intent, 1); //这里注意使用的是带有回调方式的，回调代码为1
@@ -517,7 +521,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                             @Override
                             public void failed(IOException e) {
-
+//                                没有网络的时候，显示的应该全是空，及这个时候的json数据为空，但是注意bodyOtherloc仍然需要初始化
                             }
                         });
 
@@ -866,6 +870,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     Log.d("zw", "testBDRequest: 访问福大北斗位置信息线程崩溃");
                     e.printStackTrace();
                 }
+            }
+            else if(resultCode == 0)
+            {
+
             }
         }
     }

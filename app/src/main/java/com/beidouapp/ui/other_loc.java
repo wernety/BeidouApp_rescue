@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
+import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.Relation;
 import com.beidouapp.model.User;
 import com.beidouapp.model.adapters.RelationAdapter;
@@ -25,12 +26,16 @@ import com.beidouapp.model.adapters.locOthers;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.messages.onlinestetusON;
 
+import org.litepal.LitePal;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Response;
 
+
+//在首页当中显示的组织架构
 public class other_loc extends AppCompatActivity implements View.OnClickListener {
     private RecyclerView recyclerView;
     private String token;
@@ -42,6 +47,11 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
     private String bodyOtherLoc;
     private onlinestetusON onlinestetusON;
     private int cntDeviceID;
+    private String curToken;
+    private orgAndUidAndKey record;
+    private String uid;
+    private List<orgAndUidAndKey> records;
+    private String orgRecord;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,7 +59,11 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
         setContentView(R.layout.other_loc);
         Bundle bundle = this.getIntent().getExtras();
         token = bundle.getString("token");
+        curToken = bundle.getString("curToken");
         bodyOtherLoc = bundle.getString("status");
+        uid = bundle.getString("uid");
+//        flag = bundle.getBoolean("flag");
+//        writeToDb();
         cntDeviceID = 0;
         Log.d("zw", "onCreate: 从亮哥那儿拿到的消息，显示在other_loc中：" + bodyOtherLoc);
         onlinestetusON = JSONUtils.receiveOnlinestetusONJson(bodyOtherLoc);
@@ -67,11 +81,36 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
         RefreshRecyclerView(this, token);
     }
 
+    //这里是将数据储存至数据库当中，从而使得没有网络的时候，也有可操作空间，初始化数据库在MainActivity中，注意这里只有打开这个activity才能储存
+    private void writeToDb() {
+        records = LitePal.where("uid = ?", uid).find(orgAndUidAndKey.class);
+        Log.d("zw", "writeToDb: 此时的记录是" + records);
+        if(records.isEmpty())
+        {
+            record = new orgAndUidAndKey();
+            record.setOrg(orgRecord);  //结构应该使用字符串加入进去，直接使用的是服务器回传的response里的body的String
+            record.setCurToken(curToken);
+            record.setUid(uid);
+            record.save();
+            Log.d("zw", "writeToDb: 此时数据库为空，初次设置库：");
+//            record.setPass(); //这里是设置密码，可以用来验证登录
+        }else{
+            //如果存在此账号，修改该账号下的所有信息
+            record = records.get(0);    //首先获取这条记录
+            record.setOrg(orgRecord);
+            record.setCurToken(curToken);
+            record.save();
+            Log.d("zw", "writeToDb: 此时的记录是：" + record.getPass() + " 用户是 " + record.getUid());
+        }
+    }
+
     public void RefreshRecyclerView (Context context, String token) {
         OkHttpUtils.getInstance(context).get("http://139.196.122.222:8080/system/dept/user", token, new OkHttpUtils.MyCallback() {
             @Override
             public void success(Response response) throws IOException {
-                JSONObject object = JSON.parseObject(response.body().string());
+                orgRecord = response.body().string();
+                writeToDb();  //储存至数据库
+                JSONObject object = JSON.parseObject(orgRecord);
                 int code = object.getInteger("code");
                 if (code == 200) {
                     JSONArray array = (JSONArray) object.get("data");
@@ -84,23 +123,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
                         @Override
                         public void run() {
                             relationList = list;
-//                            int i,j;
-//                            int num;
-//                            num = relationList.size();
-                            //
                             Log.d("zw", "run: relationlist里面的数据是" + relationList.toString());
-//                            for(i=0;i<cntDeviceID;i++){
-//                                for(j=0;j<num;j++)
-//                                {
-//                                    if(onlinestetusON.getDeviceId().get(i) == relationList.get(j).getId())
-//                                    {
-//                                        if(onlinestetusON.getStatus().get(i) == 1)
-//                                        Log.d("zw", "run: 在状态栏里面改变状态");
-//                                        Log.d("zw", "run: 改变状态的ID是" + onlinestetusON.getDeviceId().get(i));
-//                                    }
-//                                }
-//                            }
-
                             initRelationRecyclerView();
                             initRelationListener();
                         }
