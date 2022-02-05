@@ -54,6 +54,7 @@ import com.baidu.mapapi.map.offline.MKOfflineMapListener;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beidouapp.R;
+import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.messages.Other_loc;
 import com.beidouapp.model.messages.recOtherPositions;
 import com.beidouapp.model.utils.JSONUtils;
@@ -64,6 +65,8 @@ import com.beidouapp.model.utils.MyOrientationListener;
 import com.beidouapp.ui.MainActivity;
 import com.beidouapp.ui.other_loc;
 
+
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.sql.Time;
@@ -122,6 +125,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private String token;
     private String bodyOtherLoc;
     private String uid;
+    private List<orgAndUidAndKey> records;
+    private orgAndUidAndKey record;
+    private String org;
 
 
     @Override
@@ -153,7 +159,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
        lonAndLat = loc(getActivity().getApplicationContext());
         Log.d("zw", "onCreateView: " + lonAndLat.toString());
-        transToBD();
+        try {
+            transToBD();
+        }catch (Exception e){
+            Log.d("zw", "onCreateView: 位置信息捕获失败");
+            e.printStackTrace();
+            //使用其他方式获取位置
+
+        }
 
 
         mMap.getUiSettings().setCompassEnabled(false);
@@ -500,6 +513,25 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 startActivityForResult(intent, 1); //这里注意使用的是带有回调方式的，回调代码为1
                                 break;
                             }
+                            case 2:{
+                                bodyOtherLoc = new String();
+                                records = LitePal.where("uid = ?", uid).find(orgAndUidAndKey.class);
+                                if(records.isEmpty()){
+                                    org = new String();
+                                    curToken = "f9bddcacc678ea185bf8158d90087fbc";
+                                    Log.d("zw", "failed: 这个账号原本没有登陆，数据库查无此人信息，返回的所有东西都将是空");
+                                }else{
+                                    record = records.get(0);
+                                    org = record.getOrg();
+                                }
+                                Intent intent = new Intent(getActivity(), other_loc.class);
+                                token = new String(); //这地方先写了，没有网络的时候，token为空
+                                intent.putExtra("token", token);
+                                intent.putExtra("curToken", curToken);
+                                intent.putExtra("status", bodyOtherLoc);
+                                intent.putExtra("uid", uid);
+                                break;
+                            }
                             default:{break;}
                         }
 
@@ -509,6 +541,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        Log.d("zw", "run: 开始进行网络请求");
                         OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/getStatus1", new OkHttpUtils.MyCallback() {
                             @Override
                             public void success(Response response) throws IOException {
@@ -521,7 +554,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                             @Override
                             public void failed(IOException e) {
-//                                没有网络的时候，显示的应该全是空，及这个时候的json数据为空，但是注意bodyOtherloc仍然需要初始化
+//                                没有网络的时候，拿取数据库里面的字段，传入到other_loc里面，使得在无网络的情况下也能正常显示组织
+//                                此时的bodyOtherLoc必须是空
+                                Log.d("zw", "failed: 网络请求返回参数失败");
+                                Message message = new Message();
+                                message.what = 2;
+                                handlerOtherloc.sendMessage(message);
+
                             }
                         });
 
