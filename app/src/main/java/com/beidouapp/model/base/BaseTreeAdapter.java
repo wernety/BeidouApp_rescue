@@ -64,7 +64,7 @@ public abstract class BaseTreeAdapter<T extends RecyclerView.ViewHolder,E extend
     public<W extends BaseModel> void checkOrUncheck(List<W> mList, int pos) {
         W model = mList.get(pos);
         if (model.isCheck()){
-            //如果是展开  把他关闭
+            //如果是选中  把他关闭
             model.setCheck(false);
             //移除子集
 //            removeChild(model.getId(),mList,0);

@@ -79,13 +79,7 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
                 }
             }
         }
-//        if(bean.isCheck())
-//        {
-//
-//        }else{
-//
-//        }
-        //是否离线
+
         int left = (int) ((bean.getLeave() + 1) * fixLeft);
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) holder.ivAvatar.getLayoutParams();
         layoutParams.leftMargin = left;

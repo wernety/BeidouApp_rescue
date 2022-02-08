@@ -1,7 +1,10 @@
 package com.beidouapp.ui.fragment;
 
+import static com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.os.Handler;
 import android.os.Message;
@@ -24,18 +28,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroupOverlay;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.baidu.location.BDAbstractLocationListener;
-import com.baidu.location.BDLocation;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.InfoWindow;
-import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
@@ -44,7 +44,6 @@ import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
-import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.map.offline.MKOLSearchRecord;
@@ -60,25 +59,25 @@ import com.beidouapp.model.messages.recOtherPositions;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.messages.posBD;
-import com.beidouapp.model.messages.posFromBD;
 import com.beidouapp.model.utils.MyOrientationListener;
-import com.beidouapp.ui.MainActivity;
 import com.beidouapp.ui.other_loc;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.CancellationToken;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
+import com.google.android.gms.tasks.Task;
 
 
 import org.litepal.LitePal;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.LogRecord;
 
 import okhttp3.Response;
 
@@ -107,6 +106,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Timer timer;    //定时器
     private Handler handler;    //定时器处理
     private Handler handlerOtherloc;    //定时器处理
+    private Handler handlermyloc;   //定时器处理
     private TimerTask locFresh;     //定时器处理事务
     private LocationManager lm;     //地点管理
     private Criteria criteria;
@@ -128,6 +128,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private List<orgAndUidAndKey> records;
     private orgAndUidAndKey record;
     private String org;
+    private LocalReceiver localReceiver;
+    private LocalBroadcastManager localBroadcastManager;
+    private String pass;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationRequest locationRequest;
 
 
     @Override
@@ -144,42 +149,44 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         iniAll(view);
 
 
-        username = "User0";
-        password = "000000";
-
-
         curToken = getArguments().get("curToken").toString();
-        token = getArguments().getString("token").toString();
+        token = getArguments().getString("token");
         uid = getArguments().getString("loginId");
+        pass = getArguments().getString("pass");
         Log.d("zw", "onCreateView: 测试用的uid是：" + uid);
         Log.d("zw", "onCreateView: 测试用的curToken是：" + token);
         Log.d("zw", "onCreateView: 测试用的curToken是：" + curToken);
+        Log.d("zw", "onCreateView: 测试用的密码是： " + pass);
 
 
 
-       lonAndLat = loc(getActivity().getApplicationContext());
-        Log.d("zw", "onCreateView: " + lonAndLat.toString());
+
         try {
+            lonAndLat = loc(getActivity().getApplicationContext());
             transToBD();
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.d("zw", "onCreateView: 位置信息捕获失败");
             e.printStackTrace();
             //使用其他方式获取位置
-
+            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
+//            lonAndLat = loc2();
+            transToBD();
+            Log.d("zw", "onCreateView: 此时使用是新的定位方式");
         }
-
+        Log.d("zw", "onCreateView: " + lonAndLat.toString());
 
         mMap.getUiSettings().setCompassEnabled(false);
 
 
-        testJson();
+//        testJson();
         testBDRequest();
 
         show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
 //        show_other_loc(String.valueOf(latitude), String.valueOf(lontitude));
 
-//        timInit();
-//        handlerInit();
+        handlermyloc();
+        timInit();
+
 
         mapListen();//设置地图监听器，和地图进行交互
         otherInit();//其他地图小部件设置
@@ -242,20 +249,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     /**
      * 测试json工具是否正确的函数
      */
-    private void testJson() {
-        Other_loc other_loc = new Other_loc(username, password);
-        String json = JSONUtils.sendJson(other_loc);
-        Log.d("zw", "testJson: " + json);
-        final String[] latitude = new String[1];
-        final String[] lontitude = new String[1];
-        String body = "{\"data\":{\"position\":[{\"posTime\":\"2021-12-29 16:43:28\",\"lngDir\":1,\"lng\":\"129.456\",\"latDir\":1,\"deviceId\":\"102839\",\"lat\":\"16.321\",\"speed\":\"10.56\"}]},\"rtnMsg\":\"成功\",\"time\":1642748476622,\"rtnCode\":\"0\"}";
-        recOtherPositions pos = JSONUtils.receiveLocJSON(body);
-        latitude[0] = pos.getData().getPosition().get(0).getLat();
-        lontitude[0] = pos.getData().getPosition().get(0).getLng();
-        Log.d("zw", "testJson: " + latitude[0]);
-        Log.d("zw", "testJson: " + lontitude[0]);
-
-    }
+//    private void testJson() {
+//        Other_loc other_loc = new Other_loc(username, password);
+//        String json = JSONUtils.sendJson(other_loc);
+//        Log.d("zw", "testJson: " + json);
+//        final String[] latitude = new String[1];
+//        final String[] lontitude = new String[1];
+//        String body = "{\"data\":{\"position\":[{\"posTime\":\"2021-12-29 16:43:28\",\"lngDir\":1,\"lng\":\"129.456\",\"latDir\":1,\"deviceId\":\"102839\",\"lat\":\"16.321\",\"speed\":\"10.56\"}]},\"rtnMsg\":\"成功\",\"time\":1642748476622,\"rtnCode\":\"0\"}";
+//        recOtherPositions pos = JSONUtils.receiveLocJSON(body);
+//        latitude[0] = pos.getData().getPosition().get(0).getLat();
+//        lontitude[0] = pos.getData().getPosition().get(0).getLng();
+//        Log.d("zw", "testJson: " + latitude[0]);
+//        Log.d("zw", "testJson: " + lontitude[0]);
+//
+//    }
 
     private void transToBD() {
         LatLng point = new LatLng(Double.parseDouble(lonAndLat.get(0)),Double.parseDouble(lonAndLat.get(1)));
@@ -265,8 +272,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         LatLng desLatlon = converter.convert();
         latitude = desLatlon.latitude;
         lontitude = desLatlon.longitude;
-        Log.d("zw", "onCreateView: " + String.valueOf(latitude));
-        Log.d("zw", "onCreateView: " + String.valueOf(lontitude));
+
+//        Log.d("zw", "onCreateView: " + String.valueOf(latitude));
+//        Log.d("zw", "onCreateView: " + String.valueOf(lontitude));
     }
 
 
@@ -276,42 +284,55 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      * 由于显示位置的函数中首先将地图上的所有的marker清除，所以再次显示位置的时候，需要重新将所有的marker加载
      * 其中无网络需要将信息存入到一个消息队列中（我理解成文件）
      */
-//    private void handlerInit() {
-//        handler = new Handler() {
-//            @SuppressLint("HandlerLeak")
-//            public void handleMessage(Message message) {
-//                switch (message.what) {
-//                    case 0: {
-//                        break;
-//                    }
-//                    case 1: {
-//                        testRequest();
-//                        Log.d("zw", "handleMessage:  + 定时成功");
-//                        break;
-//                    }
-//                }
-//            }
-//        };
-//    }
-//
-//
-//    /**
-//     * timInit函数作为计时器使用，
-//     * 其中message.what中赋值的是网络状态，分为有网络和无网络情况
-//     */
-//
-//    private void timInit() {
-//        timer = new Timer();
-//        locFresh = new TimerTask() {
-//            @Override
-//            public void run() {
-//                Message message = new Message();
-//                message.what = 1;
-//                handler.sendMessage(message);
-//            }
-//        };
-//        timer.schedule(locFresh, 0, 10 * 1000);
-//    }
+    private void handlermyloc() {
+        handlermyloc = new Handler() {
+            @SuppressLint("HandlerLeak")
+            public void handleMessage(Message message) {
+                switch (message.what) {
+                    case 0: {
+                        break;
+                    }
+                    case 1: {
+
+//                        Log.d("zw", "onCreateView: 重新定位时的一些位置信息" + lonAndLat.toString());
+                        try {
+                            lonAndLat = loc(getActivity().getApplicationContext());
+                            transToBD();
+                        }catch (Exception e){
+                            Log.d("zw", "onCreateView: 位置信息捕获失败");
+                            e.printStackTrace();
+                            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
+//                            lonAndLat = loc2();
+                            transToBD();
+                        }finally {
+                            show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
+                        }
+                        Log.d("zw", "handleMessage:  + 重新定位成功");
+                        break;
+                    }
+                }
+            }
+        };
+    }
+
+
+    /**
+     * timInit函数作为计时器使用，
+     * 其中message.what中赋值的是网络状态，分为有网络和无网络情况
+     */
+
+    private void timInit() {
+        timer = new Timer();
+        locFresh = new TimerTask() {
+            @Override
+            public void run() {
+                Message messageMyloc = new Message();
+                messageMyloc.what = 1;
+                handlermyloc.sendMessage(messageMyloc);
+            }
+        };
+        timer.schedule(locFresh, 0, 10 * 1000);
+    }
 
 
     /**
@@ -330,30 +351,78 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 Log.d("zw", "loc: + 没有权限");
             }
             else{
-                lm.requestLocationUpdates("gps", 1000, 1, new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-
-                    }
-
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-
-                    }
-                });
-
+                Log.d("zw", "loc: 此时的provider为空");
             }
+            lm.requestLocationUpdates("gps", 1000, 1, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+//                    Log.d("zw", "onLocationChanged: 定位过程中位置发生改变,发送广播重新定位" );
+
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+
+            });
+//            lm.requestLocationUpdates(provider, 0, 0, (LocationListener) getActivity().getApplicationContext());
+//            Log.d("zw", "loc: 此时的provider是" + provider);
             Location location = lm.getLastKnownLocation(provider);
+            if(location != null){
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                double altitude = location.getAltitude();
+                float speed = location.getSpeed();
+                long time = location.getTime();
+
+                list.add(String.valueOf(latitude));
+                list.add(String.valueOf(longitude));
+                list.add(String.valueOf(altitude));
+                list.add(String.valueOf(speed));
+                list.add(String.valueOf(time));
+            }
+        }
+        return list;
+    }
+
+
+    /**
+     * 使用其他方法进行定位
+     * @param context
+     */
+    private List<String> locUseOtherWay(Context context) {
+        List<String> list = new ArrayList<String>();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }else{
+            Task<Location> locations = fusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, new CancellationToken() {
+                @Override
+                public boolean isCancellationRequested() {
+                    return false;
+                }
+
+                @NonNull
+                @Override
+                public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                    return null;
+                }
+            }).addOnCompleteListener((OnCompleteListener<Location>) getActivity());
+
+            Location location = locations.getResult();
+            Log.d("zw", "locUseOtherWay: 使用其他方法获取的location" + location);
             if(location != null){
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
@@ -508,6 +577,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 intent.putExtra("curToken", curToken);
                                 intent.putExtra("status", bodyOtherLoc);
                                 intent.putExtra("uid", uid);
+                                intent.putExtra("pass", pass);
 //                                Log.d("zw", "handleMessage: post亮哥的服务器得到的数据" + bodyOtherLoc);
 //                                intent.putExtra()
                                 startActivityForResult(intent, 1); //这里注意使用的是带有回调方式的，回调代码为1
@@ -530,6 +600,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 intent.putExtra("curToken", curToken);
                                 intent.putExtra("status", bodyOtherLoc);
                                 intent.putExtra("uid", uid);
+                                intent.putExtra("pass", pass);
+                                intent.putExtra("org", org);
+                                startActivityForResult(intent, 2);
                                 break;
                             }
                             default:{break;}
@@ -832,16 +905,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     private void iniMyLocMap() {
-        Log.d("zw", "iniMyLocMap: 进入角度设置初始化");
+
         myOrientationListener = new MyOrientationListener(getActivity());
         myOrientationListener.setOnOrientationListener(new MyOrientationListener.OnOrientationListener() {
 
             @Override
             public void onOrientationChanged(float x) {
-                Log.d("zw", "onOrientationChanged: 方向角为：" + x);
+                Log.d("zw", "onOrientationChanged: 进入设置方位角");
                 MyLocationData myLocData = locDataBuilder.build();
 
-                Log.d("zw", "show_my_loc: 设置的角度是" + myLocData.direction);
+
 
                 mMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
                 mMap.setMyLocationEnabled(true);
@@ -914,6 +987,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             {
 
             }
+        }
+    }
+
+    protected void createLocationRequest() {
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    private class LocalReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
         }
     }
 }

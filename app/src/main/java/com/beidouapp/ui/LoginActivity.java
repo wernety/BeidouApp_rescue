@@ -23,9 +23,12 @@ import androidx.core.content.ContextCompat;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
+import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.User4Login;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
+
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -150,10 +153,30 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         @Override
                         public void failed(IOException e) {
+                            Log.d("zw", "failed: 没有网络状态，此时使用本地数据库加载数据");
+                            List<orgAndUidAndKey> records = LitePal.where("uid = ?", username).find(orgAndUidAndKey.class);
+                            //查询数据库，如果有此人，则跳转页面
+                            if(records.isEmpty()){
+
+                            }else{
+                                Log.d("zw", "failed: 开始检测");
+                                orgAndUidAndKey record = records.get(0);
+                                Log.d("zw", "failed: 数据库中的密码是" + record.getPass());
+                                Log.d("zw", "failed: 检测结果应该是" + password);
+                                if(record.getPass().equals(password)){
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    intent.putExtra("uid", username);
+                                    intent.putExtra("upw", password);
+
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }
                             Log.d("login", e.getMessage());
                         }
                     });
         } catch (Exception e) {
+            Log.d("zw", "loginByPost: 遇到问题直接退出了");
             e.printStackTrace();
         }
     }

@@ -121,9 +121,11 @@ public class MainActivity extends AppCompatActivity {
         application.dbForRecord = Connector.getDatabase(); //这里是创库顺便创意张空表
     }
 
+    //没有网络状态下的curToken传输
     private void initUserAndMsgNowang() {
-        bundle.putString("curToken", curToken);
-        intentservice.putExtra("curToken", curToken);
+        Log.d("zw", "initUserAndMsgNowang: 此时的curToken的值为：" + curToken);
+
+//        intentservice.putExtra("curToken", curToken);
     }
 
 
@@ -186,9 +188,12 @@ public class MainActivity extends AppCompatActivity {
         user4Login = new User4Login(intent.getStringExtra("uid"),
                 "upw");
         token = intent.getStringExtra("token");
+//        pass = intent.getStringExtra("upw");
         bundle = new Bundle();
+        bundle.putString("curToken", curToken);
         bundle.putString("token", token);
         bundle.putString("loginId", user4Login.getUsername());
+        bundle.putString("pass", intent.getStringExtra("upw"));  //传密码进去
     }
 
     private void initUI() {
@@ -222,8 +227,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void getToken() {
         timestamp = System.currentTimeMillis();
-//        String token = GenerateTokenDemo.generate(timestamp, this);
-        // post福大获得token
+
         generateToken(timestamp,this);
 
 

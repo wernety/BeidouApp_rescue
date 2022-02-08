@@ -52,22 +52,18 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
     private String uid;
     private List<orgAndUidAndKey> records;
     private String orgRecord;
+    private String org;
+    private List<String> deviceIDs;
+    private List<Integer> onlineStatus;
+    private String pass;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.other_loc);
-        Bundle bundle = this.getIntent().getExtras();
-        token = bundle.getString("token");
-        curToken = bundle.getString("curToken");
-        bodyOtherLoc = bundle.getString("status");
-        uid = bundle.getString("uid");
-//        flag = bundle.getBoolean("flag");
-//        writeToDb();
-        cntDeviceID = 0;
-        Log.d("zw", "onCreate: 从亮哥那儿拿到的消息，显示在other_loc中：" + bodyOtherLoc);
-        onlinestetusON = JSONUtils.receiveOnlinestetusONJson(bodyOtherLoc);
-        cntDeviceID = onlinestetusON.getTotalCount();
+
+        ini();
+
 //        Log.d("zw", "onCreate: 需要读取状态的其他人" + onlinestetusON.getDeviceId());
 
 
@@ -81,26 +77,26 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
         RefreshRecyclerView(this, token);
     }
 
-    //这里是将数据储存至数据库当中，从而使得没有网络的时候，也有可操作空间，初始化数据库在MainActivity中，注意这里只有打开这个activity才能储存
-    private void writeToDb() {
-        records = LitePal.where("uid = ?", uid).find(orgAndUidAndKey.class);
-        Log.d("zw", "writeToDb: 此时的记录是" + records);
-        if(records.isEmpty())
-        {
-            record = new orgAndUidAndKey();
-            record.setOrg(orgRecord);  //结构应该使用字符串加入进去，直接使用的是服务器回传的response里的body的String
-            record.setCurToken(curToken);
-            record.setUid(uid);
-            record.save();
-            Log.d("zw", "writeToDb: 此时数据库为空，初次设置库：");
-//            record.setPass(); //这里是设置密码，可以用来验证登录
-        }else{
-            //如果存在此账号，修改该账号下的所有信息
-            record = records.get(0);    //首先获取这条记录
-            record.setOrg(orgRecord);
-            record.setCurToken(curToken);
-            record.save();
-            Log.d("zw", "writeToDb: 此时的记录是：" + record.getPass() + " 用户是 " + record.getUid());
+    private void ini() {
+        Bundle bundle = this.getIntent().getExtras();
+        token = bundle.getString("token");
+        curToken = bundle.getString("curToken");
+        bodyOtherLoc = bundle.getString("status");
+        uid = bundle.getString("uid");
+        pass = bundle.getString("pass");
+        org = bundle.getString("org");
+        cntDeviceID = 0;
+
+//        Log.d("zw", "onCreate: 从亮哥那儿拿到的消息，显示在other_loc中：" + bodyOtherLoc);
+        onlinestetusON = JSONUtils.receiveOnlinestetusONJson(bodyOtherLoc);
+        try {
+            cntDeviceID = onlinestetusON.getTotalCount();
+            deviceIDs = onlinestetusON.getDeviceId();
+            onlineStatus = onlinestetusON.getStatus();
+        }catch (Exception e){
+            cntDeviceID = 0;
+            deviceIDs = new ArrayList<String>();
+            onlineStatus = new ArrayList<Integer>();
         }
     }
 
@@ -133,21 +129,41 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
             }
             @Override
             public void failed(IOException e) {
+                orgRecord = org;
+                JSONObject object = JSON.parseObject(orgRecord);
+                int code = object.getInteger("code");
+                if (code == 200) {
+                    JSONArray array = (JSONArray) object.get("data");
+                    List<Relation> list = (List<Relation>) JSONArray.parseArray(array.toString(),Relation.class);
+                    int size = list.size();
+                    for (int i = 0; i < size; i++) {
+                        transform(list.get(i));
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            relationList = list;
+                            Log.d("zw", "run: relationlist里面的数据是" + relationList.toString());
+                            initRelationRecyclerView();
+                            initRelationListener();
+                        }
+                    });
 
+                }
             }
         });
     }
 
     private void initRelationRecyclerView() {
-//        relationAdapter = new RelationAdapter(relationList, this);
-//        locOthersAdapter = new locOthers(relationList,this);
-        locOthersAdapter = new locOthers(relationList,this, onlinestetusON.getDeviceId(), onlinestetusON.getStatus());
+
+        locOthersAdapter = new locOthers(relationList,this, deviceIDs, onlineStatus);
         recyclerView.setAdapter(locOthersAdapter);
     }
 
     private void initRelationListener() {
         locOthersAdapter.setOnItemClickListener(new locOthers.OnItemClickListener() {
             @Override
+            //这里是候选框
             public void onCheckClick(View v, int pos) {
 
                 Relation relation = relationList.get(pos);
@@ -193,16 +209,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
                     if(flag){
                         idList.remove(delPos);
                     }
-//                    Log.d("zw", "onCheckClick: 删除后现在的idList中的数据有：" + idList.toString());
                 }
-//                String id = relation.getId();
-//                String nickname = relation.getLabel();
-//                Intent intent = new Intent(context, ChatActivity.class);
-//                intent.putExtra("uid", id);
-//                intent.putExtra("nickname", nickname);
-//                intent.putExtra("type", "single");
-//                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                startActivity(intent);
             }
 
             @Override
@@ -218,6 +225,72 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
             }
         });
         locOthersAdapter.notifyDataSetChanged();
+    }
+
+
+    @Override
+    protected void onPause() {
+        Log.d("zw", "onDestroy: other_loc的activity得到暂停");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("zw", "onDestroy: other_loc的activity得到终止");
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("zw", "onDestroy: other_loc的activity得到销毁");
+        super.onDestroy();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_loc:{
+                Intent intent = getIntent();
+                Bundle bundle = new Bundle();
+                ArrayList<String> arrayList = new ArrayList<String>(idList);
+                bundle.putStringArrayList("pos", arrayList);
+                intent.putExtras(bundle);
+//                intent.putExtra("pos", "小梓薇");
+                setResult(2,intent);
+//              下一阶段点击这个按钮实现退出当前页面
+//                onPause();
+                onStop();
+//                onDestroy();
+//                this.finish();
+                break;
+            }
+            default:break;
+        }
+    }
+
+    //这里是将数据储存至数据库当中，从而使得没有网络的时候，也有可操作空间，初始化数据库在MainActivity中，注意这里只有打开这个activity才能储存
+    private void writeToDb() {
+        records = LitePal.where("uid = ?", uid).find(orgAndUidAndKey.class);
+        Log.d("zw", "writeToDb: 此时的记录是" + records);
+        if(records.isEmpty())
+        {
+            record = new orgAndUidAndKey();
+            record.setOrg(orgRecord);  //结构应该使用字符串加入进去，直接使用的是服务器回传的response里的body的String
+            record.setCurToken(curToken);
+            record.setUid(uid);
+            record.setPass(pass);
+            record.save();
+            Log.d("zw", "writeToDb: 此时数据库为空，初次设置库：");
+//            record.setPass(); //这里是设置密码，可以用来验证登录
+        }else{
+            //如果存在此账号，修改该账号下的所有信息
+            record = records.get(0);    //首先获取这条记录
+            record.setOrg(orgRecord);
+            record.setCurToken(curToken);
+            record.setPass(pass);
+            record.save();
+            Log.d("zw", "writeToDb: 此时的记录是：" + record.getPass() + " 用户是 " + record.getUid());
+        }
     }
 
     public void transform(Relation rel) {
@@ -261,43 +334,4 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
         }
     }
 
-    @Override
-    protected void onPause() {
-        Log.d("zw", "onDestroy: other_loc的activity得到暂停");
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("zw", "onDestroy: other_loc的activity得到终止");
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d("zw", "onDestroy: other_loc的activity得到销毁");
-        super.onDestroy();
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_loc:{
-                Intent intent = getIntent();
-                Bundle bundle = new Bundle();
-                ArrayList<String> arrayList = new ArrayList<String>(idList);
-                bundle.putStringArrayList("pos", arrayList);
-                intent.putExtras(bundle);
-//                intent.putExtra("pos", "小梓薇");
-                setResult(2,intent);
-//              下一阶段点击这个按钮实现退出当前页面
-//                onPause();
-                onStop();
-//                onDestroy();
-//                this.finish();
-                break;
-            }
-            default:break;
-        }
-    }
 }
