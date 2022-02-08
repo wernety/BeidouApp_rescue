@@ -35,7 +35,7 @@ public class posFromBD {
         return time;
     }
 
-    public class Data {
+    public static class Data {
 
         private List<Position> position;
         public void setPosition(List<Position> position) {
@@ -45,9 +45,15 @@ public class posFromBD {
             return position;
         }
 
+        @Override
+        public String toString() {
+            return "Data{" +
+                    "position=" + position +
+                    '}';
+        }
     }
 
-    public class Position {
+    public static class Position {
 
         private String lat;
         private int latDir;
@@ -105,5 +111,27 @@ public class posFromBD {
             return deviceId;
         }
 
+        @Override
+        public String toString() {
+            return "Position{" +
+                    "lat='" + lat + '\'' +
+                    ", latDir=" + latDir +
+                    ", lng='" + lng + '\'' +
+                    ", lngDir=" + lngDir +
+                    ", posTime=" + posTime +
+                    ", speed='" + speed + '\'' +
+                    ", deviceId='" + deviceId + '\'' +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "posFromBD{" +
+                "rtnCode='" + rtnCode + '\'' +
+                ", rtnMsg='" + rtnMsg + '\'' +
+                ", data=" + data +
+                ", time=" + time +
+                '}';
     }
 }

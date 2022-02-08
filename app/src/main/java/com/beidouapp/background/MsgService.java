@@ -15,6 +15,8 @@ import com.beidouapp.model.utils.LocationUtils;
 import com.beidouapp.model.utils.NetworkManager;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.state_request;
+import com.beidouapp.ui.fragment.HomeFragment;
+import com.beidouapp.ui.fragment.MyLocationListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -279,9 +281,16 @@ public class MsgService extends Service {
         sysProperty sysProperty = new sysProperty(messageType, "北三手持终端");
         appProperty appProperty = new appProperty(uid, timestamp, dataStreams);
 
-        lonAndLat = stateRequest.loc(this);
+        try {
+            lonAndLat = stateRequest.loc(this);
+        }catch (Exception e){
+            e.printStackTrace();
+            List<String> list = new ArrayList<>();
+            MyLocationListener myLocationListener = new MyLocationListener();
+            lonAndLat = myLocationListener.getLatLng();
+        }
 
-        position position1 = new position(lonAndLat.get(1), lonAndLat.get(2), "E", "W", true,
+        position position1 = new position(lonAndLat.get(0), lonAndLat.get(1), "E", "W", true,
                 Double.parseDouble(lonAndLat.get(2)), 0, Double.parseDouble(lonAndLat.get(3)), timestamp);
 
         positions.add(position1);

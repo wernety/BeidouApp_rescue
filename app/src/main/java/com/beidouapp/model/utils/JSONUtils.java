@@ -63,6 +63,11 @@ public class JSONUtils {
         return  onlinestetusON;
     }
 
+    public static posFromBD receivePosFromBDJson(String json){
+        posFromBD posFromBD = JSON.parseObject(json, posFromBD.class);
+        return  posFromBD;
+    }
+
     public static JSONObject Receive(String json) {
         JSONObject object = JSON.parseObject(json);
         return object;

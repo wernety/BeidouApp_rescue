@@ -1,5 +1,7 @@
 package com.beidouapp.ui.fragment;
 
+import static com.beidouapp.model.utils.JSONUtils.Receive;
+import static com.beidouapp.model.utils.JSONUtils.receivePosFromBDJson;
 import static com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY;
 
 import android.Manifest;
@@ -32,6 +34,10 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.baidu.location.BDAbstractLocationListener;
+import com.baidu.location.BDLocation;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -55,6 +61,7 @@ import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.messages.Other_loc;
+import com.beidouapp.model.messages.posFromBD;
 import com.beidouapp.model.messages.recOtherPositions;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
@@ -65,6 +72,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.CancellationToken;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.android.gms.tasks.Task;
@@ -105,7 +113,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private IntentFilter intentFilter;
     private Timer timer;    //定时器
     private Handler handler;    //定时器处理
-    private Handler handlerOtherloc;    //定时器处理
+    private static Handler handlerOtherloc;    //定时器处理
     private Handler handlermyloc;   //定时器处理
     private TimerTask locFresh;     //定时器处理事务
     private LocationManager lm;     //地点管理
@@ -133,6 +141,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private String pass;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest locationRequest;
+    private static Handler handlerecOtherloc;
+    private List<posFromBD.Position> posLists;
+    private CancellationTokenSource cancellationTokenSource;
+
+    public HomeFragment() {
+    }
 
 
     @Override
@@ -168,9 +182,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             Log.d("zw", "onCreateView: 位置信息捕获失败");
             e.printStackTrace();
             //使用其他方式获取位置
-            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
-//            lonAndLat = loc2();
-            transToBD();
+//            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
+            lonAndLat = loc2();
+//            transToBD();
+            latitude = Double.parseDouble(lonAndLat.get(0));
+            lontitude = Double.parseDouble(lonAndLat.get(1));
             Log.d("zw", "onCreateView: 此时使用是新的定位方式");
         }
         Log.d("zw", "onCreateView: " + lonAndLat.toString());
@@ -196,6 +212,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         return view;
 
     }
+
 
     private void iniAll(@NonNull View view) {
         mapView = view.findViewById(R.id.mMV);
@@ -301,9 +318,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         }catch (Exception e){
                             Log.d("zw", "onCreateView: 位置信息捕获失败");
                             e.printStackTrace();
-                            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
-//                            lonAndLat = loc2();
-                            transToBD();
+//                            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
+                            lonAndLat = loc2();
+                            latitude = Double.parseDouble(lonAndLat.get(0));
+                            lontitude = Double.parseDouble(lonAndLat.get(1));
+
+//                            transToBD();
                         }finally {
                             show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
                         }
@@ -396,6 +416,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         return list;
     }
 
+    /**
+     * 使用百度定位实现的
+     * @return
+     */
+    public List<String> loc2() {
+        List<String> list = new ArrayList<>();
+        MyLocationListener myLocationListener = new MyLocationListener();
+        list = myLocationListener.getLatLng();
+        return list;
+    }
+
 
     /**
      * 使用其他方法进行定位
@@ -405,37 +436,42 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         List<String> list = new ArrayList<String>();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
+        cancellationTokenSource = new CancellationTokenSource();
+
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("zw", "locUseOtherWay: 用其他方法检测权限出问题了");
         }else{
-            Task<Location> locations = fusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, new CancellationToken() {
+            Task<Location> locations = fusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken());
+            locations.addOnCompleteListener(new OnCompleteListener<Location>() {
                 @Override
-                public boolean isCancellationRequested() {
-                    return false;
+                public void onComplete(@NonNull Task<Location> task) {
+                    if(task.isSuccessful()){
+                        Location location = task.getResult();
+                        Log.d("zw", "locUseOtherWay: 使用其他方法获取的location" + location);
+                        if(location != null){
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+                            double altitude = location.getAltitude();
+                            float speed = location.getSpeed();
+                            long time = location.getTime();
+
+                            list.add(String.valueOf(latitude));
+                            list.add(String.valueOf(longitude));
+                            list.add(String.valueOf(altitude));
+                            list.add(String.valueOf(speed));
+                            list.add(String.valueOf(time));
+                        }else{
+                            Log.d("zw", "onComplete: 用其他方法获取的location是空的");
+                        }
+                    }else{
+                        Exception e = task.getException();
+                        Log.d("zw", "onComplete: 用其他方法获取位置出问题了：" + e);
+                    }
                 }
+            });
 
-                @NonNull
-                @Override
-                public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
-                    return null;
-                }
-            }).addOnCompleteListener((OnCompleteListener<Location>) getActivity());
 
-            Location location = locations.getResult();
-            Log.d("zw", "locUseOtherWay: 使用其他方法获取的location" + location);
-            if(location != null){
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                double altitude = location.getAltitude();
-                float speed = location.getSpeed();
-                long time = location.getTime();
-
-                list.add(String.valueOf(latitude));
-                list.add(String.valueOf(longitude));
-                list.add(String.valueOf(altitude));
-                list.add(String.valueOf(speed));
-                list.add(String.valueOf(time));
-            }
         }
         return list;
     }
@@ -568,6 +604,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
             case R.id.people:{
                 handlerOtherloc = new Handler(){
+                    @SuppressLint("HandlerLeak")
                     public void handleMessage(Message message) {
                         switch (message.what)
                         {
@@ -810,6 +847,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                 markerOptions.zIndex(17);   //层级
 
+//                Bundle bundle = new Bundle();
+//                bundle.putString("deviceID", "13886415060");
+/**
+ * 816到821设置额外信息
+ */
+//                markerOptions.extraInfo(bundle);
+
                 Marker marker = (Marker) mMap.addOverlay(markerOptions);
 
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
@@ -849,6 +893,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 LatLng latlon = marker.getPosition();
+                Bundle info = marker.getExtraInfo();
+                String deviceID = info.getString("deviceID");
                 Log.d("zw", "onMarkerClick: 取消标记");
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
                 View view = inflater.inflate(R.layout.text_item, null);
@@ -869,6 +915,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         mMap.hideInfoWindow();
                     }
                 });
+                DecimalFormat df = new DecimalFormat("#0.0000000");
+                textView.setText("纬度：" + df.format(latlon.latitude) +  "经度：" + df.format(latlon.longitude) + "用户：" + deviceID);
                 InfoWindow infowindow = new InfoWindow(view, latlon, +47);
                 mMap.showInfoWindow(infowindow);
                 return true;
@@ -951,6 +999,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             Log.d("zw", "onActivityResult: 现在的resultcode是：" + resultCode);
             if (resultCode == 2)
             {
+                handleRecOtherloc();
                 Log.d("zw", "onActivityResult: 是由other_loc Activity返回：" + resultCode);
                 Log.d("zw", "onActivityResult: 现在确定是否由other_loc返回的：" + data.getStringArrayListExtra("pos"));
                 ArrayList<String> idlist = data.getStringArrayListExtra("pos");
@@ -967,7 +1016,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             OkHttpUtils.getInstance(getActivity().getApplicationContext()).postBD("http://119.3.130.87:50099/whbdApi/device/pos/getCurrent", json, new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
-                                    Log.d("zw", "success: 访问福大北斗的位置信息得到的结果："+ response.body().string());
+                                    String rec = response.body().string();
+                                    Log.d("zw", "success: 访问福大北斗的位置信息得到的结果："+ rec);
+                                    posFromBD recPos = receivePosFromBDJson(rec);
+                                    posLists = recPos.getData().getPosition();
+                                    Log.d("zw", "success: 访问福大北斗的所有位置是" + posLists.toString());
+                                    //获取位置后，显示出marker，带有个人信息的marker
+                                    Message message = new Message();
+                                    message.what = 1;
+                                    handlerecOtherloc.sendMessage(message);
                                 }
 
                                 @Override
@@ -990,6 +1047,38 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private void handleRecOtherloc() {
+        handlerecOtherloc = new Handler(){
+            public void handleMessage(Message message){
+                switch (message.what){
+                    case 1:{
+                        mMap.clear();
+                        int num = posLists.size();
+                        for(int i = 0;i<num;i++){
+                            posFromBD.Position pos = posLists.get(i);
+                            String deviceID = pos.getDeviceId();
+                            String lat = pos.getLat();
+                            String lon = pos.getLng();
+                            LatLng latlon = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));
+                            markerOptions = new MarkerOptions();
+                            markerOptions.position(latlon);
+                            BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.icon_mark);
+                            markerOptions.icon(bitmapDescriptor);
+                            markerOptions.zIndex(17);   //层级
+                            Bundle bundle = new Bundle();
+                            bundle.putString("deviceID", deviceID);
+                            markerOptions.extraInfo(bundle);
+
+                            Marker marker = (Marker) mMap.addOverlay(markerOptions);
+                        }
+                        break;
+                    }
+                    default:break;
+                }
+            }
+        };
+    }
+
     protected void createLocationRequest() {
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000);
@@ -1004,3 +1093,4 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     }
 }
+
