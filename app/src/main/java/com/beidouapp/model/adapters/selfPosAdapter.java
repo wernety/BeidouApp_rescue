@@ -1,0 +1,70 @@
+package com.beidouapp.model.adapters;
+
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.beidouapp.R;
+import com.beidouapp.ui.fragment.starPos;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class selfPosAdapter extends RecyclerView.Adapter<selfPosAdapter.selfViewHolder> {
+
+    List<starPos> mlist = new ArrayList<starPos>();
+
+    public selfPosAdapter(List<starPos> list){
+        this.mlist = list;
+        Log.d("zw", "selfPosAdapter: 此时的列表是" + mlist);
+    }
+
+    @NonNull
+    @Override
+    public selfViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_selffragment, parent, false);
+        Log.d("zw", "onCreateViewHolder: 创建了selfViewHolder的item");
+        selfViewHolder holder = new selfViewHolder(view);
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull selfViewHolder holder, int position) {
+        starPos starPos = mlist.get(position);
+        holder.tv2_uid.setText(starPos.getUid());
+        Log.d("zw", "onBindViewHolder: 此时的需要设置的用户是" + starPos.getUid());
+        if (starPos.getTag().isEmpty()){
+            holder.tv2_postag.setText("没有信息");
+        }else{
+            holder.tv2_postag.setText(starPos.getTag());
+        }
+        if(starPos.getText().isEmpty()){
+            holder.tv2_selfpos.setText("没有名称");
+        }else {
+            holder.tv2_selfpos.setText(starPos.getText());
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return mlist.size();
+    }
+
+    public class selfViewHolder extends RecyclerView.ViewHolder{
+        TextView tv2_selfpos;
+        TextView tv2_postag;
+        TextView tv2_uid;
+
+        public selfViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tv2_selfpos = (TextView) itemView.findViewById(R.id.tv2_selfpos);
+            tv2_postag = (TextView) itemView.findViewById(R.id.tv2_postag);
+            tv2_uid = (TextView) itemView.findViewById(R.id.tv2_uid);
+        }
+    }
+}

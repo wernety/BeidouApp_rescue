@@ -14,10 +14,18 @@
         android:textColor="@color/black"
         android:background="@color/white"/>
 
-    <TextView
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/white"/>
+        android:id="@+id/et_text"
+        android:hint="输入标记点名称"
+        android:maxLines="1"/>
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/et_type"
+        android:hint="输入标记点类型"
+        android:maxLines="1"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -29,7 +37,7 @@
             android:layout_height="wrap_content"
             android:background="@color/white"
             android:textSize="15sp"
-            android:text="退出"
+            android:text="提交"
             android:layout_weight="1"
             />
         <Button

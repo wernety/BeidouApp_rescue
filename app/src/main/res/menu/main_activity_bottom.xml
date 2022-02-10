@@ -17,11 +17,11 @@
         android:title="组织"
         android:icon="@drawable/relation"
         app:showAsAction="ifRoom" />
-<!--    <item android:id="@+id/mainAct_bottom_posManage"-->
-<!--        android:enabled="true"-->
-<!--        android:title="地点管理"-->
-<!--        android:icon="@drawable/ic_launcher_foreground"-->
-<!--        app:showAsAction="ifRoom" />-->
+    <item android:id="@+id/mainAct_bottom_posManage"
+        android:enabled="true"
+        android:title="地点管理"
+        android:icon="@drawable/ic_launcher_foreground"
+        app:showAsAction="ifRoom" />
 
     <item android:id="@+id/mainAct_bottom_settings"
         android:enabled="true"

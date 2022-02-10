@@ -33,6 +33,7 @@ import com.beidouapp.model.utils.MD5;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.fragment.HomeFragment;
 import com.beidouapp.ui.fragment.MessageFragment;
+import com.beidouapp.ui.fragment.PosManageFragment;
 import com.beidouapp.ui.fragment.RelationFragment;
 import com.beidouapp.ui.fragment.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private MessageFragment messageFragment;
     private RelationFragment relationFragment;
     private SettingsFragment settingsFragment;
+    private PosManageFragment posManageFragment;
     private String token;
     private Bundle bundle;
     private User4Login user4Login;
@@ -87,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     private regist regist;
     private Intent intentservice;
     private DemoApplication application;
+
 
 
     @Override
@@ -147,9 +150,9 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.mainAct_bottom_relation:
                         switchFragment(relationFragment);
                         break;
-//                    case R.id.mainAct_bottom_posManage:
-//                        switchFragment(posManageFragment);
-//                        break;
+                    case R.id.mainAct_bottom_posManage:
+                        switchFragment(posManageFragment);
+                        break;
                     case R.id.mainAct_bottom_settings:
                         switchFragment(settingsFragment);
                         break;
@@ -202,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
         homeFragment = new HomeFragment();
         messageFragment = new MessageFragment();
         relationFragment = new RelationFragment();
-        //posManageFragment = new PosManageFragment();
+        posManageFragment = new PosManageFragment();
         settingsFragment = new SettingsFragment();
         switchFragment(homeFragment);
     }

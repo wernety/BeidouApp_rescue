@@ -93,6 +93,7 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
                 }
             }
         });
+
         holder.ivCheck.setImageResource(bean.isCheck() ? R.mipmap.road_checked : R.mipmap.road_check);
 //        Log.d("zw", "onBindHolder: 是否被选中: " + bean.isCheck());
 

@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -59,6 +60,7 @@ import com.baidu.mapapi.map.offline.MKOfflineMapListener;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beidouapp.R;
+import com.beidouapp.model.DataBase.Pos;
 import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.messages.Other_loc;
 import com.beidouapp.model.messages.posFromBD;
@@ -78,6 +80,7 @@ import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.android.gms.tasks.Task;
 
 
+import org.litepal.FluentQuery;
 import org.litepal.LitePal;
 
 import java.io.IOException;
@@ -144,6 +147,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private static Handler handlerecOtherloc;
     private List<posFromBD.Position> posLists;
     private CancellationTokenSource cancellationTokenSource;
+    private List<Pos> posRecords;
+    private Pos posRecord;
+
 
     public HomeFragment() {
     }
@@ -831,9 +837,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         listener = new BaiduMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
-                MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
-
-                mMap.animateMapStatus(mapStatusUpdate);
+//                MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
+//
+//                mMap.animateMapStatus(mapStatusUpdate);
 
                 mMap.clear();
 
@@ -862,6 +868,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 TextView textView = (TextView) view.findViewById(R.id.tv_loc);
                 Button btnCancel = view.findViewById(R.id.btn_cancel);
                 Button btnCommit = view.findViewById(R.id.btn_search);
+                EditText et_text = view.findViewById(R.id.et_text);
+                EditText et_type = view.findViewById(R.id.et_type);
 
                 btnCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -873,6 +881,41 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 btnCommit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        posRecords = LitePal.where("latitude=? or lontitude=?",
+                                String.valueOf(latLng.latitude), String.valueOf(latLng.longitude)).find(Pos.class);
+                        if (posRecords.isEmpty()){
+                            posRecord = new Pos();
+                            posRecord.setLatitude(String.valueOf(latLng.latitude));
+                            posRecord.setLontitude(String.valueOf(latLng.longitude));
+                            posRecord.setStatus("离线");
+                            posRecord.setUid(uid);
+                            if (et_text.getText().toString().isEmpty()){
+                                posRecord.setText("没有设置");
+                            }else{
+                            posRecord.setText(et_text.getText().toString());
+                            }
+                            if(et_type.getText().toString().isEmpty())
+                            {
+                                posRecord.setTag("没有设置");
+                            }else{
+                                posRecord.setTag(et_type.getText().toString());
+                            }
+                            posRecord.save();
+                        }else{
+                            posRecord = posRecords.get(0);
+                            if (et_text.getText().toString().isEmpty()){
+                                posRecord.setText("没有设置");
+                            }else{
+                                posRecord.setText(et_text.getText().toString());
+                            }
+                            if(et_type.getText().toString().isEmpty())
+                            {
+                                posRecord.setTag("没有设置");
+                            }else{
+                                posRecord.setTag(et_type.getText().toString());
+                            }
+                            posRecord.save();
+                        }
 
                     }
                 });
