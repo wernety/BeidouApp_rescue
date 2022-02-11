@@ -37,18 +37,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BeidouApp"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".ui.add_group"
+            android:exported="false" />
+
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="p1IDmZkDyWYyOn3LXkAquiIYVMg1r32V" />
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".ui.friend_info"
-            android:exported="false" />
-        <!-- <meta-data -->
+            android:exported="false" /> <!-- <meta-data -->
         <!-- android:name="com.google.android.actions" -->
         <!-- android:resource="@xml/actions" /> -->
         <meta-data
@@ -109,10 +111,7 @@
         <service
             android:name=".background.MsgService"
             android:enabled="true"
-
-            android:exported="false"></service>
-
-
+            android:exported="false" />
     </application>
 
 </manifest>

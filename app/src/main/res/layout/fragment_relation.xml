@@ -24,7 +24,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:layout_gravity="right"
-                android:id="@+id/more_relation" />
+                android:id="@+id/iv_more_relation" />
             <EditText
                 android:id="@+id/search_et_input_relation"
                 android:layout_gravity="center|bottom"

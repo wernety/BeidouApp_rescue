@@ -10,12 +10,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -31,6 +34,7 @@ import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.ChatActivity;
+import com.beidouapp.ui.add_group;
 import com.beidouapp.ui.friend_info;
 
 import java.io.IOException;
@@ -47,6 +51,7 @@ public class RelationFragment extends Fragment {
 
     private Context context;
     private View view;
+    private ImageView more;
     private RecyclerView recyclerView;
     private ListView friendListView;
     private ListView groupListView;
@@ -84,6 +89,7 @@ public class RelationFragment extends Fragment {
      * 初始化UI控件
      */
     private void initUI() {
+        more = (ImageView) view.findViewById(R.id.iv_more_relation);
         recyclerView = view.findViewById(R.id.rvData);
         recyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.VERTICAL, false));// 设定类型样式
         recyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));// 设定顶类型样式
@@ -134,6 +140,38 @@ public class RelationFragment extends Fragment {
                     }
                 });
 
+            }
+        });
+        more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popupMenu = new PopupMenu(context, view);
+                popupMenu.getMenuInflater().inflate(R.menu.pop_out, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.add_friends: {
+                                break;
+                            }
+                            case R.id.add_group: {
+                                Intent intent = new Intent(context, add_group.class);
+                                startActivity(intent);
+                                break;
+                            }
+                        }
+                        return true;
+                    }
+                });
+
+                popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+                    @Override
+                    public void onDismiss(PopupMenu popupMenu) {
+
+                    }
+                });
+
+                popupMenu.show();
             }
         });
     }
