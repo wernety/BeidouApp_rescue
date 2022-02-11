@@ -31,6 +31,7 @@ import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.ChatActivity;
+import com.beidouapp.ui.friend_info;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -98,7 +99,12 @@ public class RelationFragment extends Fragment {
                 Friend friend = friendList.get(position);
                 String id = friend.getFriendId();
                 String nickname = friend.getFriendName();
-                Intent intent = new Intent(context, ChatActivity.class);
+//                Intent intent = new Intent(context, ChatActivity.class);
+//                intent.putExtra("uid", id);
+//                intent.putExtra("nickname", nickname);
+//                intent.putExtra("type", "single");
+//                startActivity(intent);
+                Intent intent = new Intent(context, friend_info.class);
                 intent.putExtra("uid", id);
                 intent.putExtra("nickname", nickname);
                 intent.putExtra("type", "single");
