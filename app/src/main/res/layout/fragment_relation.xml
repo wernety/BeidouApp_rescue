@@ -2,7 +2,6 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.fragment.SettingsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp">
@@ -14,7 +13,7 @@
         tools:context=".ui.fragment.RelationFragment">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar1"
+            android:id="@+id/toolbar_relation"
             android:background="@color/white"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize">
@@ -25,10 +24,9 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:layout_gravity="right"
-                android:id="@+id/toolbar_title" />
-
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/search_et_input"
+                android:id="@+id/iv_more_relation" />
+            <EditText
+                android:id="@+id/search_et_input_relation"
                 android:layout_gravity="center|bottom"
                 android:drawableRight="@drawable/search_icon"
                 android:paddingRight="5dp"
@@ -37,10 +35,8 @@
                 android:layout_height="match_parent"
                 android:textSize="16sp"
                 android:imeOptions="actionSearch"
-                app:iconifiedByDefault="false"
                 android:inputType="text"
-                android:hint="">
-            </androidx.appcompat.widget.SearchView>
+                android:hint=""/>
 
         </androidx.appcompat.widget.Toolbar>
 

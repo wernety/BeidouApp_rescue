@@ -27,8 +27,6 @@
     <uses-permission android:name="android.permission.GET_TASKS" /> <!-- 鉴权所需该权限获取进程列表 -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-
-
     <application
         android:name=".ui.DemoApplication"
         android:allowBackup="true"
@@ -39,17 +37,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BeidouApp"
         android:usesCleartextTraffic="true">
-<!--        <meta-data-->
-<!--            android:name="com.google.android.actions"-->
-<!--            android:resource="@xml/actions" />-->
+        <activity
+            android:name=".ui.add_group"
+            android:exported="false" />
+
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="p1IDmZkDyWYyOn3LXkAquiIYVMg1r32V" />
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
+        <activity
+            android:name=".ui.friend_info"
+            android:exported="false" /> <!-- <meta-data -->
+        <!-- android:name="com.google.android.actions" -->
+        <!-- android:resource="@xml/actions" /> -->
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="p1IDmZkDyWYyOn3LXkAquiIYVMg1r32V" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyB4hf08ABvCpp2pVyMibAtqXhikMgjwKa4" />
@@ -102,7 +111,7 @@
         <service
             android:name=".background.MsgService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>
