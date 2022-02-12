@@ -5,6 +5,7 @@
       <map>
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_chat.xml" value="0.25" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_login.xml" value="0.21822916666666667" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_main.xml" value="0.29375" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_map.xml" value="0.370018115942029" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/contact_item.xml" value="0.24583333333333332" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/fragment_home.xml" value="0.21875" />
@@ -15,13 +16,16 @@
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_chat_receive_text.xml" value="0.21041666666666667" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_chat_send_text.xml" value="0.21041666666666667" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_locsend.xml" value="0.24583333333333332" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_markerclick.xml" value="0.171875" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_selffragment.xml" value="0.29375" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_starfragment.xml" value="0.370018115942029" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_tree.xml" value="0.24583333333333332" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/layout.xml" value="0.371875" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/other_loc.xml" value="0.21875" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/selfpos_setting.xml" value="0.22083333333333333" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/text_item.xml" value="0.29375" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/menu/main_activity_bottom.xml" value="0.38645833333333335" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/menu/selfposconfig_menu.xml" value="0.22083333333333333" />
         <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.16666666666666666" />
         <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/btn_multi_bg.xml" value="0.21822916666666667" />
         <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable/btn_send_bg_disable.xml" value="0.21822916666666667" />

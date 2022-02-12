@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beidouapp.R;
+import com.beidouapp.ui.fragment.selfFragment;
 import com.beidouapp.ui.fragment.starPos;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 public class selfPosAdapter extends RecyclerView.Adapter<selfPosAdapter.selfViewHolder> {
 
     List<starPos> mlist = new ArrayList<starPos>();
+    private OnItemClickListener onItemClickListener;
 
     public selfPosAdapter(List<starPos> list){
         this.mlist = list;
@@ -44,15 +46,80 @@ public class selfPosAdapter extends RecyclerView.Adapter<selfPosAdapter.selfView
             holder.tv2_postag.setText(starPos.getTag());
         }
         if(starPos.getText().isEmpty()){
-            holder.tv2_selfpos.setText("没有名称");
+            holder.tv2_selfpos.setText("没有位置名称");
         }else {
             holder.tv2_selfpos.setText(starPos.getText());
         }
+        holder.tv2_selfpos.setTag(position);
+        holder.tv2_selfpos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onItemClickListener!=null){
+                    onItemClickListener.onItemClick(v, (int)v.getTag());
+                }
+            }
+        });
+        holder.tv2_selfpos.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (onItemClickListener!=null){
+                    onItemClickListener.onItemClick(v, (int)v.getTag());
+                }
+                return false;
+            }
+        });
+
+
+        holder.tv2_postag.setTag(position);
+        holder.tv2_postag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onItemClickListener!=null){
+                    onItemClickListener.onItemClick(v, (int)v.getTag());
+                }
+            }
+        });
+        holder.tv2_postag.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (onItemClickListener!=null){
+                    onItemClickListener.onItemLongClick(v, (int)v.getTag());
+                }
+                return false;
+            }
+        });
+
+        holder.tv2_uid.setTag(position);
+        holder.tv2_uid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //点击uid应该跳转到用户详情
+            }
+        });
+    }
+
+    //回调接口
+    public void setOnItemClickListener(selfPosAdapter.OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public interface OnItemClickListener{
+        void onItemClick(View v, int pos);
+        void onItemLongClick(View v, int pos);
     }
 
     @Override
     public int getItemCount() {
         return mlist.size();
+    }
+
+    public void deleteData(int pos){
+        Log.d("zw", "deleteData: 此时开始删除recycleView里面的数据");
+        mlist.remove(pos);
+        notifyItemRemoved(pos);
+        if(pos != getItemCount()) {
+            notifyItemRangeChanged(pos, getItemCount());
+        }
     }
 
     public class selfViewHolder extends RecyclerView.ViewHolder{

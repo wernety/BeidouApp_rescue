@@ -1,16 +1,21 @@
 package com.beidouapp.ui.fragment;
 
 
+import java.io.Serializable;
+
 /**
  * 用于收藏点和自建点的Adapter初始化列表显示数据的类
  */
-public class starPos {
+public class starPos implements Serializable{
     private String Text;
     private String uid;
     private String status;
     private String tag;
     private String latitude;
     private String lontitude;
+
+    public starPos(){
+    }
 
     public starPos(String Text, String uid, String status, String tag, String latitude, String lontitude){
         this.latitude = latitude;

@@ -36,6 +36,7 @@ import com.beidouapp.ui.fragment.MessageFragment;
 import com.beidouapp.ui.fragment.PosManageFragment;
 import com.beidouapp.ui.fragment.RelationFragment;
 import com.beidouapp.ui.fragment.SettingsFragment;
+import com.beidouapp.ui.fragment.starPos;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.beidouapp.model.utils.NetworkManager;
 import com.beidouapp.model.messages.regist;
@@ -207,7 +208,27 @@ public class MainActivity extends AppCompatActivity {
         relationFragment = new RelationFragment();
         posManageFragment = new PosManageFragment();
         settingsFragment = new SettingsFragment();
+        iniPosFragmentListener();
+
+
         switchFragment(homeFragment);
+    }
+
+    /**
+     * 第三次回调，此次回调将PosManagerFragment里面的两个小的Fragment的item点击事件回调给MainActivity然后在地图上显示
+     */
+    private void iniPosFragmentListener() {
+        posManageFragment.setBackToMainListener(new PosManageFragment.BackToMainListener() {
+            @Override
+            public void changeMap(starPos selfPos) {
+                Log.d("zw", "changeMap: 第三次回调成功");
+                bundle.putSerializable("selfPos", selfPos);
+                switchFragment(homeFragment);
+                lastFragment = posManageFragment;
+                bottomNavigationView.setSelectedItemId(R.id.mainAct_bottom_home);
+//                bundle.putString();
+            }
+        });
     }
 
     private void StartMsgService(){

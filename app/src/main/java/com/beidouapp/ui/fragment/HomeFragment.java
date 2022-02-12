@@ -78,6 +78,8 @@ import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 
 import org.litepal.FluentQuery;
@@ -149,6 +151,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private CancellationTokenSource cancellationTokenSource;
     private List<Pos> posRecords;
     private Pos posRecord;
+    private starPos selfPos;
 
 
     public HomeFragment() {
@@ -177,7 +180,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Log.d("zw", "onCreateView: 测试用的curToken是：" + token);
         Log.d("zw", "onCreateView: 测试用的curToken是：" + curToken);
         Log.d("zw", "onCreateView: 测试用的密码是： " + pass);
-
 
 
 
@@ -379,29 +381,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             else{
                 Log.d("zw", "loc: 此时的provider为空");
             }
-            lm.requestLocationUpdates("gps", 1000, 1, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-//                    Log.d("zw", "onLocationChanged: 定位过程中位置发生改变,发送广播重新定位" );
-
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-
-                }
-
-            });
+//            lm.requestLocationUpdates("gps", 1000, 1, new LocationListener() {
+//                @Override
+//                public void onLocationChanged(Location location) {
+////                    Log.d("zw", "onLocationChanged: 定位过程中位置发生改变,发送广播重新定位" );
+//
+//                }
+//
+//                @Override
+//                public void onStatusChanged(String provider, int status, Bundle extras) {
+//
+//                }
+//
+//                @Override
+//                public void onProviderEnabled(String provider) {
+//
+//                }
+//
+//                @Override
+//                public void onProviderDisabled(String provider) {
+//
+//                }
+//
+//            });
 //            lm.requestLocationUpdates(provider, 0, 0, (LocationListener) getActivity().getApplicationContext());
 //            Log.d("zw", "loc: 此时的provider是" + provider);
             Location location = lm.getLastKnownLocation(provider);
@@ -568,6 +570,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d("zw", "onStart: Fragment开始实现");
         myOrientationListener.start();
     }
 
@@ -577,10 +580,56 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //        myOrientationListener.stop();
     }
 
+    /**
+     * 这里是对应前面switch时使用的hide和show
+     * @param hidden
+     */
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(!hidden){
+            Log.d("zw", "onResume: Fragment继续呈现");
+            selfPos = (starPos) getArguments().getSerializable("selfPos");
+            if(selfPos != null){
+                Log.d("zw", "onResume: 设置回传的位置");
+                show_selfbuild_loc(selfPos);
+            }
+            selfPos = null;
+            getArguments().putSerializable("selfPos", selfPos);
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onPause();
+        mapView.onResume();
+
+    }
+
+    /**
+     * 显示从PosManagerFragment处返回的点
+     * @param selfPos
+     */
+    private void show_selfbuild_loc(starPos selfPos) {
+        double latitude = Double.parseDouble(selfPos.getLatitude());
+        double lontitude = Double.parseDouble(selfPos.getLontitude());
+
+        LatLng point = new LatLng(latitude, lontitude);
+        MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newLatLng(point);
+        mMap.animateMapStatus(mapStatusUpdate);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("uid", selfPos.getUid());
+        bundle.putString("Text", selfPos.getText());
+        BitmapDescriptor bitmap = BitmapDescriptorFactory
+                .fromResource(R.drawable.icon_mark);
+        OverlayOptions option = new MarkerOptions()
+                .position(point)
+                .icon(bitmap)
+                .extraInfo(bundle);
+//在地图上添加Marker，并显示
+        mMap.addOverlay(option);
+        Log.d("zw", "show_selfbuild_loc: 设置回传的位置成功");
     }
 
     @Override
@@ -851,7 +900,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                 markerOptions.icon(bitmapDescriptor);
 
-                markerOptions.zIndex(17);   //层级
+                markerOptions.zIndex(14);   //层级
 
 //                Bundle bundle = new Bundle();
 //                bundle.putString("deviceID", "13886415060");
@@ -916,7 +965,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             }
                             posRecord.save();
                         }
-
+mMap.hideInfoWindow();
                     }
                 });
 
@@ -940,11 +989,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 String deviceID = info.getString("deviceID");
                 Log.d("zw", "onMarkerClick: 取消标记");
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
-                View view = inflater.inflate(R.layout.text_item, null);
-                TextView textView = (TextView) view.findViewById(R.id.tv_loc);
-                Button btnCancel = view.findViewById(R.id.btn_cancel);
-                Button btnCommit = view.findViewById(R.id.btn_search);
-                btnCancel.setOnClickListener(new View.OnClickListener() {
+                View view = inflater.inflate(R.layout.item_markerclick, null);
+                TextView textView = (TextView) view.findViewById(R.id.tv_markerclick);
+                Button btnDelete = view.findViewById(R.id.btn_markerclickDelete);
+                Button btnExit = view.findViewById(R.id.btn_makerclickExit);
+                btnDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Log.d("zw", "onClick: 真的取消标记");
@@ -952,7 +1001,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         mMap.hideInfoWindow();
                     }
                 });
-                btnCommit.setOnClickListener(new View.OnClickListener() {
+                btnExit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         mMap.hideInfoWindow();
