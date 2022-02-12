@@ -5,6 +5,7 @@ public class Friend {
     private String friendId;
     private String friendName;
     private String addTime;
+    private boolean isChecked;
 
     public void setUserId(String userId) {
         this.userId = userId;
@@ -32,5 +33,12 @@ public class Friend {
     }
     public String getAddTime() {
         return addTime;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
+    }
+    public boolean isChecked() {
+        return isChecked;
     }
 }

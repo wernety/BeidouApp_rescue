@@ -85,6 +85,12 @@ public class RelationFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        RefreshView(context, token);
+    }
+
     /**
      * 初始化UI控件
      */
@@ -156,6 +162,7 @@ public class RelationFragment extends Fragment {
                             }
                             case R.id.add_group: {
                                 Intent intent = new Intent(context, add_group.class);
+                                intent.putExtra("id", loginId);
                                 startActivity(intent);
                                 break;
                             }
