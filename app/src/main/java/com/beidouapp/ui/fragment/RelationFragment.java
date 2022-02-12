@@ -376,8 +376,8 @@ public class RelationFragment extends Fragment {
             public void success(Response response) throws IOException {
                 //Log.d("group", response.body().string());
                 String body = response.body().string();
-                Log.d("zw", "success: 最新整合版的问题" + body);
                 JSONObject object = JSON.parseObject(body);
+                Log.d("zzzml", body);
                 int code = object.getInteger("code");
                 if (code == 200) {
                     JSONArray array = (JSONArray) object.get("data");

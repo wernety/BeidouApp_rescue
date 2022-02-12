@@ -28,7 +28,9 @@ import com.beidouapp.model.utils.OkHttpUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Response;
 
@@ -41,6 +43,7 @@ public class add_group extends AppCompatActivity {
     private Button confirm;
     private String loginId;
     private String groupName;
+    private String groupId;
 
 
     @Override
@@ -79,14 +82,36 @@ public class add_group extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("zz","CLICKED");
+                int size = personList.size();
+                JSONArray jsonArray = new JSONArray();
 
                 Handler handler = new Handler() {
                     //           @Override
                     @SuppressLint("HandlerLeak")
                     public void handleMessage(Message message) {
                         if (message.what == 1) {
-                            finish();
+                            try {
+                                OkHttpUtils.getInstance(add_group.this).post("http://120.27.242.92:8080/groupusers",
+                                        jsonArray.toJSONString(), new OkHttpUtils.MyCallback() {
+                                            @Override
+                                            public void success(Response response) throws IOException {
+                                                JSONObject object = JSON.parseObject(response.body().string());
+                                                int code = object.getInteger("code");
+                                                if (code == 200) {
+                                                    finish();
+                                                }
+
+                                            }
+
+                                            @Override
+                                            public void failed(IOException e) {
+
+                                            }
+                                        });
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 };
@@ -111,6 +136,21 @@ public class add_group extends AppCompatActivity {
                                             JSONObject object = JSON.parseObject(response.body().string());
                                             int code = object.getInteger("code");
                                             if (code == 200) {
+                                                groupId = object.getString("data");
+                                                JSONObject me = new JSONObject();
+                                                me.put("groupId", groupId);
+                                                me.put("userId", loginId);
+                                                jsonArray.add(me);
+                                                for (int i = 0; i < size; i++) {
+                                                    Friend temp = personList.get(i);
+                                                    if (temp.isChecked()) {
+                                                        JSONObject jsonObject = new JSONObject();
+                                                        jsonObject.put("groupId", groupId);
+                                                        jsonObject.put("userId", temp.getFriendId());
+                                                        jsonObject.put("userName", temp.getFriendName());
+                                                        jsonArray.add(jsonObject);
+                                                    }
+                                                }
                                                 Message message = new Message();
                                                 message.what = 1;
                                                 handler.sendMessage(message);
@@ -138,8 +178,8 @@ public class add_group extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Friend person = personList.get(position);
-
+                boolean status = personList.get(position).isChecked();
+                personList.get(position).setChecked(!status);
             }
         });
     }
