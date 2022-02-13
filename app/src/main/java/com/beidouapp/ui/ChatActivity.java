@@ -4,10 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Editable;
@@ -46,14 +49,14 @@ import java.util.Map;
  */
 
 public class ChatActivity extends AppCompatActivity {
-    private Context context;
+    private Context context; //
     private ChatAdapter adapter;
     private List<ChatMessage> chatMessageList = new ArrayList<>();
     private ChatReceiver chatReceiver;
-    private String toID;
-    private String toNickname;
-    private String toType;
-    private String loginId;
+    private String toID;//对方ID
+    private String toNickname;//昵称
+    private String toType;  //消息类型
+    private String loginId;  //自己的ID
     private Map<String, String> userMap = new HashMap<String, String>();
     private TextView title;
     private ListView listView;
@@ -79,19 +82,23 @@ public class ChatActivity extends AppCompatActivity {
             msgService = null;
         }
     };
+    private DemoApplication application;
+    private SQLiteDatabase writableDatabase;
+    private long timeMillis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_chat);
-
+        application = (DemoApplication) this.getApplicationContext();
+        writableDatabase = application.dbHelper.getWritableDatabase();
         getInfo();
-        Log.d("uid, chat", toID);
+//        Log.d("uid, chat", toID);
         initUI();
+        initChatMessageList();
         initListener();
         BindMsgService();
-
     }
 
 
@@ -170,7 +177,7 @@ public class ChatActivity extends AppCompatActivity {
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String content = input.getText().toString();
+                String content = input.getText().toString();  //获取自己发送消息
                 if (content.length() <= 0){
                     Toast.makeText(ChatActivity.this, "输入不能为空", Toast.LENGTH_LONG).show();
                 }
@@ -190,9 +197,10 @@ public class ChatActivity extends AppCompatActivity {
                         chatMessage.setTime(System.currentTimeMillis()+"");
                         chatMessageList.add(chatMessage);
 
+
                     } else {
 
-                        Log.d("uid, sendto", toID);
+                        Log.d("uid, sendto", toID); //toID 对方ID
                         Message4Send message4Send = new Message4Send(toID, "single", "text", content);
                         Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send, true);
@@ -202,8 +210,17 @@ public class ChatActivity extends AppCompatActivity {
                         ChatMessage chatMessage = new ChatMessage();
                         chatMessage.setContent(content);
                         chatMessage.setIsMeSend(1);
-                        chatMessage.setTime(System.currentTimeMillis()+"");
+                        timeMillis = System.currentTimeMillis();
+                        chatMessage.setTime(String.valueOf(timeMillis)+"");
                         chatMessageList.add(chatMessage);
+                        //插入数据
+                        ContentValues values = new ContentValues();
+                        values.put("toID", toID);
+                        values.put("flag", 1);//自己发的是1
+                        values.put("contentChat", content);
+                        values.put("message_type", "text");
+                        values.put("time", String.valueOf(timeMillis));
+                        writableDatabase.insert("chat", null, values);
 
                     }
                     initChatMsgListView();
@@ -271,10 +288,19 @@ public class ChatActivity extends AppCompatActivity {
                     ChatMessage chatMessage = new ChatMessage();
                     chatMessage.setContent(message4Receive.getData().getSendText());
                     chatMessage.setIsMeSend(0);
-                    chatMessage.setTime(System.currentTimeMillis()+"");
+                    long timeMillis1 = System.currentTimeMillis();
+                    chatMessage.setTime(String.valueOf(timeMillis1)+"");
                     chatMessage.setName(toNickname);
                     chatMessageList.add(chatMessage);
                     initChatMsgListView();
+                    //插入数据库
+                    ContentValues values = new ContentValues();
+                    values.put("toID", toID);
+                    values.put("flag", 0);//别人发的是0
+                    values.put("contentChat", message4Receive.getData().getSendText());
+                    values.put("message_type", "text");
+                    values.put("time", String.valueOf(timeMillis1));
+                    writableDatabase.insert("chat", null, values);
 
                 }
             }
@@ -305,11 +331,14 @@ public class ChatActivity extends AppCompatActivity {
      * 初始化聊天记录
      */
     private void initChatMessageList() {
-
-
-
-
-
+        try {
+            Cursor query = writableDatabase.query("chat", null, "toID=?",
+                    new String[]{toID}, null, null, "time desc");
+            Log.d("zw", "initChatMessageList: 此时拿到的数据的样式" + query.toString());
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.d("zw", "initChatMessageList: 取消息出错");
+        }
         initChatMsgListView();
     }
 

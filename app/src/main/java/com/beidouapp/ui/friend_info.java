@@ -69,7 +69,6 @@ public class  friend_info extends AppCompatActivity {
         Nickname = intent.getStringExtra("nickname");
         String Type = intent.getStringExtra("type");
         loginId = intent.getStringExtra("loginId");
-
         nickname.setText(Nickname);
         uid.setText(ID);
         Append_or_Delete.setText("删除好友");
@@ -88,7 +87,6 @@ public class  friend_info extends AppCompatActivity {
                 intent.putExtra("uid", ID);
                 intent.putExtra("nickname", Nickname);
                 intent.putExtra("type", "single");
-                intent.putExtra("loginId", loginId);
                 startActivity(intent);
             }
         });

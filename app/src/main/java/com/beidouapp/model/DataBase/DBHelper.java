@@ -15,16 +15,17 @@ import androidx.annotation.Nullable;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String T_USerInfo = "CREATE TABLE chat (id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-            "receive_id varchar(64), "+
-            "send_id varchar(64), "+
-            "contentChat varchar(255), "+
-            "time varchar(64)" +
+            "toID text, "+
+            "flag blob, "+
+            "contentChat text, "+
+            "time text," +
+            "message_type text" +
            // "ismineChat integer NOT NULL DEFAULT (0)" +
             ");";
 
     private static final String Friend_info = "CREATE TABLE friend (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "friend_id varchar(64)," +
-            "friend_name varchar(64)"+
+            "friend_id text," +
+            "friend_name text"+
             ");";
 
 
