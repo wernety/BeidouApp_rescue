@@ -13,19 +13,20 @@
 
     <TextView
         android:id="@+id/tv_add2group"
-        android:layout_width="327dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginLeft="10dp"
         android:gravity="center_vertical"
-        android:text="13545110505"
+        android:layout_weight="10"
         android:textColor="#333333"
         android:textSize="16dp" />
 
 
     <CheckBox
         android:id="@+id/cb_add_group"
-        android:layout_width="match_parent"
+        android:layout_width="30dp"
         android:layout_height="wrap_content"
+        android:layout_marginRight="15dp"
         android:gravity="center_vertical"
         tools:ignore="RtlHardcoded" />
 

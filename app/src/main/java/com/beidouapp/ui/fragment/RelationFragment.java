@@ -163,6 +163,7 @@ public class RelationFragment extends Fragment {
                             case R.id.add_group: {
                                 Intent intent = new Intent(context, add_group.class);
                                 intent.putExtra("id", loginId);
+                                intent.putExtra("token", token);
                                 startActivity(intent);
                                 break;
                             }

@@ -298,4 +298,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * 初始化聊天记录
+     */
+    private void initChatMessageList() {
+
+    }
+
+
 }
