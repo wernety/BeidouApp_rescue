@@ -56,7 +56,7 @@ public class Add2GroupRelAdapter extends BaseTreeAdapter<Add2GroupRelAdapter.Rel
                 }
             }
         });
-
+        holder.ivCheck.setImageResource(bean.isCheck() ? R.mipmap.road_checked : R.mipmap.road_check);
         holder.ivAvatar.setTag(position);
         holder.ivAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,13 +98,13 @@ public class Add2GroupRelAdapter extends BaseTreeAdapter<Add2GroupRelAdapter.Rel
         TextView tvName;
         ImageView ivAvatar;
         ImageView ivNext;
-        CheckBox ivCheck;
+        ImageView ivCheck;
         public RelationViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_add2group_relation);
             ivAvatar = itemView.findViewById(R.id.iv_Avatar_add_group_relation);
             ivNext = itemView.findViewById(R.id.iv_add_group_relation);
-            ivCheck = itemView.findViewById(R.id.cb_add_group_relation);
+            ivCheck = itemView.findViewById(R.id.iv_check_group_relation);
 
         }
     }

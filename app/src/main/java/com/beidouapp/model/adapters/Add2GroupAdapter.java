@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.beidouapp.R;
@@ -15,7 +16,7 @@ import java.util.List;
 public class Add2GroupAdapter extends BaseAdapter {
     private Context context;
     private View view;
-    private Add2GroupViewHolder viewHolder;
+    public Add2GroupViewHolder viewHolder;
     private List<Friend> data;
 
     public Add2GroupAdapter(Context context, List<Friend> data) {
@@ -45,7 +46,7 @@ public class Add2GroupAdapter extends BaseAdapter {
             viewHolder = new Add2GroupViewHolder();
             view = View.inflate(context, R.layout.item_add_group, null);
             viewHolder.name = (TextView) view.findViewById(R.id.tv_add2group);
-            viewHolder.check = (CheckBox) view.findViewById(R.id.cb_add_group);
+            viewHolder.check = (ImageView) view.findViewById(R.id.iv_check_group);
             view.setTag(viewHolder);
         } else {
             view = convertView;
@@ -54,11 +55,14 @@ public class Add2GroupAdapter extends BaseAdapter {
 
         String name = person.getFriendName();
         viewHolder.name.setText(name);
+        viewHolder.check.setImageResource(R.mipmap.road_check);
         return view;
+    }
+
+    public static class Add2GroupViewHolder {
+        public TextView name;
+        public ImageView check;
     }
 }
 
-class Add2GroupViewHolder {
-    public TextView name;
-    public CheckBox check;
-}
+

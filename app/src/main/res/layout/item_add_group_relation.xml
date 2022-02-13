@@ -39,13 +39,14 @@
             android:layout_marginRight="15dp"
             android:layout_gravity="center_vertical"/>
 
-        <CheckBox
-            android:id="@+id/cb_add_group_relation"
-            android:layout_width="30dp"
+        <ImageView
+            android:id="@+id/iv_check_group_relation"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginRight="15dp"
-            android:gravity="center_vertical"
-            />
+            android:rotation="0"
+            android:tint="#000000" />
         <!--            android:src="@mipmap/enter"-->
     </LinearLayout>
 </LinearLayout>

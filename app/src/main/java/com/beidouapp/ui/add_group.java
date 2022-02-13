@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,23 +28,20 @@ import com.beidouapp.model.Relation;
 import com.beidouapp.model.User;
 import com.beidouapp.model.adapters.Add2GroupAdapter;
 import com.beidouapp.model.adapters.Add2GroupRelAdapter;
-import com.beidouapp.model.adapters.RelationAdapter;
 import com.beidouapp.model.messages.Friend;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.Response;
 
 public class add_group extends AppCompatActivity {
     private ListView listView;
     private RecyclerView recyclerView;
-    private List<Friend> personList = new ArrayList<Friend>();
+    private List<Friend> friendList = new ArrayList<Friend>();
     private List<Relation>  relationList = new ArrayList<>();
     private Add2GroupRelAdapter relationAdapter;
     private Add2GroupAdapter adapter;
@@ -99,7 +95,8 @@ public class add_group extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int size = personList.size();
+                int size_friend = friendList.size();
+                int size_relation = relationList.size();
                 JSONArray jsonArray = new JSONArray();
 
                 Handler handler = new Handler() {
@@ -158,13 +155,23 @@ public class add_group extends AppCompatActivity {
                                                 me.put("groupId", groupId);
                                                 me.put("userId", loginId);
                                                 jsonArray.add(me);
-                                                for (int i = 0; i < size; i++) {
-                                                    Friend temp = personList.get(i);
+                                                for (int i = 0; i < size_friend; i++) {
+                                                    Friend temp = friendList.get(i);
                                                     if (temp.isChecked()) {
                                                         JSONObject jsonObject = new JSONObject();
                                                         jsonObject.put("groupId", groupId);
                                                         jsonObject.put("userId", temp.getFriendId());
                                                         jsonObject.put("userName", temp.getFriendName());
+                                                        jsonArray.add(jsonObject);
+                                                    }
+                                                }
+                                                for (int i = 0; i < size_relation; i++) {
+                                                    Relation temp = relationList.get(i);
+                                                    if (temp.isCheck()) {
+                                                        JSONObject jsonObject = new JSONObject();
+                                                        jsonObject.put("groupId", groupId);
+                                                        jsonObject.put("userId", temp.getId());
+                                                        jsonObject.put("userName", temp.getLabel());
                                                         jsonArray.add(jsonObject);
                                                     }
                                                 }
@@ -195,8 +202,16 @@ public class add_group extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                boolean status = personList.get(position).isChecked();
-                personList.get(position).setChecked(!status);
+                View temp = listView.getChildAt(position);
+                Add2GroupAdapter.Add2GroupViewHolder viewHolder = (Add2GroupAdapter.Add2GroupViewHolder) temp.getTag();
+                boolean isChecked = friendList.get(position).isChecked();
+                if (isChecked) {
+                    friendList.get(position).setChecked(false);
+                    viewHolder.check.setImageResource(R.mipmap.road_check);
+                } else {
+                    friendList.get(position).setChecked(true);
+                    viewHolder.check.setImageResource(R.mipmap.road_checked);
+                }
             }
         });
     }
@@ -209,8 +224,9 @@ public class add_group extends AppCompatActivity {
             @Override
             public void onCheckClick(View v, int pos) {
                 Relation relation = relationList.get(pos);
-                String id = relation.getId();
-                String nickname = relation.getLabel();
+                relationAdapter.checkOrUncheck(relationList, pos);
+                relationAdapter.notifyDataSetChanged();
+
             }
 
             @Override
@@ -231,9 +247,9 @@ public class add_group extends AppCompatActivity {
      * 初始化listview
      */
     private void initListView() {
-        adapter = new Add2GroupAdapter(add_group.this, personList);
+        adapter = new Add2GroupAdapter(add_group.this, friendList);
         listView.setAdapter(adapter);
-        listView.setSelection(personList.size());
+        listView.setSelection(friendList.size());
         ListViewUtils.setListViewHeightBasedOnChildren(listView);
     }
 
@@ -260,9 +276,9 @@ public class add_group extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            personList = friends;
+                            friendList = friends;
                             for (int i=0;i<size;i++){
-                                Log.d("zzzz", personList.get(i).getFriendName());
+                                Log.d("zzzz", friendList.get(i).getFriendName());
                             }
                             initListView();
                         }
