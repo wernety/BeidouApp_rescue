@@ -120,6 +120,7 @@ public class RelationFragment extends Fragment {
                 intent.putExtra("uid", id);
                 intent.putExtra("nickname", nickname);
                 intent.putExtra("type", "single");
+                intent.putExtra("loginId", loginId);
                 startActivity(intent);
             }
         });

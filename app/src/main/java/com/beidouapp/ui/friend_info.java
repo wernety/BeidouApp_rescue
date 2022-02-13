@@ -28,6 +28,7 @@ public class  friend_info extends AppCompatActivity {
     private String ID;
     private String Nickname;
     private String Type;
+    private String loginId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,7 @@ public class  friend_info extends AppCompatActivity {
         ID = intent.getStringExtra("uid");
         Nickname = intent.getStringExtra("nickname");
         String Type = intent.getStringExtra("type");
+        loginId = intent.getStringExtra("loginId");
 
         nickname.setText(Nickname);
         uid.setText(ID);
@@ -82,6 +84,7 @@ public class  friend_info extends AppCompatActivity {
                 intent.putExtra("uid", ID);
                 intent.putExtra("nickname", Nickname);
                 intent.putExtra("type", "single");
+                intent.putExtra("loginId", loginId);
                 startActivity(intent);
             }
         });

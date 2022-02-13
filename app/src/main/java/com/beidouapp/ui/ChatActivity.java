@@ -53,6 +53,7 @@ public class ChatActivity extends AppCompatActivity {
     private String toID;
     private String toNickname;
     private String toType;
+    private String loginId;
     private Map<String, String> userMap = new HashMap<String, String>();
     private TextView title;
     private ListView listView;
@@ -121,6 +122,7 @@ public class ChatActivity extends AppCompatActivity {
         toID = intent.getStringExtra("uid");
         toNickname = intent.getStringExtra("nickname");
         toType = intent.getStringExtra("type");
+        loginId = intent.getStringExtra("loginId");
         if (toType.equals("group")) {
             String groupInfo = intent.getStringExtra("groupInfo");
             Log.d("group", groupInfo);
@@ -189,6 +191,7 @@ public class ChatActivity extends AppCompatActivity {
                         chatMessageList.add(chatMessage);
 
                     } else {
+
                         Log.d("uid, sendto", toID);
                         Message4Send message4Send = new Message4Send(toID, "single", "text", content);
                         Log.d("string", message4Send.toString());
@@ -302,6 +305,11 @@ public class ChatActivity extends AppCompatActivity {
      * 初始化聊天记录
      */
     private void initChatMessageList() {
+
+
+
+
+
         initChatMsgListView();
     }
 
