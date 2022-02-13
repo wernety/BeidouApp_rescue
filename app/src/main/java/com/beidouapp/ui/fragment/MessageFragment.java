@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.model.adapters.MessageAdapter;
+import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.ChatActivity;
 
@@ -152,6 +153,7 @@ public class MessageFragment extends Fragment {
         BaseAdapter adapter = new MessageAdapter(context, ContactList);
         listView.setAdapter(adapter);
         listView.setSelection(ContactList.size());
+        ListViewUtils.setListViewHeightBasedOnChildren(listView);
     }
 
 
