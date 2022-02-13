@@ -60,7 +60,6 @@ public class MessageFragment extends Fragment {
     private List<Map<String, Object>> ContactList = new ArrayList<Map<String, Object>>();
     private Context context;
     private boolean isGetData = false;
-    private ChatReceiver chatReceiver;
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
     private List<recentMan> manRecords;
@@ -104,13 +103,13 @@ public class MessageFragment extends Fragment {
     public void onResume() {
         super.onResume();
         isGetData = false;
-        initReceiver();
+//        initReceiver();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(chatReceiver);
+//        getActivity().unregisterReceiver(chatReceiver);
     }
 
     private void initUI () {
@@ -183,43 +182,43 @@ public class MessageFragment extends Fragment {
     }
 
 
-    /**
-     * 初始化广播接收器
-     */
-    private void initReceiver(){
-        chatReceiver = new ChatReceiver();
-        IntentFilter filter = new IntentFilter("com.beidouapp.callback.content");
-        getActivity().registerReceiver(chatReceiver, filter);
-    }
-    /**
-     * 聊天消息广播接收器
-     */
-    private class ChatReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-            Log.d("WebSocket", "onReceive" + message);
-            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
-            if (message4Receive.getType().equals("MSG")) {
-                if (message4Receive.getReceiveType().equals("group")) {
-                    initContactListView();
-
-                } else {
-                    //插入数据库
-                    ContentValues values = new ContentValues();
-                    long timeMillis1 = System.currentTimeMillis();
-                    values.put("toID", message4Receive.getData().getSendUserId());
-                    values.put("flag", 0);//别人发的是0
-                    values.put("contentChat", message4Receive.getData().getSendText());
-                    values.put("message_type", "text");
-                    values.put("time", String.valueOf(timeMillis1));
-                    writableDatabase.insert("chat", null, values);
-                    initContactListView();
-
-                }
-            }
-        }
-    }
+//    /**
+//     * 初始化广播接收器
+//     */
+//    private void initReceiver(){
+//        chatReceiver = new ChatReceiver();
+//        IntentFilter filter = new IntentFilter("com.beidouapp.callback.content");
+//        getActivity().registerReceiver(chatReceiver, filter);
+//    }
+//    /**
+//     * 聊天消息广播接收器
+//     */
+//    private class ChatReceiver extends BroadcastReceiver {
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String message = intent.getStringExtra("message");
+//            Log.d("WebSocket", "onReceive" + message);
+//            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
+//            if (message4Receive.getType().equals("MSG")) {
+//                if (message4Receive.getReceiveType().equals("group")) {
+//                    initContactListView();
+//
+//                } else {
+//                    //插入数据库
+//                    ContentValues values = new ContentValues();
+//                    long timeMillis1 = System.currentTimeMillis();
+//                    values.put("toID", message4Receive.getData().getSendUserId());
+//                    values.put("flag", 0);//别人发的是0
+//                    values.put("contentChat", message4Receive.getData().getSendText());
+//                    values.put("message_type", "text");
+//                    values.put("time", String.valueOf(timeMillis1));
+//                    writableDatabase.insert("chat", null, values);
+//                    initContactListView();
+//
+//                }
+//            }
+//        }
+//    }
 
 }
