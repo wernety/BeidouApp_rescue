@@ -34,6 +34,7 @@ import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.ChatActivity;
+import com.beidouapp.ui.add_friend;
 import com.beidouapp.ui.add_group;
 import com.beidouapp.ui.friend_info;
 
@@ -159,6 +160,10 @@ public class RelationFragment extends Fragment {
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         switch (menuItem.getItemId()) {
                             case R.id.add_friends: {
+                                Intent intent = new Intent(context, add_friend.class);
+                                intent.putExtra("id", loginId);
+                                intent.putExtra("token", token);
+                                startActivity(intent);
                                 break;
                             }
                             case R.id.add_group: {

@@ -38,6 +38,9 @@
         android:theme="@style/Theme.BeidouApp"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.add_friend"
+            android:exported="false" />
+        <activity
             android:name=".ui.add_group"
             android:exported="false" />
 

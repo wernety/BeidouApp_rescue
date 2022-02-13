@@ -142,7 +142,7 @@ public class add_group extends AppCompatActivity {
                             Log.d("zz",groupName);
                             Log.d("zz",loginId);
                             Log.d("zz",object.toJSONString());
-                            OkHttpUtils.getInstance(add_group.this).post("http://120.27.242.92:8080/groups",
+                            OkHttpUtils.getInstance(add_group.this).post("http://120.27.242.92:8080/friends",
                                     object.toJSONString(), new OkHttpUtils.MyCallback() {
                                         @Override
                                         public void success(Response response) throws IOException {
