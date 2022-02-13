@@ -67,8 +67,8 @@ public class add_friend extends AppCompatActivity {
                 object.put("friendName", friendName);
                 Log.d("zz",object.toJSONString());
                 try {
-                    OkHttpUtils.getInstance(add_friend.this).post("http://120.27.242.92:8080/friends", object.toJSONString(),
-                            new OkHttpUtils.MyCallback() {
+                    OkHttpUtils.getInstance(add_friend.this).post("http://120.27.242.92:8080/friends",
+                            object.toJSONString(), new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
                                     Log.d("zz","添加好友中");

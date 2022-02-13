@@ -16,8 +16,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.model.messages.Group;
+import com.beidouapp.model.utils.OkHttpUtils;
 
+import java.io.IOException;
 import java.util.List;
+
+import okhttp3.Response;
 
 public class  friend_info extends AppCompatActivity {
     private TextView nickname;
@@ -92,6 +96,36 @@ public class  friend_info extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 finish();
+            }
+        });
+
+        Append_or_Delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject object = new JSONObject();
+                object.put("userId", loginId);
+                object.put("friendId", ID);
+                try {
+                    OkHttpUtils.getInstance(friend_info.this).delete("http://120.27.242.92:8080/friends",
+                            object.toJSONString(), new OkHttpUtils.MyCallback() {
+                                @Override
+                                public void success(Response response) throws IOException {
+                                    String body = response.body().string();
+                                    JSONObject jsonObject = JSON.parseObject(body);
+                                    int code = jsonObject.getInteger("code");
+                                    if (code == 200) {
+                                        finish();
+                                    }
+                                }
+
+                                @Override
+                                public void failed(IOException e) {
+
+                                }
+                            });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
