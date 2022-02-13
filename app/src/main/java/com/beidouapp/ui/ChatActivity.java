@@ -1,6 +1,7 @@
 package com.beidouapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.collection.ArraySet;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -38,6 +39,7 @@ import com.beidouapp.model.messages.Message4Send;
 import com.beidouapp.model.utils.JSONUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,17 +54,23 @@ public class ChatActivity extends AppCompatActivity {
     private Context context; //
     private ChatAdapter adapter;
     private List<ChatMessage> chatMessageList = new ArrayList<>();
+    private List<ChatMessage> templeList = new ArrayList<>();
     private ChatReceiver chatReceiver;
     private String toID;//对方ID
     private String toNickname;//昵称
     private String toType;  //消息类型
     private String loginId;  //自己的ID
+    private long timeMillis;
     private Map<String, String> userMap = new HashMap<String, String>();
     private TextView title;
     private ListView listView;
     private EditText input;
     private Button btn_send;
     private ImageButton btn_back;
+    private DemoApplication application;
+    private SQLiteDatabase writableDatabase;
+
+
 
 
     /**
@@ -82,9 +90,8 @@ public class ChatActivity extends AppCompatActivity {
             msgService = null;
         }
     };
-    private DemoApplication application;
-    private SQLiteDatabase writableDatabase;
-    private long timeMillis;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,6 +190,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 if (msgService.msgLink.webSocket != null) {
+//                if (true) {
 
                     if (toType.equals("group")) {
                         Message4Send message4Send = new Message4Send(toID,"group", "text", content);
@@ -221,6 +229,8 @@ public class ChatActivity extends AppCompatActivity {
                         values.put("message_type", "text");
                         values.put("time", String.valueOf(timeMillis));
                         writableDatabase.insert("chat", null, values);
+
+                        Log.d("zw", "onClick: 写自己的消息");
 
                     }
                     initChatMsgListView();
@@ -301,6 +311,7 @@ public class ChatActivity extends AppCompatActivity {
                     values.put("message_type", "text");
                     values.put("time", String.valueOf(timeMillis1));
                     writableDatabase.insert("chat", null, values);
+                    Log.d("zw", "onReceive: 写库，写别人的消息");
 
                 }
             }
@@ -331,14 +342,53 @@ public class ChatActivity extends AppCompatActivity {
      * 初始化聊天记录
      */
     private void initChatMessageList() {
+        String flag;
+        String contentChat;
+        String time;
+        String message_type;
+        ChatMessage chatMessage;
+        int i = 0;
+//        ContentValues values = new ContentValues();
+//        values.put("toID", "测试ID");
+//        values.put("flag", "1");//自己发的是1
+//        values.put("contentChat", "content");
+//        values.put("message_type", "text");
+//        values.put("time", "000000002");
+//        writableDatabase.insert("chat", null, values);
+        Log.d("zw", "initChatMessageList: 此时初始化入库");
         try {
             Cursor query = writableDatabase.query("chat", null, "toID=?",
                     new String[]{toID}, null, null, "time desc");
-            Log.d("zw", "initChatMessageList: 此时拿到的数据的样式" + query.toString());
+            query.moveToFirst();
+                do{
+                    i++;
+                    flag = query.getString(query.getColumnIndex("flag"));
+                    contentChat = query.getString(query.getColumnIndex("contentChat"));
+                    time = query.getString(query.getColumnIndex("time"));
+                    message_type = query.getString(query.getColumnIndex("message_type"));
+                    if (flag.equals("0")){
+                        chatMessage = new ChatMessage(toNickname, contentChat, time, 0);
+                    }else{
+                        chatMessage = new ChatMessage(loginId, contentChat, time, 1);
+                    }
+                    templeList.add(chatMessage);
+                    if (i == 11){break;}
+                }while (query.moveToNext());
         }catch (Exception e){
             e.printStackTrace();
             Log.d("zw", "initChatMessageList: 取消息出错");
         }
+        if (templeList.size() == 0){
+            Log.d("zw", "initChatMessageList: 此时数据库关于此人聊天记录为空");
+        }
+        try {
+            Collections.reverse(templeList);
+            chatMessageList = templeList;
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.d("zw", "initChatMessageList: 倒序发生异常");
+        }
+
         initChatMsgListView();
     }
 

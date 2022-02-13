@@ -16,7 +16,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String T_USerInfo = "CREATE TABLE chat (id INTEGER PRIMARY KEY AUTOINCREMENT,"+
             "toID text, "+
-            "flag blob, "+
+            "flag text, "+
             "contentChat text, "+
             "time text," +
             "message_type text" +
