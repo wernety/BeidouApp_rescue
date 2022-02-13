@@ -260,7 +260,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
 //                onPause();
                 onStop();
 //                onDestroy();
-//                this.finish();
+                finish();
                 break;
             }
             default:break;

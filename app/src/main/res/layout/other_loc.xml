@@ -15,38 +15,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar_loc"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/white">
-
-                <ImageView
-                    android:id="@+id/toolbar_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:src="@drawable/more_icon" />
-
-                <androidx.appcompat.widget.SearchView
-                    android:id="@+id/search_loc_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center|bottom"
-                    android:background="@null"
-                    android:drawableRight="@drawable/search_icon"
-                    android:hint=""
-                    android:imeOptions="actionSearch"
-                    android:inputType="text"
-                    android:paddingRight="5dp"
-                    android:textSize="16sp"
-                    app:iconifiedByDefault="false"></androidx.appcompat.widget.SearchView>
-
-            </androidx.appcompat.widget.Toolbar>
-
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvLocData"
                 android:layout_width="match_parent"
