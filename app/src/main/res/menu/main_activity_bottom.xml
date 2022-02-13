@@ -20,7 +20,7 @@
     <item android:id="@+id/mainAct_bottom_posManage"
         android:enabled="true"
         android:title="地点管理"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/posmanager"
         app:showAsAction="ifRoom" />
 
     <item android:id="@+id/mainAct_bottom_settings"

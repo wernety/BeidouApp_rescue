@@ -141,6 +141,35 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(reciverForWriteDB, filter);
     }
 
+    private void initUser() {
+        Intent intent = getIntent();
+        user4Login = new User4Login(intent.getStringExtra("uid"),
+                "upw");
+        token = intent.getStringExtra("token");
+//        pass = intent.getStringExtra("upw");
+        bundle = new Bundle();
+        bundle.putString("curToken", curToken);
+        bundle.putString("token", token);
+        bundle.putString("loginId", user4Login.getUsername());
+        bundle.putString("pass", intent.getStringExtra("upw"));  //传密码进去
+    }
+
+    private void initUI() {
+        bottomNavigationView = findViewById(R.id.mainAct_bnv);
+        fragmentManager = getSupportFragmentManager();
+        homeFragment = new HomeFragment();
+        messageFragment = new MessageFragment();
+        relationFragment = new RelationFragment();
+        posManageFragment = new PosManageFragment();
+        settingsFragment = new SettingsFragment();
+        iniPosFragmentListener();
+
+
+        switchFragment(homeFragment);
+    }
+
+
+
     /**
      * LitePal数据库初始化，用于记录curtoken，组织结构以及uid，password
      * 聊天数据库Sqlite创建 dbHelper
@@ -214,32 +243,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    private void initUser() {
-        Intent intent = getIntent();
-        user4Login = new User4Login(intent.getStringExtra("uid"),
-                "upw");
-        token = intent.getStringExtra("token");
-//        pass = intent.getStringExtra("upw");
-        bundle = new Bundle();
-        bundle.putString("curToken", curToken);
-        bundle.putString("token", token);
-        bundle.putString("loginId", user4Login.getUsername());
-        bundle.putString("pass", intent.getStringExtra("upw"));  //传密码进去
-    }
 
-    private void initUI() {
-        bottomNavigationView = findViewById(R.id.mainAct_bnv);
-        fragmentManager = getSupportFragmentManager();
-        homeFragment = new HomeFragment();
-        messageFragment = new MessageFragment();
-        relationFragment = new RelationFragment();
-        posManageFragment = new PosManageFragment();
-        settingsFragment = new SettingsFragment();
-        iniPosFragmentListener();
-
-
-        switchFragment(homeFragment);
-    }
 
     /**
      * 第三次回调，此次回调将PosManagerFragment里面的两个小的Fragment的item点击事件回调给MainActivity然后在地图上显示
