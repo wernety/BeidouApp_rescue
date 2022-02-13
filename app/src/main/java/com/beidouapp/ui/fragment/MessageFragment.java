@@ -63,6 +63,7 @@ public class MessageFragment extends Fragment {
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
     private List<recentMan> manRecords;
+    private ChatReceiver chatReceiver;
 
     @Nullable
     @Override
@@ -100,16 +101,23 @@ public class MessageFragment extends Fragment {
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        RefreshContactList(getActivity().getApplicationContext());
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         isGetData = false;
-//        initReceiver();
+        RefreshContactList(getActivity().getApplicationContext());
+        initReceiver();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-//        getActivity().unregisterReceiver(chatReceiver);
+        getActivity().unregisterReceiver(chatReceiver);
     }
 
     private void initUI () {
@@ -151,8 +159,8 @@ public class MessageFragment extends Fragment {
             map.put("content", query.getString(query.getColumnIndex("contentChat")));
             map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
             ContactList.add(map);
-            initContactListView();
         }
+        initContactListView();
 /*现在要改的是要将各个数据库的初始化环节整理一下，
     对于chat表，建议单独在MainActivity写一个广播接受类，在接受的时候，就能够写库
     对于recentMan表，也是如此，在广播接受的时候，写库
@@ -182,21 +190,20 @@ public class MessageFragment extends Fragment {
     }
 
 
-//    /**
-//     * 初始化广播接收器
-//     */
-//    private void initReceiver(){
-//        chatReceiver = new ChatReceiver();
-//        IntentFilter filter = new IntentFilter("com.beidouapp.callback.content");
-//        getActivity().registerReceiver(chatReceiver, filter);
-//    }
-//    /**
-//     * 聊天消息广播接收器
-//     */
-//    private class ChatReceiver extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
+    /**
+     * 初始化广播接收器
+     */
+    private void initReceiver(){
+        chatReceiver = new ChatReceiver();
+        IntentFilter filter = new IntentFilter("com.beidouapp.callback.content");
+        getActivity().registerReceiver(chatReceiver, filter);
+    }
+    /**
+     * 聊天消息广播接收器
+     */
+    private class ChatReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
 //            String message = intent.getStringExtra("message");
 //            Log.d("WebSocket", "onReceive" + message);
 //            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
@@ -214,11 +221,11 @@ public class MessageFragment extends Fragment {
 //                    values.put("message_type", "text");
 //                    values.put("time", String.valueOf(timeMillis1));
 //                    writableDatabase.insert("chat", null, values);
-//                    initContactListView();
+            RefreshContactList(getActivity().getApplicationContext());
+        }
 //
-//                }
 //            }
 //        }
-//    }
+    }
 
 }
