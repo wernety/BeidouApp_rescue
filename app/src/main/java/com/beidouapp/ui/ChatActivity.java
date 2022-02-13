@@ -360,20 +360,21 @@ public class ChatActivity extends AppCompatActivity {
             Cursor query = writableDatabase.query("chat", null, "toID=?",
                     new String[]{toID}, null, null, "time desc");
             query.moveToFirst();
-                do{
-                    i++;
-                    flag = query.getString(query.getColumnIndex("flag"));
-                    contentChat = query.getString(query.getColumnIndex("contentChat"));
-                    time = query.getString(query.getColumnIndex("time"));
-                    message_type = query.getString(query.getColumnIndex("message_type"));
-                    if (flag.equals("0")){
-                        chatMessage = new ChatMessage(toNickname, contentChat, time, 0);
-                    }else{
-                        chatMessage = new ChatMessage(loginId, contentChat, time, 1);
-                    }
-                    templeList.add(chatMessage);
-                    if (i == 11){break;}
-                }while (query.moveToNext());
+            do{
+                i++;
+                flag = query.getString(query.getColumnIndex("flag"));
+                contentChat = query.getString(query.getColumnIndex("contentChat"));
+                time = query.getString(query.getColumnIndex("time"));
+                message_type = query.getString(query.getColumnIndex("message_type"));
+                if (flag.equals("0")){
+                    chatMessage = new ChatMessage(toNickname, contentChat, time, 0);
+                }else{
+                    chatMessage = new ChatMessage(loginId, contentChat, time, 1);
+                }
+                templeList.add(chatMessage);
+                if (i == 11){break;}
+            }while (query.moveToNext());
+
         }catch (Exception e){
             e.printStackTrace();
             Log.d("zw", "initChatMessageList: 取消息出错");

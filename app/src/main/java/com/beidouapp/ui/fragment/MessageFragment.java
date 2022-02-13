@@ -1,7 +1,11 @@
 package com.beidouapp.ui.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -21,9 +25,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.model.adapters.MessageAdapter;
+import com.beidouapp.model.messages.ChatMessage;
+import com.beidouapp.model.messages.Message4Receive;
+import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.ChatActivity;
+import com.beidouapp.ui.DemoApplication;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,6 +54,9 @@ public class MessageFragment extends Fragment {
     private List<Map<String, Object>> ContactList = new ArrayList<Map<String, Object>>();
     private Context context;
     private boolean isGetData = false;
+    private ChatReceiver chatReceiver;
+    private DemoApplication application;
+    private SQLiteDatabase writableDatabase;
 
     @Nullable
     @Override
@@ -53,22 +64,19 @@ public class MessageFragment extends Fragment {
         if (enter && !isGetData && ContactList.isEmpty()) {
             isGetData = true;
             RefreshContactList(getActivity().getApplicationContext());
-
         } else {
             isGetData = false;
         }
         return super.onCreateAnimation(transit, enter, nextAnim);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        isGetData = false;
-    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        application = (DemoApplication) getActivity().getApplicationContext();
+        writableDatabase = application.dbHelper.getWritableDatabase();
     }
 
     @Override
@@ -82,6 +90,19 @@ public class MessageFragment extends Fragment {
         RefreshContactList(context);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isGetData = false;
+        initReceiver();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(chatReceiver);
     }
 
     private void initUI () {
@@ -110,40 +131,13 @@ public class MessageFragment extends Fragment {
      * @param context
      */
     private void RefreshContactList(Context context) {
-        OkHttpUtils.getInstance(context)
-                .get("http://120.27.242.92:8080/users", new OkHttpUtils.MyCallback() {
-                    @Override
-                    public void success(Response response) throws IOException {
-                        JSONObject object = JSON.parseObject(response.body().string());
-                        int code = object.getInteger("code");
-                        if (code == 200) {
-                            JSONArray array = (JSONArray) object.get("data");
-                            List<String> list = (List<String>) JSONArray.parseArray(array.toString(),String.class);
-                            int size = list.size();
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ContactList.clear();
-                                    for (int i = 0; i < size; i++) {
-                                        Map<String, Object> map = new HashMap<String, Object>();
-                                        map.put("title", list.get(i));
-                                        map.put("content", "How are u");
-                                        map.put("time", "2022:1:11");
-                                        ContactList.add(map);
-                                        Log.d("contactlist", ContactList.toString());
-                                    }
-                                    initContactListView();
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void failed(IOException e) {
-                        Log.d("getmsg", e.getMessage());
-                    }
-                });
-
+        ContactList.clear();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("title", "x");
+        map.put("content", "How are u");
+        map.put("time", "2022:1:11");
+        ContactList.add(map);
+        initContactListView();
     }
 
     /**
@@ -157,5 +151,43 @@ public class MessageFragment extends Fragment {
     }
 
 
+    /**
+     * 初始化广播接收器
+     */
+    private void initReceiver(){
+        chatReceiver = new ChatReceiver();
+        IntentFilter filter = new IntentFilter("com.beidouapp.callback.content");
+        getActivity().registerReceiver(chatReceiver, filter);
+    }
+    /**
+     * 聊天消息广播接收器
+     */
+    private class ChatReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            Log.d("WebSocket", "onReceive" + message);
+            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
+            if (message4Receive.getType().equals("MSG")) {
+                if (message4Receive.getReceiveType().equals("group")) {
+                    initContactListView();
+
+                } else {
+                    //插入数据库
+                    ContentValues values = new ContentValues();
+                    long timeMillis1 = System.currentTimeMillis();
+                    values.put("toID", message4Receive.getData().getSendUserId());
+                    values.put("flag", 0);//别人发的是0
+                    values.put("contentChat", message4Receive.getData().getSendText());
+                    values.put("message_type", "text");
+                    values.put("time", String.valueOf(timeMillis1));
+                    writableDatabase.insert("chat", null, values);
+                    initContactListView();
+
+                }
+            }
+        }
+    }
 
 }

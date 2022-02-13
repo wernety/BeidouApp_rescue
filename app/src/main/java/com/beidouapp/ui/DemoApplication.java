@@ -11,7 +11,7 @@ import org.litepal.LitePal;
 
 public class DemoApplication extends Application {
     SQLiteDatabase dbForRecord;
-    DBHelper dbHelper;
+    public DBHelper dbHelper;
     //使用这个dbHelper再某个表中添加数据的方法是
     /*
     SQLiteDatabase db = dbHelper.getWritableDatabase();
