@@ -31,12 +31,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.background.MsgService;
+import com.beidouapp.model.DataBase.recentMan;
 import com.beidouapp.model.adapters.ChatAdapter;
 import com.beidouapp.model.messages.ChatMessage;
 import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.messages.Message4Send;
 import com.beidouapp.model.utils.JSONUtils;
+
+import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +72,8 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton btn_back;
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
-
+    private List<recentMan> manRecords;
+    private recentMan manRecord;
 
 
 
@@ -231,6 +235,17 @@ public class ChatActivity extends AppCompatActivity {
                         writableDatabase.insert("chat", null, values);
 
                         Log.d("zw", "onClick: 写自己的消息");
+                        //将最近的一次消息写入数据库
+                        manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
+                        if(manRecords.isEmpty()){
+                            manRecord = new recentMan();
+                            manRecord.setUid(toID);
+                            manRecord.save();
+                        }else {
+                            manRecord = manRecords.get(0);
+                            manRecord.setUid(toID);
+                            manRecord.save();
+                        }
 
                     }
                     initChatMsgListView();
@@ -280,7 +295,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("message");
-            Log.d("WebSocket", "onReceive" + message);
+//            Log.d("WebSocket", "onReceive" + message);
             Message4Receive message4Receive = JSONUtils.receiveJSON(message);
             if (message4Receive.getType().equals("MSG")) {
                 if (message4Receive.getReceiveType().equals("group")) {
@@ -312,6 +327,17 @@ public class ChatActivity extends AppCompatActivity {
                     values.put("time", String.valueOf(timeMillis1));
                     writableDatabase.insert("chat", null, values);
                     Log.d("zw", "onReceive: 写库，写别人的消息");
+                    //将最近给自己发过消息的人记录入数据库
+                    manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
+                    if(manRecords.isEmpty()){
+                       manRecord = new recentMan();
+                       manRecord.setUid(toID);
+                       manRecord.save();
+                    }else {
+                        manRecord = manRecords.get(0);
+                        manRecord.setUid(toID);
+                        manRecord.save();
+                    }
 
                 }
             }

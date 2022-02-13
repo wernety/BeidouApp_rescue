@@ -2,7 +2,9 @@ package com.beidouapp.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -11,6 +13,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -26,8 +29,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.background.MsgService;
 import com.beidouapp.model.DataBase.DBHelper;
+import com.beidouapp.model.DataBase.recentMan;
 import com.beidouapp.model.User;
 import com.beidouapp.model.User4Login;
+import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.messages.regist;
 import com.beidouapp.model.utils.GenerateTokenDemo;
 import com.beidouapp.model.utils.JSONUtils;
@@ -43,6 +48,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.beidouapp.model.utils.NetworkManager;
 import com.beidouapp.model.messages.regist;
 
+import org.litepal.LitePal;
 import org.litepal.tablemanager.Connector;
 
 import java.io.IOException;
@@ -92,7 +98,10 @@ public class MainActivity extends AppCompatActivity {
     private regist regist;
     private Intent intentservice;
     private DemoApplication application;
-
+    private List<recentMan> manRecords;
+    private recentMan manRecord;
+    private SQLiteDatabase writableDatabase;
+    private reciverForWriteDB reciverForWriteDB;
 
 
     @Override
@@ -113,12 +122,23 @@ public class MainActivity extends AppCompatActivity {
             curToken = "f9bddcacc678ea185bf8158d90087fbc";
             initUserAndMsgNowang();
         }
+
+
         iniDbForRecord();
         initUser();
         initUI();
         initListener();
         StartMsgService();
         mContext = getContext();
+    }
+
+    /**
+     * 这是将广播接收器和广播动作绑定到一起，实现广播到来，就将消息写入数据库
+     */
+    private void iniForBroadCastListener() {
+        reciverForWriteDB = new reciverForWriteDB();
+        IntentFilter filter = new IntentFilter("com.beidouapp.callback.content");
+        registerReceiver(reciverForWriteDB, filter);
     }
 
     /**
@@ -129,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         application = (DemoApplication) this.getApplicationContext();
         application.dbForRecord = Connector.getDatabase(); //这里是创库顺便创意张空表
         application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 3);
-        application.dbHelper.getWritableDatabase();
+        writableDatabase = application.dbHelper.getWritableDatabase();
     }
 
     //没有网络状态下的curToken传输
@@ -245,6 +265,17 @@ public class MainActivity extends AppCompatActivity {
         startService(intentservice);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        iniForBroadCastListener();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(reciverForWriteDB);
+    }
 
     @Override
     protected void onDestroy() {
@@ -332,5 +363,48 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    /**
+     * 这个广播接收器专门用来写库的，当有消息接受到的时候，就进入库中
+     */
+    private class reciverForWriteDB extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+//            Log.d("WebSocket", "onReceive" + message);
+            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
+            if (message4Receive.getType().equals("MSG")) {
+                if (message4Receive.getReceiveType().equals("group")) {
+                    Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
+                }else{
+                    if(!message4Receive.getData().getSendUserId().isEmpty()){
+                        String toID = message4Receive.getData().getSendUserId();
+                        manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
+                        if(manRecords.isEmpty()){
+                            manRecord = new recentMan();
+                            manRecord.setUid(toID);
+                        }else {
+                            manRecord = manRecords.get(0);
+//                            manRecord.setUid(sendID);
+                            Log.d("zw", "onReceive: 这个时候做啥呢？我都已经有这个数据了，要不以后更新一下接收时间？");
+                        }
+                        manRecord.save();//最近单聊用户入库
+                        ContentValues values = new ContentValues();
+                        values.put("toID", toID);
+                        values.put("flag", 0);//别人发的是0
+                        values.put("contentChat", message4Receive.getData().getSendText());
+                        values.put("message_type", "text");
+                        values.put("time", String.valueOf(System.currentTimeMillis()));
+                        writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
+
+                    }else{
+                        Log.d("zw", "onReceive: 此时收到的广播的消息，但是这条广播显示的发送人ID是空的，woc");
+                    }
+                }
+
+            }
+        }
     }
 }

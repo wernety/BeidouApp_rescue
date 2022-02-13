@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
@@ -24,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
+import com.beidouapp.model.DataBase.recentMan;
 import com.beidouapp.model.adapters.MessageAdapter;
 import com.beidouapp.model.messages.ChatMessage;
 import com.beidouapp.model.messages.Message4Receive;
@@ -33,8 +35,12 @@ import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.ChatActivity;
 import com.beidouapp.ui.DemoApplication;
 
+import org.litepal.LitePal;
+
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +63,11 @@ public class MessageFragment extends Fragment {
     private ChatReceiver chatReceiver;
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
+    private List<recentMan> manRecords;
 
     @Nullable
     @Override
+    //刷新
     public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
         if (enter && !isGetData && ContactList.isEmpty()) {
             isGetData = true;
@@ -132,12 +140,36 @@ public class MessageFragment extends Fragment {
      */
     private void RefreshContactList(Context context) {
         ContactList.clear();
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("title", "x");
-        map.put("content", "How are u");
-        map.put("time", "2022:1:11");
-        ContactList.add(map);
-        initContactListView();
+        manRecords = LitePal.findAll(recentMan.class);
+        int num = manRecords.size();
+        for(int i=0;i<num;i++){
+            recentMan manRecord = manRecords.get(i);
+            Cursor query = writableDatabase.query("chat", null, "toID=?",
+                    new String[]{manRecord.getUid()}, null, null, "time desc");
+            query.moveToFirst();
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("title", manRecord.getUid());
+            map.put("content", query.getString(query.getColumnIndex("contentChat")));
+            map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
+            ContactList.add(map);
+            initContactListView();
+        }
+/*现在要改的是要将各个数据库的初始化环节整理一下，
+    对于chat表，建议单独在MainActivity写一个广播接受类，在接受的时候，就能够写库
+    对于recentMan表，也是如此，在广播接受的时候，写库
+*/
+    }
+
+    /**
+     * 将时间戳转换成分秒时
+     * @param timeMillis
+     * @return
+     */
+    private String formatTime(String timeMillis) {
+        long timeMillisl=Long.parseLong(timeMillis);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(timeMillisl);
+        return simpleDateFormat.format(date);
     }
 
     /**

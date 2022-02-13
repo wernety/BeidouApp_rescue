@@ -14,6 +14,10 @@ import androidx.annotation.Nullable;
  */
 public class DBHelper extends SQLiteOpenHelper {
 
+    /**
+     * 第一个用于聊天记录的表，在chatActivity里面进行加库
+     * （个人觉得应该在收到消息的时候进行加库，而不是在chatActivity显示的时候进行加库）
+     */
     private static final String T_USerInfo = "CREATE TABLE chat (id INTEGER PRIMARY KEY AUTOINCREMENT,"+
             "toID text, "+
             "flag text, "+
@@ -25,7 +29,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String Friend_info = "CREATE TABLE friend (id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "friend_id text," +
-            "friend_name text"+
+            "friend_name text,"+
+            "flag text" +
             ");";
 
 
