@@ -13,17 +13,22 @@ public class starPos implements Serializable{
     private String tag;
     private String latitude;
     private String lontitude;
+    private String locInfo;//信息
+    private int legend;
 
     public starPos(){
     }
 
-    public starPos(String Text, String uid, String status, String tag, String latitude, String lontitude){
+    public starPos(String Text, String uid, String status, String tag, String latitude, String lontitude,
+                   String locInfo, int legend){
         this.latitude = latitude;
         this.lontitude = lontitude;
         this.status = status;
         this.tag = tag;
         this.uid = uid;
         this.Text = Text;
+        this.locInfo = locInfo;
+        this.legend = legend;
     }
 
     public String getStatus() {
@@ -50,6 +55,14 @@ public class starPos implements Serializable{
         return tag;
     }
 
+    public String getLocInfo() {
+        return locInfo;
+    }
+
+    public int getLegend() {
+        return legend;
+    }
+
     @Override
     public String toString() {
         return "starPos{" +
@@ -59,6 +72,8 @@ public class starPos implements Serializable{
                 ", tag='" + tag + '\'' +
                 ", latitude='" + latitude + '\'' +
                 ", lontitude='" + lontitude + '\'' +
+                ", locInfo='" + locInfo + '\'' +
+                ", legend=" + legend +
                 '}';
     }
 }

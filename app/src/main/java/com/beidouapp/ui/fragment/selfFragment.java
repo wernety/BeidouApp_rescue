@@ -21,11 +21,17 @@ import com.beidouapp.R;
 import com.beidouapp.model.DataBase.Pos;
 import com.beidouapp.model.adapters.locOthers;
 import com.beidouapp.model.adapters.selfPosAdapter;
+import com.beidouapp.model.utils.JSONUtils;
+import com.beidouapp.model.utils.OkHttpUtils;
+import com.beidouapp.model.utils.selfPosJson;
 
 import org.litepal.LitePal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Response;
 
 public class selfFragment extends Fragment {
 
@@ -36,6 +42,8 @@ public class selfFragment extends Fragment {
     private selfPosAdapter selfPosAdapter;
     private starPos selfPos;
     private OnFragmentClick onFragmentClick;
+    private List<Pos> selfPosRecords;
+    private Pos selfPosRecord;
 
 
     @Nullable
@@ -68,8 +76,8 @@ public class selfFragment extends Fragment {
         int num = posRecords.size();
         for(int i=0;i<num;i++){
             posRecord = posRecords.get(i);
-            starPos starPos = new starPos(posRecord.getText(),
-                    posRecord.getUid(),posRecord.getStatus(),posRecord.getTag(),posRecord.getLatitude(),posRecord.getLontitude());
+            starPos starPos = new starPos(posRecord.getText(), posRecord.getUid(),posRecord.getStatus(),
+                    posRecord.getTag(),posRecord.getLatitude(),posRecord.getLontitude(), posRecord.getLocInfo(), posRecord.getLegend());
             list.add(starPos);
         }
         Log.d("zw", "iniData: 在初始化selfFragment的时候的list是：" + list.toString());
@@ -134,6 +142,32 @@ public class selfFragment extends Fragment {
      */
     private void uploadSelfPos(starPos selfPos) {
 //先查到这个数据，然后上传这个数据的所有，如果上传成功，我们就改变状态（tag标签），并且写库,上传失败则弹出对话框
+        selfPosRecords = LitePal.where("latitude=? or lontitude=?",
+                selfPos.getLatitude(), selfPos.getLontitude()).find(Pos.class);
+        if (!selfPosRecords.isEmpty()){
+            selfPosRecord = selfPosRecords.get(0);
+                //发送到亮哥那边去，然后记得在显示的时候要根据设计的图例来显示自建点，先留白
+            try {
+                selfPosJson selfPosJson = new selfPosJson(selfPosRecord.getUid(), selfPosRecord.getLontitude(),
+                        selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), selfPosRecord.getText(), selfPosRecord.getLocInfo());
+                String json = JSONUtils.sendJson(selfPosJson);
+                OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("", json, new OkHttpUtils.MyCallback() {
+                    @Override
+                    public void success(Response response) throws IOException {
+                        //将数据库发送状态修改成已发送
+                        selfPosRecord.setStatus("1");
+                    }
+
+                    @Override
+                    public void failed(IOException e) {
+
+                    }
+                });
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.d("zw", "uploadSelfPos: 发送自建位置点失败");
+            }
+        }
     }
 
     /**

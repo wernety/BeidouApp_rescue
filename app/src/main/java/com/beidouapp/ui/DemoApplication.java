@@ -5,11 +5,19 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
+import com.beidouapp.model.DataBase.DBHelper;
 
 import org.litepal.LitePal;
 
 public class DemoApplication extends Application {
     SQLiteDatabase dbForRecord;
+    DBHelper dbHelper;
+    //使用这个dbHelper再某个表中添加数据的方法是
+    /*
+    SQLiteDatabase db = dbHelper.getWritableDatabase();
+    db.insert()
+    */
+
     @Override
     public void onCreate() {
         super.onCreate();

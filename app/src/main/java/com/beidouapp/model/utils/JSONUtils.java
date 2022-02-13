@@ -33,6 +33,10 @@ public class JSONUtils {
         return JSON.toJSONString(o, true);
     }
 
+    public static  String sendJson(selfPosJson selfPosJson){
+        return JSON.toJSONString(selfPosJson, true);
+    }
+
     public static recOtherPositions receiveLocJSON(String json){
         recOtherPositions recOtherPositions = JSON.parseObject(json, com.beidouapp.model.messages.recOtherPositions.class);
         return recOtherPositions;

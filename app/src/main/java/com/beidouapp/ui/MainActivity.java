@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.background.MsgService;
+import com.beidouapp.model.DataBase.DBHelper;
 import com.beidouapp.model.User;
 import com.beidouapp.model.User4Login;
 import com.beidouapp.model.messages.regist;
@@ -119,10 +121,15 @@ public class MainActivity extends AppCompatActivity {
         mContext = getContext();
     }
 
-    //LitePal数据库初始化，用于记录curtoken，组织结构以及uid，password
+    /**
+     * LitePal数据库初始化，用于记录curtoken，组织结构以及uid，password
+     * 聊天数据库Sqlite创建 dbHelper
+     */
     private void iniDbForRecord() {
         application = (DemoApplication) this.getApplicationContext();
         application.dbForRecord = Connector.getDatabase(); //这里是创库顺便创意张空表
+        application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 1);
+        application.dbHelper.getWritableDatabase();
     }
 
     //没有网络状态下的curToken传输

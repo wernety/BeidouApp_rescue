@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="locInfo">
+        <item>集合点</item>
+        <item>休息点</item>
+        <item>救援集合点</item>
+        <item>吃饭的地儿</item>
+    </string-array>
+
+    <string-array name="locLegend">
+        <item>黑</item>
+        <item>红</item>
+        <item>蓝</item>
+        <item>黄</item>
+    </string-array>
+</resources>

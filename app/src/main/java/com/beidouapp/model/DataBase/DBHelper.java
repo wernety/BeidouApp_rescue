@@ -22,6 +22,13 @@ public class DBHelper extends SQLiteOpenHelper {
            // "ismineChat integer NOT NULL DEFAULT (0)" +
             ");";
 
+    private static final String Friend_info = "CREATE TABLE friend (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "friend_id varchar(64)," +
+            "friend_name varchar(64)"+
+            ");";
+
+
+
     public DBHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version, @Nullable DatabaseErrorHandler errorHandler) {
         super(context, name, factory, version, errorHandler);
     }
@@ -35,10 +42,13 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
             db.execSQL(T_USerInfo);
+            db.execSQL(Friend_info);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("drop table if exists chat");
+        db.execSQL("drop table if exists friend");
+        onCreate(db);
     }
 }

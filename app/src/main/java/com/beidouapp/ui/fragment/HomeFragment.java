@@ -30,9 +30,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
@@ -152,6 +156,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private List<Pos> posRecords;
     private Pos posRecord;
     private starPos selfPos;
+    private String[] ss=new String[]{
+            "集合点",
+            "休息点",
+            "救援集合点"
+    };
 
 
     public HomeFragment() {
@@ -618,11 +627,32 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newLatLng(point);
         mMap.animateMapStatus(mapStatusUpdate);
 
+        BitmapDescriptor bitmap;
         Bundle bundle = new Bundle();
         bundle.putString("uid", selfPos.getUid());
         bundle.putString("Text", selfPos.getText());
-        BitmapDescriptor bitmap = BitmapDescriptorFactory
-                .fromResource(R.drawable.icon_mark);
+        switch ((int) selfPos.getLegend()){
+            case 0: {
+                bitmap = BitmapDescriptorFactory.fromResource(R.drawable.black);
+                break;
+            }
+            case 1:{
+                bitmap = BitmapDescriptorFactory.fromResource(R.drawable.red);
+                break;
+            }
+            case 2:{
+                bitmap = BitmapDescriptorFactory.fromResource(R.drawable.deepblue);
+                break;
+            }
+            case 3:{
+                bitmap = BitmapDescriptorFactory.fromResource(R.drawable.yellow);
+            } default:{
+                bitmap = BitmapDescriptorFactory
+                        .fromResource(R.drawable.icon_mark);
+                break;
+            }
+        }
+
         OverlayOptions option = new MarkerOptions()
                 .position(point)
                 .icon(bitmap)
@@ -918,15 +948,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 Button btnCancel = view.findViewById(R.id.btn_cancel);
                 Button btnCommit = view.findViewById(R.id.btn_search);
                 EditText et_text = view.findViewById(R.id.et_text);
-                EditText et_type = view.findViewById(R.id.et_type);
+                Spinner locChoose = view.findViewById(R.id.locChoose_Spinner);
+                Spinner legendChoose = view.findViewById(R.id.legendChoose_Spinner);
+//                ArrayAdapter<String> adapter=new ArrayAdapter<String>(getActivity().getApplicationContext(),
+//                        android.R.layout.simple_spinner_item ,ss);
 
                 btnCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        marker.remove();
                         mMap.hideInfoWindow();
                     }
                 });
 
+                //提交按钮
                 btnCommit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -943,12 +978,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             }else{
                             posRecord.setText(et_text.getText().toString());
                             }
-                            if(et_type.getText().toString().isEmpty())
+                            if(locChoose.getSelectedItem().toString().isEmpty())
                             {
+//                                posRecord.setTag("99");
                                 posRecord.setTag("没有设置");
                             }else{
-                                posRecord.setTag(et_type.getText().toString());
+//                                posRecord.setTag(String.valueOf(locChoose.getSelectedItemId()));
+                                posRecord.setTag(String.valueOf(locChoose.getSelectedItem().toString()));
                             }
+                            posRecord.setLocInfo("已经写死，暂不设置");
+                            posRecord.setLegend((int) legendChoose.getSelectedItemId());
                             posRecord.save();
                         }else{
                             posRecord = posRecords.get(0);
@@ -957,15 +996,41 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             }else{
                                 posRecord.setText(et_text.getText().toString());
                             }
-                            if(et_type.getText().toString().isEmpty())
+                            if(locChoose.getSelectedItem().toString().isEmpty())
                             {
+//                                posRecord.setTag("99");
                                 posRecord.setTag("没有设置");
                             }else{
-                                posRecord.setTag(et_type.getText().toString());
+//                                posRecord.setTag(String.valueOf(locChoose.getSelectedItemId()));
+                                posRecord.setTag(String.valueOf(locChoose.getSelectedItem().toString()));
                             }
+                            posRecord.setLegend((int) legendChoose.getSelectedItemId());
                             posRecord.save();
                         }
-mMap.hideInfoWindow();
+                        //根据选择切换标识颜色
+                        switch ((int) legendChoose.getSelectedItemId()){
+                            case 0: {
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.black);
+                                marker.setIcon(bitmapDescriptor);
+                                break;
+                            }
+                            case 1:{
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.red);
+                                marker.setIcon(bitmapDescriptor);
+                                break;
+                            }
+                            case 2:{
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.deepblue);
+                                marker.setIcon(bitmapDescriptor);
+                                break;
+                            }
+                            case 3:{
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.yellow);
+                                marker.setIcon(bitmapDescriptor);
+                            } default:break;
+                        }
+
+                        mMap.hideInfoWindow();
                     }
                 });
 
@@ -984,10 +1049,17 @@ mMap.hideInfoWindow();
         listenerMark = new BaiduMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                Log.d("zw", "onMarkerClick: 点击marker成功，开始执行响应事件");
+                String deviceID;
                 LatLng latlon = marker.getPosition();
-                Bundle info = marker.getExtraInfo();
-                String deviceID = info.getString("deviceID");
-                Log.d("zw", "onMarkerClick: 取消标记");
+                try {
+                    Bundle info = marker.getExtraInfo();
+                    deviceID = info.getString("deviceID");
+                }catch (Exception e){
+                    e.printStackTrace();
+                    deviceID = uid;
+                }
+                Log.d("zw", "onMarkerClick: marker响应事件中的deviceID" + deviceID);
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
                 View view = inflater.inflate(R.layout.item_markerclick, null);
                 TextView textView = (TextView) view.findViewById(R.id.tv_markerclick);
