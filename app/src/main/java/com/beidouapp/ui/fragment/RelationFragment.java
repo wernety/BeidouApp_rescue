@@ -85,6 +85,12 @@ public class RelationFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        RefreshView(context, token);
+    }
+
     /**
      * 初始化UI控件
      */
@@ -156,6 +162,8 @@ public class RelationFragment extends Fragment {
                             }
                             case R.id.add_group: {
                                 Intent intent = new Intent(context, add_group.class);
+                                intent.putExtra("id", loginId);
+                                intent.putExtra("token", token);
                                 startActivity(intent);
                                 break;
                             }
@@ -369,8 +377,8 @@ public class RelationFragment extends Fragment {
             public void success(Response response) throws IOException {
                 //Log.d("group", response.body().string());
                 String body = response.body().string();
-                Log.d("zw", "success: 最新整合版的问题" + body);
                 JSONObject object = JSON.parseObject(body);
+                Log.d("zzzml", body);
                 int code = object.getInteger("code");
                 if (code == 200) {
                     JSONArray array = (JSONArray) object.get("data");
