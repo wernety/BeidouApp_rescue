@@ -5,6 +5,7 @@ import static com.beidouapp.model.utils.JSONUtils.receivePosFromBDJson;
 import static com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY;
 
 import android.Manifest;
+import android.location.Address;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,6 +40,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.location.BDAbstractLocationListener;
@@ -92,9 +94,12 @@ import org.litepal.LitePal;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.Response;
 
@@ -113,6 +118,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private boolean ifFirst = true;  //判断是否第一次
     private ImageButton btn1;   //
     private ImageButton btn2;   //
+    private ImageButton btn3;   //
+    private ImageButton btn4;   //
+    private ImageButton btn5;   //
+    private TextView textView1;   //
+    private TextView textView2;   //
+    private TextView textView3;   //
+    private TextView textView4;   //
+    private TextView textView5;   //
+
     private MKOfflineMap moffline;  //离线地图
     private MKOfflineMapListener mml;   //离线地图监听
     private MKOLUpdateElement MKOLUpdateElement;
@@ -130,6 +144,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private List<String> lonAndLat;
     private double latitude;        //经度·
     private double lontitude;       //维度
+    private double altitude;       //海拔
+    private double speed;       //速度
+    private String district;
+    private String weatherType;
+    private String weatherTemperature;
     private BaiduMap.OnMapLongClickListener listener;   //地图长安监听
     private MarkerOptions markerOptions;    //marker形式
     private UiSettings mUiSet;      //
@@ -201,6 +220,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             //使用其他方式获取位置
 //            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
             lonAndLat = loc2();
+            show_info_text(lonAndLat);
 //            transToBD();
             latitude = Double.parseDouble(lonAndLat.get(0));
             lontitude = Double.parseDouble(lonAndLat.get(1));
@@ -240,6 +260,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btn2.setOnClickListener(this);
         otherLocbtn.setOnClickListener(this);
         mMap = mapView.getMap();
+        textView1 = view.findViewById(R.id.weatherTemperature);
+        textView2 = view.findViewById(R.id.longitudeLatitude);
+        textView3 = view.findViewById(R.id.altitude);
+        textView4 = view.findViewById(R.id.velocity);
+        textView5 = view.findViewById(R.id.direction);
     }
 
 
@@ -337,6 +362,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             e.printStackTrace();
 //                            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
                             lonAndLat = loc2();
+                            show_info_text(lonAndLat);
                             latitude = Double.parseDouble(lonAndLat.get(0));
                             lontitude = Double.parseDouble(lonAndLat.get(1));
 
@@ -344,7 +370,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         }finally {
                             show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
                         }
-                        Log.d("zw", "handleMessage:  + 重新定位成功");
+                        show_info_text(lonAndLat);
+                        Log.d("抓取位置包", "E"+lontitude+"°   "+"N"+latitude+"°");
                         break;
                     }
                 }
@@ -441,6 +468,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         List<String> list = new ArrayList<>();
         MyLocationListener myLocationListener = new MyLocationListener();
         list = myLocationListener.getLatLng();
+//        Log.d("loc2函数返回list结果", "loc2: "+list);
         return list;
     }
 
@@ -508,6 +536,70 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         //初始化方位角 由底层传感器获得
         iniMyLocMap();
 
+    }
+
+    /**网络状态下的辅助信息栏的显示
+     *先根据经纬度查询区域编码，根据区域编码查询天气，包含天气类型，温度
+     *
+     */
+    private void show_info_text(List<String> infoList) {
+        java.text.DecimalFormat   df   =new   java.text.DecimalFormat("#.00");
+        latitude = Double.parseDouble(infoList.get(0));
+        lontitude = Double.parseDouble(infoList.get(1));
+        latitude = Double.parseDouble(df.format(latitude));
+        lontitude = Double.parseDouble(df.format(lontitude));
+        altitude = Double.parseDouble(infoList.get(2));
+        speed = Double.parseDouble(infoList.get(3));
+        textView2.setText(new StringBuilder().append("E").append(lontitude).append("°  ").append("N").append(latitude).append("°").toString());
+        textView3.setText(new StringBuilder().append("海拔：").append(altitude).append("米").toString());
+        textView4.setText(new StringBuilder().append("速度：").append(speed).append("m/s").toString());
+        String ak = "p1IDmZkDyWYyOn3LXkAquiIYVMg1r32V";
+        OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://api.map.baidu.com/geocoder?output=json&location=32.133381,111.313438&ak=esNPFDwwsXWtsQfw4NMNmur1", new OkHttpUtils.MyCallback() {
+                    @Override
+                    public void success(Response response) throws IOException {
+                        JSONObject object = JSON.parseObject(response.body().string());
+                        Log.d("获取到区域", "success: 百度逆地址解析" + object);
+                        JSONObject result = object.getJSONObject("result");
+                        JSONObject addressComponent = result.getJSONObject("addressComponent");
+                        district = addressComponent.getString("district");
+                        Log.d("获取到区域", "success: "+ district);
+                    }
+            @Override
+            public void failed(IOException e) {
+                Log.d("getmsg", e.getMessage());
+            }
+        });
+        HashMap<String, String> hm = new HashMap<String, String>();
+        hm.put("city", district);
+        if (district!=null) {
+            OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://wthrcdn.etouch.cn/weather_mini",hm,new OkHttpUtils.MyCallback() {
+                @Override
+                public void success(Response response) throws IOException {
+                    JSONObject object = JSON.parseObject(response.body().string());
+                    Log.d("查询天气", "success: 结果" + object);
+                    JSONObject result = object.getJSONObject("data");
+                    JSONArray forecast = result.getJSONArray("forecast");
+                    JSONObject today = forecast.getJSONObject(0) ;
+                    Log.d("今日天气", "success: "+ today);
+                    String high = today.getString("high");
+                    String low = today.getString("low");
+                    weatherType = today.getString("type");
+                    String regEx="[^0-9]";
+                    Pattern p = Pattern.compile(regEx);
+                    Matcher m1 = p.matcher(high);
+                    Matcher m2 = p.matcher(low);
+                    high = m1.replaceAll("").trim();
+                    low = m2.replaceAll("").trim();
+                    weatherTemperature = new StringBuilder().append(weatherType).append("  "+low).append("~").append(high).append("℃").toString();
+                    Log.d("天气温度", "success: "+ weatherTemperature);
+                }
+                @Override
+                public void failed(IOException e) {
+                    Log.d("getmsg", e.getMessage());
+                }
+            });
+        };
+        textView1.setText(weatherTemperature);
     }
 
 
@@ -1095,6 +1187,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         mUiSet.setOverlookingGesturesEnabled(false);
         mUiSet.setRotateGesturesEnabled(false);
     }
+
 
     /**
      * 这个函数是直接从北斗那边获取想要的位置坐标
