@@ -1,22 +1,31 @@
 package com.beidouapp.background;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.beidouapp.model.DataBase.recentMan;
 import com.beidouapp.model.messages.HeartbeatMsg;
 import com.beidouapp.model.messages.HeartbeatMsg.*;
+import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.LocationUtils;
 import com.beidouapp.model.utils.NetworkManager;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.state_request;
+import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.fragment.HomeFragment;
 import com.beidouapp.ui.fragment.MyLocationListener;
+
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +57,10 @@ public class MsgService extends Service {
     private Timer timer;
     private TimerTask heartbeatMSG;
     private String curToken;
+    private List<recentMan> manRecords;
+    private recentMan manRecord;
+    private DemoApplication application;
+    private SQLiteDatabase writableDatabase;
 
 
     // 通过Binder来保持Activity和Service的通信
@@ -74,6 +87,8 @@ public class MsgService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        application = (DemoApplication) this.getApplicationContext();
+        writableDatabase = application.dbHelper.getWritableDatabase();
         uid = intent.getStringExtra("uid");
         curToken = intent.getStringExtra("curToken");
         networkManager = new NetworkManager();
@@ -226,11 +241,11 @@ public class MsgService extends Service {
                 cnt[0]++;
 //                onHeartbeat();
                 sendLoc();
-                Log.d("zw", "run: 发送定位包");
+//                Log.d("zw", "run: 发送定位包");
                 if(cnt[0]%6 == 0)
                 {
                     sendHeart();
-                    Log.d("zw", "run: 发送状态包");
+//                    Log.d("zw", "run: 发送状态包");
                 }
             }
         };
@@ -244,7 +259,7 @@ public class MsgService extends Service {
         int battery = state_request.getBattery(this);
 
         sysProperty sysProperty = new sysProperty(messageType, "北三手持终端");
-        Log.d("zw", "onHeartbeat: 在发送状态包的时候的用户是：" + uid);
+//        Log.d("zw", "onHeartbeat: 在发送状态包的时候的用户是：" + uid);
         appProperty appProperty = new appProperty(uid, timestamp);
 
         body body = new body("online", String.valueOf(battery));
@@ -255,7 +270,7 @@ public class MsgService extends Service {
         OkHttpUtils.getInstance(MsgService.this).postBD("http://119.3.130.87:50099/whbdApi/device/report/status", json, new OkHttpUtils.MyCallback() {
             @Override
             public void success(Response response) throws IOException {
-                Log.d("zw", "心跳包上传到福大的返回消息是：" + response.body().string());
+//                Log.d("zw", "心跳包上传到福大的返回消息是：" + response.body().string());
             }
 
             @Override
@@ -301,15 +316,16 @@ public class MsgService extends Service {
         body body = new body(positions,alarm);
         HeartbeatMsg heartbeatMsg = new HeartbeatMsg(sysProperty,appProperty,body);
         String json = JSONUtils.sendJSON(heartbeatMsg);
-        OkHttpUtils.getInstance(MsgService.this).postBD("http://119.3.130.87:50099/whbdApi/device/report/status", json, new OkHttpUtils.MyCallback() {
+//        Log.d("zw", "sendLoc: 上传位置包的Json" + json);
+        OkHttpUtils.getInstance(MsgService.this).postBD("http://119.3.130.87:50099/whbdApi/device/report/data", json, new OkHttpUtils.MyCallback() {
             @Override
             public void success(Response response) throws IOException {
-                Log.d("zw", "位置包上传到福大的返回消息是：" + response.body().string());
+//                Log.d("zw", "位置包上传到福大的返回消息是：" + response.body().string());
             }
 
             @Override
             public void failed(IOException e) {
-                Log.d("callback:failed", e.getMessage());
+//                Log.d("callback:failed", e.getMessage());
             }
         }, "f9bddcacc678ea185bf8158d90087fbc");
 
@@ -345,9 +361,8 @@ public class MsgService extends Service {
         body body = new body(position, alarm);
 
 
-
-
         HeartbeatMsg heartbeatMsg = new HeartbeatMsg(sysProperty,appProperty,body);
+
         String json = JSONUtils.sendJSON(heartbeatMsg);
         Log.d("heartbeat", json);
         OkHttpUtils.getInstance(MsgService.this).post("http://119.3.130.87:50099/whbdApi/device/report/status", json, new OkHttpUtils.MyCallback() {
@@ -361,6 +376,49 @@ public class MsgService extends Service {
                 Log.d("callback:failed", e.getMessage());
             }
         });
+    }
+
+
+    /**
+     * 这个广播接收器专门用来写库的，当有消息接受到的时候，就进入库中
+     */
+    private class reciverForWriteDB extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+//            Log.d("WebSocket", "onReceive" + message);
+            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
+            if (message4Receive.getType().equals("MSG")) {
+                if (message4Receive.getReceiveType().equals("group")) {
+                    Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
+                }else{
+                    if(!message4Receive.getData().getSendUserId().isEmpty()){
+                        String toID = message4Receive.getData().getSendUserId();
+                        manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
+                        if(manRecords.isEmpty()){
+                            manRecord = new recentMan();
+                            manRecord.setUid(toID);
+                        }else {
+                            manRecord = manRecords.get(0);
+//                            manRecord.setUid(sendID);
+                            Log.d("zw", "onReceive: 这个时候做啥呢？我都已经有这个数据了，要不以后更新一下接收时间？");
+                        }
+                        manRecord.save();//最近单聊用户入库
+                        ContentValues values = new ContentValues();
+                        values.put("toID", toID);
+                        values.put("flag", 0);//别人发的是0
+                        values.put("contentChat", message4Receive.getData().getSendText());
+                        values.put("message_type", "text");
+                        values.put("time", String.valueOf(System.currentTimeMillis()));
+                        writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
+                    }else{
+                        Log.d("zw", "onReceive: 此时收到的广播的消息，但是这条广播显示的发送人ID是空的，woc");
+                    }
+                }
+
+            }
+        }
     }
 
 }

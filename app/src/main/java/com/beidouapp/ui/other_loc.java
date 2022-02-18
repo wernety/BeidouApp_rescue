@@ -256,10 +256,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
                 intent.putExtras(bundle);
 //                intent.putExtra("pos", "小梓薇");
                 setResult(2,intent);
-//              下一阶段点击这个按钮实现退出当前页面
-//                onPause();
                 onStop();
-//                onDestroy();
                 finish();
                 break;
             }

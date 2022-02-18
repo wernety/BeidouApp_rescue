@@ -37,6 +37,10 @@ public class JSONUtils {
         return JSON.toJSONString(selfPosJson, true);
     }
 
+   public static String sendJson(tracsPos tracsPos){
+        return JSON.toJSONString(tracsPos, true);
+   }
+
     public static recOtherPositions receiveLocJSON(String json){
         recOtherPositions recOtherPositions = JSON.parseObject(json, com.beidouapp.model.messages.recOtherPositions.class);
         return recOtherPositions;
@@ -70,6 +74,11 @@ public class JSONUtils {
     public static posFromBD receivePosFromBDJson(String json){
         posFromBD posFromBD = JSON.parseObject(json, posFromBD.class);
         return  posFromBD;
+    }
+
+    public static tracePosFromBD reciveTracePosFromBDJson(String json){
+        tracePosFromBD tracePosFromBD = JSON.parseObject(json, tracePosFromBD.class);
+        return tracePosFromBD;
     }
 
     public static JSONObject Receive(String json) {

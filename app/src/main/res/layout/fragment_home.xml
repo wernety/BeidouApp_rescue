@@ -134,7 +134,7 @@
                 android:src="@drawable/people" />
 
             <ImageButton
-                android:id="@+id/guiji"
+                android:id="@+id/trace"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginLeft="10dp"

@@ -57,7 +57,9 @@ import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.map.offline.MKOLSearchRecord;
 import com.baidu.mapapi.map.offline.MKOLUpdateElement;
@@ -71,11 +73,14 @@ import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.messages.Other_loc;
 import com.beidouapp.model.messages.posFromBD;
 import com.beidouapp.model.messages.recOtherPositions;
+import com.beidouapp.model.messages.tracePosFromBD;
+import com.beidouapp.model.messages.tracsPos;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.messages.posBD;
 import com.beidouapp.model.utils.MyOrientationListener;
 import com.beidouapp.ui.other_loc;
+import com.beidouapp.ui.trace_activity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -118,6 +123,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private boolean ifFirst = true;  //判断是否第一次
     private ImageButton btn1;   //
     private ImageButton btn2;   //
+    private ImageButton traceBtn;
     private ImageButton btn3;   //
     private ImageButton btn4;   //
     private ImageButton btn5;   //
@@ -136,6 +142,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private IntentFilter intentFilter;
     private Timer timer;    //定时器
     private Handler handler;    //定时器处理
+    private Handler handlerTrace;
     private static Handler handlerOtherloc;    //定时器处理
     private Handler handlermyloc;   //定时器处理
     private TimerTask locFresh;     //定时器处理事务
@@ -180,6 +187,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             "休息点",
             "救援集合点"
     };
+    private Thread threadForTrace;
+    private String tracerId;
+    private long startTime;
+    private long endTime;
+    private JSONArray array;
+    private Handler handlerOtherTracePos;
+    private Thread threadDrawTrace;
+    private List<LatLng> traceList;
 
 
     public HomeFragment() {
@@ -256,9 +271,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btn1 = view.findViewById(R.id.dingwei);
         btn2 = view.findViewById(R.id.download);
         otherLocbtn = view.findViewById(R.id.people);
+        traceBtn = view.findViewById(R.id.trace);
         btn1.setOnClickListener(this);
         btn2.setOnClickListener(this);
         otherLocbtn.setOnClickListener(this);
+        traceBtn.setOnClickListener(this);
         mMap = mapView.getMap();
         textView1 = view.findViewById(R.id.weatherTemperature);
         textView2 = view.findViewById(R.id.longitudeLatitude);
@@ -816,7 +833,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 intent.putExtra("uid", uid);
                                 intent.putExtra("pass", pass);
                                 intent.putExtra("org", org);
-                                startActivityForResult(intent, 2);
+                                startActivityForResult(intent, 1);
                                 break;
                             }
                             default:{break;}
@@ -854,7 +871,83 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                     }
                 }).start();
+                break;
+            }
+            case R.id.trace:{
+                Log.d("zw", "onClick: 点击轨迹按钮");
+                handlerTrace = new Handler(){
+                    @SuppressLint("HandlerLeak")
+                    public void handleMessage(Message message) {
+                        switch (message.what)
+                        {
+                            case 1:{
+                                Intent intent = new Intent(getActivity(), trace_activity.class);
+                                intent.putExtra("token", token);
+                                intent.putExtra("curToken", curToken);
+                                intent.putExtra("status", bodyOtherLoc);
+                                intent.putExtra("uid", uid);
+                                intent.putExtra("pass", pass);
+//                                Log.d("zw", "handleMessage: post亮哥的服务器得到的数据" + bodyOtherLoc);
+//                                intent.putExtra()
+                                startActivityForResult(intent, 2); //这里注意使用的是带有回调方式的，回调代码为1
+                                break;
+                            }
+                            case 2:{
+                                bodyOtherLoc = new String();
+                                records = LitePal.where("uid = ?", uid).find(orgAndUidAndKey.class);
+                                if(records.isEmpty()){
+                                    org = new String();
+                                    curToken = "f9bddcacc678ea185bf8158d90087fbc";
+                                    Log.d("zw", "failed: 这个账号原本没有登陆，数据库查无此人信息，返回的所有东西都将是空");
+                                }else{
+                                    record = records.get(0);
+                                    org = record.getOrg();
+                                }
+                                Intent intent = new Intent(getActivity(), trace_activity.class);
+                                token = new String(); //这地方先写了，没有网络的时候，token为空
+                                intent.putExtra("token", token);
+                                intent.putExtra("curToken", curToken);
+                                intent.putExtra("status", bodyOtherLoc);//
+                                intent.putExtra("uid", uid);
+                                intent.putExtra("pass", pass);
+                                intent.putExtra("org", org);
+                                startActivityForResult(intent, 2);
+                                break;
+                            }
+                            default:{break;}
+                        }
 
+                    }
+                };
+
+
+                threadForTrace = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("zw", "run: 开始进行状态请求");
+                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/getStatus1", new OkHttpUtils.MyCallback() {
+                            @Override
+                            public void success(Response response) throws IOException {
+                                bodyOtherLoc = response.body().string(); //状态信息
+//                                Log.d("zw", "success: post亮哥的服务器得到的数据" + bodyOtherLoc);
+                                Message message = new Message();
+                                message.what = 1;
+                                handlerTrace.sendMessage(message);
+                            }
+
+                            @Override
+                            public void failed(IOException e) {
+//                                没有网络的时候，拿取数据库里面的字段，传入到other_loc里面，使得在无网络的情况下也能正常显示组织
+//                                此时的bodyOtherLoc必须是空
+                                Log.d("zw", "failed: 网络请求返回参数失败");
+                                Message message = new Message();
+                                message.what = 2;
+                                handlerTrace.sendMessage(message);
+                            }
+                        });
+                    }
+                });
+                threadForTrace.start();
                 break;
             }
             default:break;
@@ -1248,6 +1341,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         });
     }
 
+    /**
+     *
+     * @param requestCode 请求代码是1表示是进入other_loc，请求代码是2表示进入trace_activity
+     * @param resultCode  返回代码是0表示异常情况，返回代码是1或者2表示正常返回
+     * @param data 在other_loc当中data数据包含的是请求列表
+     *             在trace_activity当中data数据表示的是一个String
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -1257,11 +1357,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             if (resultCode == 2)
             {
                 handleRecOtherloc();
-                Log.d("zw", "onActivityResult: 是由other_loc Activity返回：" + resultCode);
-                Log.d("zw", "onActivityResult: 现在确定是否由other_loc返回的：" + data.getStringArrayListExtra("pos"));
                 ArrayList<String> idlist = data.getStringArrayListExtra("pos");
                 List<String> list = new ArrayList<String>(idlist);
-//                list.add("13886415060");
                 Log.d("zw", "testBDRequest: 需要获取位置的设备是：" + list);
                 posBD posBD = new posBD(list);
                 String json = JSONUtils.sendJson(posBD);
@@ -1270,7 +1367,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     Thread threadPos = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).postBD("http://119.3.130.87:50099/whbdApi/device/pos/getCurrent", json, new OkHttpUtils.MyCallback() {
+                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).postBD("http://119.3.130.87:50099/whbdApi/device/pos/getCurrent",
+                                    json,
+                                    new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
                                     String rec = response.body().string();
@@ -1302,8 +1401,66 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
             }
         }
+        else if(requestCode == 2){
+            if (resultCode == 1){
+                handlerOtherTrace();
+                tracerId = data.getStringExtra("tracerID");
+                startTime = data.getLongExtra("start", 0);
+                endTime = data.getLongExtra("end", System.currentTimeMillis());
+                tracsPos tracsPos = new tracsPos(tracerId, startTime, endTime);//为什么是tracsPos，因为不小心将trace写成了tracs，嘿嘿嘿
+                String json = JSONUtils.sendJson(tracsPos);
+                try {
+                    Thread threadTrace = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).postBD("http://119.3.130.87:50099/whbdApi/device/pos/getList",
+                                    json,
+                                    new OkHttpUtils.MyCallback() {
+                                        @Override
+                                        public void success(Response response) throws IOException {
+                                            String trace = response.body().string();
+                                            JSONObject object = JSON.parseObject(trace);
+                                            JSONObject result = object.getJSONObject("data");
+                                            array = result.getJSONArray("position");
+                                            Log.d("zw", "success: 获取的数据大小" + array.size());
+//                                            JSONObject position = array.getJSONObject(0);
+                                            traceList = new ArrayList<LatLng>();
+                                            int num = array.size()-1;
+                                            for (int i=num;i>0;){
+                                                JSONObject position = array.getJSONObject(i);
+                                                String latTemp = position.getString("lat");
+                                                String lngTmp = position.getString("lng");
+                                                traceList.add(new LatLng(Double.parseDouble(latTemp), Double.parseDouble(lngTmp)));
+                                                i=i-2;
+                                            }
+                                            Message message = new Message();
+                                            message.what = 1;
+                                            handlerOtherTracePos.sendMessage(message);
+                                        }
+
+                                        @Override
+                                        public void failed(IOException e) {
+                                            Log.d("zw", "failed: 访问福大北斗网络连接失败");
+                                        }
+                                    }, curToken);
+                        }
+                    });
+                    threadTrace.start();
+                }catch (Exception e){
+                    Log.d("zw", "onActivityResult: 访问福大北斗获取历史位置失败");
+                    e.printStackTrace();
+                }
+
+
+
+
+            }
+        }
     }
 
+    /**
+     * 处理团队位置
+     */
     private void handleRecOtherloc() {
         handlerecOtherloc = new Handler(){
             public void handleMessage(Message message){
@@ -1334,6 +1491,36 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
             }
         };
+    }
+
+    /**
+     * 处理轨迹
+     * 根据福大返回的位置列表，在新的子线程中，绘制图形，避免主线程过长无响应
+     */
+    private void handlerOtherTrace() {
+        handlerOtherTracePos = new Handler(){
+            @SuppressLint("HandlerLeak")
+            public void handleMessage(Message message){
+                switch (message.what){
+                    case 1:{
+                        Log.d("zw", "handleMessage: 此时获取的轨迹列表大小" + traceList.toString());
+                        OverlayOptions mOverlayOptions = new PolylineOptions()
+                                .width(30)
+                                .color(0xAAFF0000)
+                                .points(traceList);
+//在地图上绘制折线
+//mPloyline 折线对象
+                        Overlay mPolyline = mMap.addOverlay(mOverlayOptions);
+
+
+                        break;
+                    }
+                    default:{break;}
+                }
+            }
+        };
+
+
     }
 
     protected void createLocationRequest() {

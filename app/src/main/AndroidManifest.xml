@@ -101,6 +101,8 @@
         <activity
             android:name=".ui.other_loc"
             android:exported="false" />
+        <activity android:name=".ui.trace_activity"
+            android:exported="false"/>
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true">
