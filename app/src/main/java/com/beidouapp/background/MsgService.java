@@ -213,7 +213,7 @@ public class MsgService extends Service {
                         }else{
                             if(!message4Receive.getData().getSendUserId().isEmpty()){
                                 String toID = message4Receive.getData().getSendUserId();
-                                manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
+                                manRecords = LitePal.where("toID=? and selfID", toID, uid).find(recentMan.class);
                                 if(manRecords.isEmpty()){
                                     manRecord = new recentMan();
                                     manRecord.setToID(toID);

@@ -237,7 +237,7 @@ public class ChatActivity extends AppCompatActivity {
 
                         Log.d("zw", "onClick: 写自己的消息");
                         //将最近的一次消息写入数据库
-                        manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
+                        manRecords = LitePal.where("toID=? and selfID=?", toID, loginId).find(recentMan.class);
                         if(manRecords.isEmpty()){
                             manRecord = new recentMan();
                             manRecord.setToID(toID);

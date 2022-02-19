@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     private void iniDbForRecord() {
         application = (DemoApplication) this.getApplicationContext();
         application.dbForRecord = Connector.getDatabase(); //这里是创库顺便创意张空表
-        application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 4);
+        application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 5);
         writableDatabase = application.dbHelper.getWritableDatabase();
     }
 
