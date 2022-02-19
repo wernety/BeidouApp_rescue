@@ -131,7 +131,14 @@ public class MessageFragment extends Fragment {
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra("uid", uid);
                 intent.putExtra("nickname", uid);
-                intent.putExtra("type", "single");
+                manRecords = LitePal.where("toID=?", uid).find(recentMan.class);
+                recentMan manRecord = manRecords.get(0);
+                Log.d("zw", "onItemClick: 此时传入到chatActivity的类型是："+manRecord.getType());
+                if(manRecord.getType().equals("0")){
+                    intent.putExtra("type", "single");
+                }else {
+                    intent.putExtra("type", "group");
+                }
                 startActivity(intent);
             }
         });
