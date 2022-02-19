@@ -388,7 +388,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
                         }
                         show_info_text(lonAndLat);
-                        Log.d("抓取位置包", "E"+lontitude+"°   "+"N"+latitude+"°");
                         break;
                     }
                 }
@@ -632,7 +631,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
          * a 是经度
          * b 是纬度
          */
-        mMap.clear(); //清除地图所有标记
+//        mMap.clear(); //清除地图所有标记
         double latitude = Double.parseDouble(a);
         double longtitude = Double.parseDouble(b);
         //定义Maker坐标点
@@ -959,101 +958,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         show_other_loc("30.518848","114.350055");
     }
 
-
-    /**
-     * 网络获取位置
-     * @param username
-     */
-    private void sendRequestForLoc(String username) {
-        if (username == "User0")
-        {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        Other_loc other_loc = new Other_loc(username, password);
-                        String json = JSONUtils.sendJson(other_loc);
-                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("", json, new OkHttpUtils.MyCallback() {
-                            @Override
-                            public void success(Response response) throws IOException {
-//                                String lontitude;
-                                final String[] latitude = new String[1];
-                                final String[] lontitude = new String[1];
-                                if(response.code() == 200){
-                                    String body = response.body().toString();
-                                    recOtherPositions pos = JSONUtils.receiveLocJSON(body);
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            latitude[0] = pos.getData().getPosition().get(0).getLat();
-                                            lontitude[0] = pos.getData().getPosition().get(0).getLng();
-                                            show_other_loc(latitude[0], lontitude[0]);
-                                        }
-                                    });
-
-                                }
-                            }
-
-                            @Override
-                            public void failed(IOException e) {
-
-                            }
-                        });
-                    }catch (Exception e)
-                    {
-                        e.printStackTrace();;
-                    }
-                }
-            }).start();
-        }
-        else{
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        /**
-                         * 根据选择的用户（群组id）返回一系列的位置（list类型）
-                         * */
-
-                        Other_loc other_loc = new Other_loc(username, password);
-                        String json = JSONUtils.sendJson(other_loc);
-                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("", json, new OkHttpUtils.MyCallback() {
-                            @Override
-                            public void success(Response response) throws IOException {
-                                List<String> lontitude = new ArrayList<String>();
-                                List<String> latitude = new ArrayList<String>();
-                                if(response.code() == 200){
-                                    String body = response.body().toString();
-                                    recOtherPositions pos = JSONUtils.receiveLocJSON(body);
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            int num = pos.getData().getPosition().size();
-                                            for(int i = 0; i < num; i++)
-                                            {
-                                                lontitude.add(pos.getData().getPosition().get(i).getLng());
-                                                latitude.add(pos.getData().getPosition().get(i).getLat());
-                                            }
-                                            show_others_loc(latitude, lontitude);
-                                        }
-                                    });
-                                }
-                            }
-
-                            @Override
-                            public void failed(IOException e) {
-
-                            }
-                        });
-
-                    }catch(Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        }
-
-    }
 
     private void downLoadMap() {
         moffline = new MKOfflineMap();
@@ -1430,7 +1334,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                                 JSONObject position = array.getJSONObject(i);
                                                 String latTemp = position.getString("lat");
                                                 String lngTmp = position.getString("lng");
-                                                traceList.add(new LatLng(Double.parseDouble(latTemp), Double.parseDouble(lngTmp)));
+                                                traceList.add(new LatLng(Double.parseDouble(lngTmp), Double.parseDouble(latTemp)));
+                                                //lat和lng要反着设置，这是百度SDK的锅，打印出来又反过来了
+                                                //就是设置是lng：30.400 + lat：115.26，打印的结果却是 lat：30.400 + lng：115.26：
                                                 i=i-2;
                                             }
                                             Message message = new Message();
@@ -1504,13 +1410,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 switch (message.what){
                     case 1:{
                         Log.d("zw", "handleMessage: 此时获取的轨迹列表大小" + traceList.toString());
+                        mMap.clear();
                         OverlayOptions mOverlayOptions = new PolylineOptions()
-                                .width(30)
-                                .color(0xAAFF0000)
+                                .points(traceList)
+                                .width(25)
+                                .color(0xFF000000)
+                                .visible(true)
                                 .points(traceList);
 //在地图上绘制折线
 //mPloyline 折线对象
                         Overlay mPolyline = mMap.addOverlay(mOverlayOptions);
+                        Log.d("zw", "handleMessage: 绘制的折线是否可见" + mPolyline.isVisible());
 
 
                         break;
