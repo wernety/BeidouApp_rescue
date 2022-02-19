@@ -212,6 +212,10 @@ public class MsgService extends Service {
                 public void onClosing(WebSocket webSocket, int code, String reason) {
                     super.onClosing(webSocket, code, reason);
                     Log.d("WebSocket", "onClosing");
+                    if (NetworkManager.isWIFI(MsgService.this) ||
+                    NetworkManager.isMobile(MsgService.this)) {
+                        NetLinking();
+                    }
                 }
 
                 @Override

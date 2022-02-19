@@ -52,7 +52,6 @@ import okhttp3.Response;
  * 会话列表
  */
 
-
 public class MessageFragment extends Fragment {
     private String uid;
     private ListView listView;
