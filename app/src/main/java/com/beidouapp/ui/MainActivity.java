@@ -98,8 +98,6 @@ public class MainActivity extends AppCompatActivity {
     private regist regist;
     private Intent intentservice;
     private DemoApplication application;
-    private List<recentMan> manRecords;
-    private recentMan manRecord;
     private SQLiteDatabase writableDatabase;
 
 
