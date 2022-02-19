@@ -1,12 +1,16 @@
 package com.beidouapp.ui.fragment;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
@@ -44,6 +48,7 @@ public class selfFragment extends Fragment {
     private OnFragmentClick onFragmentClick;
     private List<Pos> selfPosRecords;
     private Pos selfPosRecord;
+    private Context context;
 
 
     @Nullable
@@ -55,6 +60,12 @@ public class selfFragment extends Fragment {
         return view;
     }
 
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        context = getActivity().getApplicationContext();
+    }
 
     /**
      *
@@ -126,7 +137,12 @@ public class selfFragment extends Fragment {
 //                                selfPosAdapter.notifyDataSetChanged();
                                 selfPosAdapter.deleteData(pos);
                                 break;
-                            } default:break;
+                            }
+                            case R.id.watchLocInfo:{
+                                showInfo(selfPos);
+                                break;
+                            }
+                            default:break;
                         }
                         return false;
                     }
@@ -135,7 +151,6 @@ public class selfFragment extends Fragment {
             }
         });
     }
-
 
     /**
      * 上传自建点坐标
@@ -156,6 +171,7 @@ public class selfFragment extends Fragment {
                     public void success(Response response) throws IOException {
                         //将数据库发送状态修改成已发送
                         selfPosRecord.setStatus("1");
+                        selfPosRecord.save();
                     }
 
                     @Override
@@ -177,6 +193,43 @@ public class selfFragment extends Fragment {
         Log.d("zw", "deleteDbRecord: 开始删库");
         LitePal.deleteAll(Pos.class, "latitude = ? and lontitude=?", selfPos.getLatitude(), selfPos.getLontitude());
         //设置回调，自动创建新的。。。但是recycleview里面写了刷新了的，并没有真正的执行
+    }
+
+    /**
+     * 显示位置点详细信息
+     */
+    private void showInfo(starPos selfPos) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View v = inflater.inflate(R.layout.locinfo, null);
+        EditText content = v.findViewById(R.id.et_locInfo2);
+        Button update = v.findViewById(R.id.btn_update);
+        Button cancel = v.findViewById(R.id.btn_cancel_locInfo);
+        selfPosRecords = LitePal.where("latitude=? or lontitude=?",
+                selfPos.getLatitude(), selfPos.getLontitude()).find(Pos.class);
+        if (!selfPosRecords.isEmpty()){
+            selfPosRecord = selfPosRecords.get(0);
+            content.setText(selfPos.getLocInfo());
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            alertDialog.getWindow().setContentView(v);
+            alertDialog.getWindow().setGravity(Gravity.CENTER);
+            update.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    selfPosRecord.setLocInfo(content.getText().toString());
+                    selfPosRecord.save();
+                    alertDialog.dismiss();
+                }
+            });
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    alertDialog.dismiss();
+                }
+            });
+        }
+        selfPosAdapter.notifyDataSetChanged();
     }
 
     /**

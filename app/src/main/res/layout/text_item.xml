@@ -18,11 +18,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/et_text"
+        android:layout_weight="1"
         android:hint="输入标记点名称"
         android:maxLines="1"/>
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:id="@+id/locChoose_Spinner"
         android:entries="@array/locInfo"
         android:spinnerMode="dropdown"/>
@@ -35,6 +37,7 @@
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:id="@+id/legendChoose_Spinner"
         android:entries="@array/locLegend"
         android:spinnerMode="dropdown"/>
@@ -43,6 +46,19 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/black"/>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="3">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="输入详细信息"
+            android:id="@+id/et_locInfo"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -67,5 +83,6 @@
             android:text="取消"
             />
     </LinearLayout>
+
 
 </LinearLayout>

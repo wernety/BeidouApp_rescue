@@ -9,4 +9,8 @@
         android:id="@+id/deleteSelfPos"
         android:title="删除自建点"/>
 
+    <item
+        android:id="@+id/watchLocInfo"
+        android:title="查看详细信息"/>
+
 </menu>

@@ -227,8 +227,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
         try {
-            lonAndLat = loc(getActivity().getApplicationContext());
-            transToBD();
+//            lonAndLat = loc(getActivity().getApplicationContext());
+//            transToBD();
+            lonAndLat = loc2();
+            show_info_text(lonAndLat);
+//            transToBD();
+            latitude = Double.parseDouble(lonAndLat.get(0));
+            lontitude = Double.parseDouble(lonAndLat.get(1));
         } catch (Exception e) {
             Log.d("zw", "onCreateView: 位置信息捕获失败");
             e.printStackTrace();
@@ -241,7 +246,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             lontitude = Double.parseDouble(lonAndLat.get(1));
             Log.d("zw", "onCreateView: 此时使用是新的定位方式");
         }
-        Log.d("zw", "onCreateView: " + lonAndLat.toString());
+        Log.d("zw", "onCreateView: 此时的位置信息是" + lonAndLat.toString());
 
         mMap.getUiSettings().setCompassEnabled(false);
 
@@ -372,8 +377,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 //                        Log.d("zw", "onCreateView: 重新定位时的一些位置信息" + lonAndLat.toString());
                         try {
-                            lonAndLat = loc(getActivity().getApplicationContext());
-                            transToBD();
+//                            lonAndLat = loc(getActivity().getApplicationContext());
+//                            transToBD();
+                            lonAndLat = loc2();
+                            show_info_text(lonAndLat);
+                            latitude = Double.parseDouble(lonAndLat.get(0));
+                            lontitude = Double.parseDouble(lonAndLat.get(1));
                         }catch (Exception e){
                             Log.d("zw", "onCreateView: 位置信息捕获失败");
                             e.printStackTrace();
@@ -1037,6 +1046,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 Button btnCancel = view.findViewById(R.id.btn_cancel);
                 Button btnCommit = view.findViewById(R.id.btn_search);
                 EditText et_text = view.findViewById(R.id.et_text);
+                EditText et_locInfo = view.findViewById(R.id.et_locInfo);
                 Spinner locChoose = view.findViewById(R.id.locChoose_Spinner);
                 Spinner legendChoose = view.findViewById(R.id.legendChoose_Spinner);
 //                ArrayAdapter<String> adapter=new ArrayAdapter<String>(getActivity().getApplicationContext(),
@@ -1075,7 +1085,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //                                posRecord.setTag(String.valueOf(locChoose.getSelectedItemId()));
                                 posRecord.setTag(String.valueOf(locChoose.getSelectedItem().toString()));
                             }
-                            posRecord.setLocInfo("已经写死，暂不设置");
+                            if (et_locInfo.getText().toString().isEmpty()){
+                                posRecord.setLocInfo("无");
+                            }else {
+                                posRecord.setLocInfo(et_locInfo.getText().toString());
+                            }
+//                            posRecord.setLocInfo("已经写死，暂不设置");
                             posRecord.setLegend((int) legendChoose.getSelectedItemId());
                             posRecord.save();
                         }else{
@@ -1401,7 +1416,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     /**
      * 处理轨迹
-     * 根据福大返回的位置列表，在新的子线程中，绘制图形，避免主线程过长无响应
+     * 根据福大返回的位置列表，绘制图形
      */
     private void handlerOtherTrace() {
         handlerOtherTracePos = new Handler(){
@@ -1413,7 +1428,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         mMap.clear();
                         OverlayOptions mOverlayOptions = new PolylineOptions()
                                 .points(traceList)
-                                .width(25)
+                                .width(20)
                                 .color(0xFF000000)
                                 .visible(true)
                                 .points(traceList);

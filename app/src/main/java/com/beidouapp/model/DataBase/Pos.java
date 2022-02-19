@@ -5,6 +5,7 @@ import org.litepal.crud.LitePalSupport;
 /**
  * 此表用于储存个人自建点信息
  * 经纬度，标签，用户，状态
+ * 通过uid来查询自建的信息，同一台设备换用户登录也可以保证隐私不会泄露
  */
 public class Pos extends LitePalSupport {
     private String latitude;
