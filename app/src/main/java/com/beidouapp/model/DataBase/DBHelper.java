@@ -20,6 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
      */
     private static final String T_USerInfo = "CREATE TABLE chat (id INTEGER PRIMARY KEY AUTOINCREMENT,"+
             "toID text, "+
+            "selfID text, "+
             "flag text, "+
             "contentChat text, "+
             "time text," +
@@ -27,7 +28,23 @@ public class DBHelper extends SQLiteOpenHelper {
            // "ismineChat integer NOT NULL DEFAULT (0)" +
             ");";
 
+    /**
+     * groupID 群ID
+     * flag 确定发送者 1自己发 138是好友发送
+     */
+    private static final String T_GroupUSerInfo = "CREATE TABLE chat_group (id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+            "groupID text, "+
+            "selfID text, "+
+            "flag text, "+
+            "contentChat text, "+
+            "time text," +
+            "message_type text" +
+            ");";
+
+
+
     private static final String Friend_info = "CREATE TABLE friend (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "selfID text," +
             "friend_id text," +
             "friend_name text,"+
             "flag text" +
@@ -48,12 +65,14 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
             db.execSQL(T_USerInfo);
+            db.execSQL(T_GroupUSerInfo);
             db.execSQL(Friend_info);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("drop table if exists chat");
+        db.execSQL("drop table if exists chat_group");
         db.execSQL("drop table if exists friend");
         onCreate(db);
     }

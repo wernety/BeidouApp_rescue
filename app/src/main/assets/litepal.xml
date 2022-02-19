@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <litepal>
     <dbname value="1"></dbname>
-    <version value="4"></version>
+    <version value="5"></version>
 
 
     <list>

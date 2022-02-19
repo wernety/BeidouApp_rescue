@@ -45,6 +45,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
+import com.baidu.location.LocationClient;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -195,6 +196,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Handler handlerOtherTracePos;
     private Thread threadDrawTrace;
     private List<LatLng> traceList;
+    private LocationClient locationClient;
 
 
     public HomeFragment() {
@@ -492,6 +494,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public List<String> loc2() {
         List<String> list = new ArrayList<>();
         MyLocationListener myLocationListener = new MyLocationListener();
+        locationClient = new LocationClient(getActivity().getApplicationContext());
+        //添加地图位置监听
         list = myLocationListener.getLatLng();
 //        Log.d("loc2函数返回list结果", "loc2: "+list);
         return list;
@@ -875,8 +879,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                             }
                         });
-
-
                     }
                 }).start();
                 break;
@@ -924,7 +926,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             }
                             default:{break;}
                         }
-
                     }
                 };
 

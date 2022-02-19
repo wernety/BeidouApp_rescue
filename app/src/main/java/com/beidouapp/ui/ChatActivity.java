@@ -228,6 +228,7 @@ public class ChatActivity extends AppCompatActivity {
                         //插入数据
                         ContentValues values = new ContentValues();
                         values.put("toID", toID);
+                        values.put("selfID", loginId);
                         values.put("flag", 1);//自己发的是1
                         values.put("contentChat", content);
                         values.put("message_type", "text");
@@ -239,11 +240,13 @@ public class ChatActivity extends AppCompatActivity {
                         manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
                         if(manRecords.isEmpty()){
                             manRecord = new recentMan();
-                            manRecord.setUid(toID);
+                            manRecord.setToID(toID);
+                            manRecord.setSelfId(loginId);
                             manRecord.save();
                         }else {
                             manRecord = manRecords.get(0);
-                            manRecord.setUid(toID);
+                            manRecord.setToID(toID);
+                            manRecord.setSelfId(loginId);
                             manRecord.save();
                         }
 
@@ -318,26 +321,6 @@ public class ChatActivity extends AppCompatActivity {
                     chatMessage.setName(toNickname);
                     chatMessageList.add(chatMessage);
                     initChatMsgListView();
-                    //插入数据库
-                    ContentValues values = new ContentValues();
-                    values.put("toID", toID);
-                    values.put("flag", 0);//别人发的是0
-                    values.put("contentChat", message4Receive.getData().getSendText());
-                    values.put("message_type", "text");
-                    values.put("time", String.valueOf(timeMillis1));
-                    writableDatabase.insert("chat", null, values);
-                    Log.d("zw", "onReceive: 写库，写别人的消息");
-                    //将最近给自己发过消息的人记录入数据库
-                    manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
-                    if(manRecords.isEmpty()){
-                       manRecord = new recentMan();
-                       manRecord.setUid(toID);
-                       manRecord.save();
-                    }else {
-                        manRecord = manRecords.get(0);
-                        manRecord.setUid(toID);
-                        manRecord.save();
-                    }
 
                 }
             }
@@ -374,17 +357,10 @@ public class ChatActivity extends AppCompatActivity {
         String message_type;
         ChatMessage chatMessage;
         int i = 0;
-//        ContentValues values = new ContentValues();
-//        values.put("toID", "测试ID");
-//        values.put("flag", "1");//自己发的是1
-//        values.put("contentChat", "content");
-//        values.put("message_type", "text");
-//        values.put("time", "000000002");
-//        writableDatabase.insert("chat", null, values);
         Log.d("zw", "initChatMessageList: 此时初始化入库");
         try {
-            Cursor query = writableDatabase.query("chat", null, "toID=?",
-                    new String[]{toID}, null, null, "time desc");
+            Cursor query = writableDatabase.query("chat", null, "toID=? and selfID=?",
+                    new String[]{toID,loginId}, null, null, "time desc");
             query.moveToFirst();
             do{
                 i++;

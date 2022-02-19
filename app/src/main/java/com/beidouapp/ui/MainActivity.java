@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     private List<recentMan> manRecords;
     private recentMan manRecord;
     private SQLiteDatabase writableDatabase;
-    private reciverForWriteDB reciverForWriteDB;
+
 
 
     @Override
@@ -132,14 +132,7 @@ public class MainActivity extends AppCompatActivity {
         mContext = getContext();
     }
 
-    /**
-     * 这是将广播接收器和广播动作绑定到一起，实现广播到来，就将消息写入数据库
-     */
-    private void iniForBroadCastListener() {
-        reciverForWriteDB = new reciverForWriteDB();
-        IntentFilter filter = new IntentFilter("com.beidouapp.callback.content");
-        registerReceiver(reciverForWriteDB, filter);
-    }
+
 
     private void initUser() {
         Intent intent = getIntent();
@@ -177,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     private void iniDbForRecord() {
         application = (DemoApplication) this.getApplicationContext();
         application.dbForRecord = Connector.getDatabase(); //这里是创库顺便创意张空表
-        application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 3);
+        application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 4);
         writableDatabase = application.dbHelper.getWritableDatabase();
     }
 
@@ -272,13 +265,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        iniForBroadCastListener();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(reciverForWriteDB);
     }
 
     @Override
@@ -372,43 +363,5 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 这个广播接收器专门用来写库的，当有消息接受到的时候，就进入库中
      */
-    private class reciverForWriteDB extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-//            Log.d("WebSocket", "onReceive" + message);
-            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
-            if (message4Receive.getType().equals("MSG")) {
-                if (message4Receive.getReceiveType().equals("group")) {
-                    Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
-                }else{
-                    if(!message4Receive.getData().getSendUserId().isEmpty()){
-                        String toID = message4Receive.getData().getSendUserId();
-                        manRecords = LitePal.where("uid=?", toID).find(recentMan.class);
-                        if(manRecords.isEmpty()){
-                            manRecord = new recentMan();
-                            manRecord.setUid(toID);
-                        }else {
-                            manRecord = manRecords.get(0);
-//                            manRecord.setUid(sendID);
-                            Log.d("zw", "onReceive: 这个时候做啥呢？我都已经有这个数据了，要不以后更新一下接收时间？");
-                        }
-                        manRecord.save();//最近单聊用户入库
-                        ContentValues values = new ContentValues();
-                        values.put("toID", toID);
-                        values.put("flag", 0);//别人发的是0
-                        values.put("contentChat", message4Receive.getData().getSendText());
-                        values.put("message_type", "text");
-                        values.put("time", String.valueOf(System.currentTimeMillis()));
-                        writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
-
-                    }else{
-                        Log.d("zw", "onReceive: 此时收到的广播的消息，但是这条广播显示的发送人ID是空的，woc");
-                    }
-                }
-
-            }
-        }
-    }
 }

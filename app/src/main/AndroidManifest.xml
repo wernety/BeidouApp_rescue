@@ -37,6 +37,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BeidouApp"
         android:usesCleartextTraffic="true">
+
+        <service android:name="com.baidu.location.f"
+            android:enabled="true"
+            android:process=":remote"/>
+
         <activity
             android:name=".ui.add_friend"
             android:exported="false" />

@@ -11,7 +11,7 @@ import org.litepal.crud.LitePalSupport;
  */
 public class recentMan extends LitePalSupport {
     private String selfId;//自己的ID
-    private String uid;//其他人的ID
+    private String toID;//其他人的ID
 
 
 //    recentMan(String uid){
@@ -23,15 +23,15 @@ public class recentMan extends LitePalSupport {
         this.selfId = selfId;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public String getUid() {
-        return uid;
+    public void setToID(String toID) {
+        this.toID = toID;
     }
 
     public String getSelfId() {
         return selfId;
+    }
+
+    public String getToID() {
+        return toID;
     }
 }
