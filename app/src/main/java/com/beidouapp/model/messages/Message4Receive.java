@@ -48,12 +48,23 @@ public class Message4Receive {
         return receiveType;
     }
 
+    @Override
+    public String toString() {
+        return "Message4Receive{" +
+                "type='" + type + '\'' +
+                ", msg='" + msg + '\'' +
+                ", data=" + data +
+                ", receiveType='" + receiveType + '\'' +
+                '}';
+    }
+
     public static class data {
         private String msgType;
         private String sendText;
         private String sendUserId;
         private String receiveUserId;
         private String groupId;
+        private String sendTime;
 
 
         public void setMsgType(String msgType) {
@@ -89,6 +100,25 @@ public class Message4Receive {
         }
         public String getGroupId() {
             return groupId;
+        }
+
+        public void setSendTime(String sendTime) {
+            this.sendTime = sendTime;
+        }
+        public String getSendTime() {
+            return sendTime;
+        }
+
+        @Override
+        public String toString() {
+            return "data{" +
+                    "msgType='" + msgType + '\'' +
+                    ", sendText='" + sendText + '\'' +
+                    ", sendUserId='" + sendUserId + '\'' +
+                    ", receiveUserId='" + receiveUserId + '\'' +
+                    ", groupId='" + groupId + '\'' +
+                    ", sendTime='" + sendTime + '\'' +
+                    '}';
         }
     }
 }

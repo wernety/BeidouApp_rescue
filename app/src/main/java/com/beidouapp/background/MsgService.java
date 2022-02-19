@@ -1,13 +1,16 @@
 package com.beidouapp.background;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
@@ -23,6 +26,7 @@ import com.beidouapp.model.utils.LocationUtils;
 import com.beidouapp.model.utils.NetworkManager;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.state_request;
+import com.beidouapp.ui.ChatActivity;
 import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.fragment.HomeFragment;
 import com.beidouapp.ui.fragment.MyLocationListener;
@@ -63,6 +67,9 @@ public class MsgService extends Service {
     private recentMan manRecord;
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
+    private Handler write2DBHandler;
+
+
 
 
     // 通过Binder来保持Activity和Service的通信
@@ -93,6 +100,8 @@ public class MsgService extends Service {
         writableDatabase = application.dbHelper.getWritableDatabase();
         uid = application.getUserID();
         curToken = application.getCurToken();
+        initHandler();
+
         Log.d("zw", "onStartCommand:全局的curToken " + curToken);
         networkManager = new NetworkManager();
         NetStatus = networkManager.NetworkDetect(this);
@@ -209,38 +218,13 @@ public class MsgService extends Service {
                     Intent intent = new Intent("com.beidouapp.callback.content");
                     intent.putExtra("message", text);
                     sendBroadcast(intent);
-                    Message4Receive message4Receive = JSONUtils.receiveJSON(text);
-                    if (message4Receive.getType().equals("MSG")) {
-                        if (message4Receive.getReceiveType().equals("group")) {
-                            Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
-                        }else{
-                            if(!message4Receive.getData().getSendUserId().isEmpty()){
-                                String toID = message4Receive.getData().getSendUserId();
-                                manRecords = LitePal.where("toID=? and selfID", toID, uid).find(recentMan.class);
-                                if(manRecords.isEmpty()){
-                                    manRecord = new recentMan();
-                                    manRecord.setToID(toID);
-                                    manRecord.setSelfId(uid);
-                                }else {
-                                    manRecord = manRecords.get(0);
-//                            manRecord.setUid(sendID);
-                                    Log.d("zw", "onReceive: 这个时候做啥呢？我都已经有这个数据了，要不以后更新一下接收时间？");
-                                }
-                                manRecord.save();//最近单聊用户入库
-                                ContentValues values = new ContentValues();
-                                values.put("toID", toID);
-                                values.put("selfID", uid);
-                                values.put("flag", 0);//别人发的是0
-                                values.put("contentChat", message4Receive.getData().getSendText());
-                                values.put("message_type", "text");
-                                values.put("time", String.valueOf(System.currentTimeMillis()));
-                                writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
-                            }else{
-                                Log.d("zw", "onReceive: 此时收到的广播的消息，但是这条广播显示的发送人ID是空的，woc");
-                            }
-                        }
 
-                    }
+                    Bundle bundle = new Bundle();
+                    bundle.putString("message", text);
+                    Message message = new Message();
+                    message.setData(bundle);
+                    message.what = 1;
+                    write2DBHandler.sendMessage(message);
                 }
 
                 @Override
@@ -257,6 +241,10 @@ public class MsgService extends Service {
                 public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
                     super.onFailure(webSocket, t, response);
                     Log.d("WebSocket", "onFailure");
+                    if (NetworkManager.isWIFI(MsgService.this) ||
+                            NetworkManager.isMobile(MsgService.this)) {
+                        NetLinking();
+                    }
                 }
             });
 
@@ -370,5 +358,52 @@ public class MsgService extends Service {
 
     }
 
+
+    private void initHandler() {
+        write2DBHandler = new Handler(){
+            @SuppressLint("HandlerLeak")
+            public void handleMessage(Message message) {
+                switch (message.what){
+                    case 1:{
+                        String text = message.getData().getString("message");
+                        Message4Receive message4Receive = JSONUtils.receiveJSON(text);
+                        Log.d("WebSocket", "onMessage" + message4Receive.toString());
+                        if (message4Receive.getType().equals("MSG")) {
+                            if (message4Receive.getReceiveType().equals("group")) {
+                                Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
+                            }else{
+                                if(!message4Receive.getData().getSendUserId().isEmpty()){
+                                    String toID = message4Receive.getData().getSendUserId();
+                                    manRecords = LitePal.where("toID=? and selfID=?", toID, uid).find(recentMan.class);
+                                    if(manRecords.isEmpty()){
+                                        manRecord = new recentMan();
+                                        manRecord.setToID(toID);
+                                        manRecord.setSelfId(uid);
+                                        manRecord.save();
+                                    }else {
+                                        manRecord = manRecords.get(0);
+                                    }
+                                    manRecord.save();//最近单聊用户入库
+                                    ContentValues values = new ContentValues();
+                                    values.put("toID", toID);
+                                    values.put("selfID", uid);
+                                    values.put("flag", 0);//别人发的是0
+                                    values.put("contentChat", message4Receive.getData().getSendText());
+                                    values.put("message_type", "text");
+                                    values.put("time", message4Receive.getData().getSendTime());
+                                    writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
+                                    Log.d("websocket", "入库成功");
+                                }else{
+                                    Log.d("zw", "onReceive: 此时收到的广播的消息，但是这条广播显示的发送人ID是空的，woc");
+                                }
+                            }
+                        }
+                        break;
+                    } default:{break;}
+                }
+            }
+        };
+
+    }
 
 }

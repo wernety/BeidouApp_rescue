@@ -132,6 +132,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
+
     /**
      * 获取上下文信息
      */
@@ -295,7 +296,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("message");
-//            Log.d("WebSocket", "onReceive" + message);
+            Log.d("WebSocket", "onReceive" + message);
             Message4Receive message4Receive = JSONUtils.receiveJSON(message);
             if (message4Receive.getType().equals("MSG")) {
                 if (message4Receive.getReceiveType().equals("group")) {
