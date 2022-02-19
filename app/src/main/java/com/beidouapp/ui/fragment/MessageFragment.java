@@ -133,7 +133,6 @@ public class MessageFragment extends Fragment {
                 intent.putExtra("uid", uid);
                 intent.putExtra("nickname", uid);
                 intent.putExtra("type", "single");
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });
@@ -147,13 +146,13 @@ public class MessageFragment extends Fragment {
     private void RefreshContactList(Context context) {
         ContactList.clear();
 
-        try {
+
             manRecords = LitePal.findAll(recentMan.class);
             int num = manRecords.size();
             for(int i=0;i<num;i++){
                 recentMan manRecord = manRecords.get(i);
                 Cursor query = writableDatabase.query("chat", null, "toID=? and selfID=?",
-                        new String[]{manRecord.getToID(), uid}, null, null, "time desc");
+                        new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
                 query.moveToFirst();
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("title", manRecord.getToID());
@@ -161,9 +160,6 @@ public class MessageFragment extends Fragment {
                 map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
                 ContactList.add(map);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         initContactListView();
 /*现在要改的是要将各个数据库的初始化环节整理一下，
     对于chat表，建议单独在MainActivity写一个广播接受类，在接受的时候，就能够写库
@@ -208,28 +204,8 @@ public class MessageFragment extends Fragment {
     private class ChatReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            String message = intent.getStringExtra("message");
-//            Log.d("WebSocket", "onReceive" + message);
-//            Message4Receive message4Receive = JSONUtils.receiveJSON(message);
-//            if (message4Receive.getType().equals("MSG")) {
-//                if (message4Receive.getReceiveType().equals("group")) {
-//                    initContactListView();
-//
-//                } else {
-//                    //插入数据库
-//                    ContentValues values = new ContentValues();
-//                    long timeMillis1 = System.currentTimeMillis();
-//                    values.put("toID", message4Receive.getData().getSendUserId());
-//                    values.put("flag", 0);//别人发的是0
-//                    values.put("contentChat", message4Receive.getData().getSendText());
-//                    values.put("message_type", "text");
-//                    values.put("time", String.valueOf(timeMillis1));
-//                    writableDatabase.insert("chat", null, values);
             RefreshContactList(getActivity().getApplicationContext());
         }
-//
-//            }
-//        }
     }
 
 }

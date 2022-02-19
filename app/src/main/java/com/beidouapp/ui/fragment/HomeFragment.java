@@ -46,6 +46,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -197,6 +198,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Thread threadDrawTrace;
     private List<LatLng> traceList;
     private LocationClient locationClient;
+    private MyLocationListener myLocationListener;
 
 
     public HomeFragment() {
@@ -215,49 +217,37 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         iniAll(view);
+        iniMap();
 
 
         curToken = getArguments().get("curToken").toString();
         token = getArguments().getString("token");
         uid = getArguments().getString("loginId");
         pass = getArguments().getString("pass");
-        Log.d("zw", "onCreateView: 测试用的uid是：" + uid);
-        Log.d("zw", "onCreateView: 测试用的curToken是：" + token);
-        Log.d("zw", "onCreateView: 测试用的curToken是：" + curToken);
-        Log.d("zw", "onCreateView: 测试用的密码是： " + pass);
 
 
 
         try {
-//            lonAndLat = loc(getActivity().getApplicationContext());
-//            transToBD();
-            lonAndLat = loc2();
+            lonAndLat = loc(getActivity().getApplicationContext());
+            transToBD();
+//            lonAndLat = loc2();
             show_info_text(lonAndLat);
-//            transToBD();
-            latitude = Double.parseDouble(lonAndLat.get(0));
-            lontitude = Double.parseDouble(lonAndLat.get(1));
+//            latitude = Double.parseDouble(lonAndLat.get(0));
+//            lontitude = Double.parseDouble(lonAndLat.get(1));
         } catch (Exception e) {
             Log.d("zw", "onCreateView: 位置信息捕获失败");
             e.printStackTrace();
             //使用其他方式获取位置
-//            lonAndLat = locUseOtherWay(getActivity().getApplicationContext());
             lonAndLat = loc2();
             show_info_text(lonAndLat);
-//            transToBD();
             latitude = Double.parseDouble(lonAndLat.get(0));
             lontitude = Double.parseDouble(lonAndLat.get(1));
             Log.d("zw", "onCreateView: 此时使用是新的定位方式");
         }
         Log.d("zw", "onCreateView: 此时的位置信息是" + lonAndLat.toString());
-
         mMap.getUiSettings().setCompassEnabled(false);
-
-
-//        testJson();
         testBDRequest();
-
         show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
-//        show_other_loc(String.valueOf(latitude), String.valueOf(lontitude));
 
         handlermyloc();
         timInit();
@@ -271,7 +261,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         return view;
 
     }
-
 
     private void iniAll(@NonNull View view) {
         mapView = view.findViewById(R.id.mMV);
@@ -289,6 +278,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         textView3 = view.findViewById(R.id.altitude);
         textView4 = view.findViewById(R.id.velocity);
         textView5 = view.findViewById(R.id.direction);
+    }
+
+    private void iniMap() {
+        mMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
+        mMap.setMyLocationEnabled(true);
+        myLocationListener = new MyLocationListener();
+        locationClient = new LocationClient(getActivity().getApplicationContext());
+        LocationClientOption option = new LocationClientOption();
+        option.setOpenGps(true);
+        option.setCoorType("bd09ll");
+//        locationClient.setLocOption(option);
+        locationClient.registerLocationListener(myLocationListener);
+        locationClient.start();
     }
 
 
@@ -444,31 +446,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             else{
                 Log.d("zw", "loc: 此时的provider为空");
             }
-//            lm.requestLocationUpdates("gps", 1000, 1, new LocationListener() {
-//                @Override
-//                public void onLocationChanged(Location location) {
-////                    Log.d("zw", "onLocationChanged: 定位过程中位置发生改变,发送广播重新定位" );
-//
-//                }
-//
-//                @Override
-//                public void onStatusChanged(String provider, int status, Bundle extras) {
-//
-//                }
-//
-//                @Override
-//                public void onProviderEnabled(String provider) {
-//
-//                }
-//
-//                @Override
-//                public void onProviderDisabled(String provider) {
-//
-//                }
-//
-//            });
-//            lm.requestLocationUpdates(provider, 0, 0, (LocationListener) getActivity().getApplicationContext());
-//            Log.d("zw", "loc: 此时的provider是" + provider);
             Location location = lm.getLastKnownLocation(provider);
             if(location != null){
                 double latitude = location.getLatitude();
@@ -493,62 +470,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      */
     public List<String> loc2() {
         List<String> list = new ArrayList<>();
-        MyLocationListener myLocationListener = new MyLocationListener();
-        locationClient = new LocationClient(getActivity().getApplicationContext());
+        List<String> list2 = new ArrayList<>();
         //添加地图位置监听
         list = myLocationListener.getLatLng();
-//        Log.d("loc2函数返回list结果", "loc2: "+list);
+        try {
+            list2 = loc(getActivity().getApplicationContext());
+            list.set(2, list2.get(2));
+            list.set(3, list2.get(3));
+            list.set(4, list2.get(4));
+        }catch (Exception e){e.printStackTrace();}
+        Log.d("loc2函数返回list结果", "loc2: "+list);
         return list;
     }
 
 
-    /**
-     * 使用其他方法进行定位
-     * @param context
-     */
-    private List<String> locUseOtherWay(Context context) {
-        List<String> list = new ArrayList<String>();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-
-        cancellationTokenSource = new CancellationTokenSource();
-
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("zw", "locUseOtherWay: 用其他方法检测权限出问题了");
-        }else{
-            Task<Location> locations = fusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken());
-            locations.addOnCompleteListener(new OnCompleteListener<Location>() {
-                @Override
-                public void onComplete(@NonNull Task<Location> task) {
-                    if(task.isSuccessful()){
-                        Location location = task.getResult();
-                        Log.d("zw", "locUseOtherWay: 使用其他方法获取的location" + location);
-                        if(location != null){
-                            double latitude = location.getLatitude();
-                            double longitude = location.getLongitude();
-                            double altitude = location.getAltitude();
-                            float speed = location.getSpeed();
-                            long time = location.getTime();
-
-                            list.add(String.valueOf(latitude));
-                            list.add(String.valueOf(longitude));
-                            list.add(String.valueOf(altitude));
-                            list.add(String.valueOf(speed));
-                            list.add(String.valueOf(time));
-                        }else{
-                            Log.d("zw", "onComplete: 用其他方法获取的location是空的");
-                        }
-                    }else{
-                        Exception e = task.getException();
-                        Log.d("zw", "onComplete: 用其他方法获取位置出问题了：" + e);
-                    }
-                }
-            });
-
-
-        }
-        return list;
-    }
 
 
     /**不论有无网络，都可以根据gps发送定位，但是gps格式的位置需要改成百度上的坐标系
@@ -560,7 +495,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         locDataBuilder = new MyLocationData.Builder()
                 .accuracy(30)
                 .latitude(Double.parseDouble(lat))
-                .longitude(Double.parseDouble(lon)).direction(0.54f);
+                .longitude(Double.parseDouble(lon));
 
         //初始化方位角 由底层传感器获得
         iniMyLocMap();
@@ -587,11 +522,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void success(Response response) throws IOException {
                         JSONObject object = JSON.parseObject(response.body().string());
-                        Log.d("获取到区域", "success: 百度逆地址解析" + object);
+//                        Log.d("获取到区域", "success: 百度逆地址解析" + object);
                         JSONObject result = object.getJSONObject("result");
                         JSONObject addressComponent = result.getJSONObject("addressComponent");
                         district = addressComponent.getString("district");
-                        Log.d("获取到区域", "success: "+ district);
+//                        Log.d("获取到区域", "success: "+ district);
                     }
             @Override
             public void failed(IOException e) {
@@ -605,11 +540,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void success(Response response) throws IOException {
                     JSONObject object = JSON.parseObject(response.body().string());
-                    Log.d("查询天气", "success: 结果" + object);
+//                    Log.d("查询天气", "success: 结果" + object);
                     JSONObject result = object.getJSONObject("data");
                     JSONArray forecast = result.getJSONArray("forecast");
                     JSONObject today = forecast.getJSONObject(0) ;
-                    Log.d("今日天气", "success: "+ today);
+//                    Log.d("今日天气", "success: "+ today);
                     String high = today.getString("high");
                     String low = today.getString("low");
                     weatherType = today.getString("type");
@@ -620,7 +555,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     high = m1.replaceAll("").trim();
                     low = m2.replaceAll("").trim();
                     weatherTemperature = new StringBuilder().append(weatherType).append("  "+low).append("~").append(high).append("℃").toString();
-                    Log.d("天气温度", "success: "+ weatherTemperature);
+//                    Log.d("天气温度", "success: "+ weatherTemperature);
                 }
                 @Override
                 public void failed(IOException e) {
@@ -787,6 +722,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+        locationClient.stop();
     }
 
     @Override
@@ -1230,14 +1166,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onOrientationChanged(float x) {
                 Log.d("zw", "onOrientationChanged: 进入设置方位角");
-                MyLocationData myLocData = locDataBuilder.build();
-
-
-
-                mMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
-                mMap.setMyLocationEnabled(true);
-                mMap.setMyLocationData(myLocData);
-
                 MyLocationConfiguration configuration = new MyLocationConfiguration(
                         MyLocationConfiguration.LocationMode.NORMAL,
                         true,
@@ -1247,6 +1175,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 // 在定义了以上属性之后，通过如下方法来设置生效：
                 mMap.setMyLocationConfiguration(configuration);
                 locDataBuilder.direction(360 - x);
+                MyLocationData myLocData = locDataBuilder.build();
+                mMap.setMyLocationData(myLocData);
 
                 if (ifFirst) {
                     LatLng ll = new LatLng(myLocData.latitude, myLocData.longitude);
