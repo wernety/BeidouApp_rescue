@@ -134,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initUser() {
         Intent intent = getIntent();
+        application.setUserID(intent.getStringExtra("uid"));
+        application.setToken(intent.getStringExtra("token"));
         user4Login = new User4Login(intent.getStringExtra("uid"),
                 "upw");
         token = intent.getStringExtra("token");
@@ -218,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
         {
             Log.d("zw", "switchFragment: 设置fragment里面的bundle是：" + bundle.toString());
         }
+        application.setCurToken(bundle.getString("curToken"));
         currentFragment.setArguments(bundle);
         Log.d("zw", "switchFragment: 设置fragment里面的bundle是：" + bundle.toString());
         fragmentTransaction = fragmentManager.beginTransaction();

@@ -18,6 +18,32 @@ public class DemoApplication extends Application {
     db.insert()
     */
 
+
+    //global variable userID
+    private String userID;
+    private String curToken;
+    private String Token;
+
+    public String getToken() {
+        return Token;
+    }
+    public String getCurToken() {
+        return curToken;
+    }
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setToken(String token) {
+        Token = token;
+    }
+    public void setCurToken(String curToken) {
+        this.curToken = curToken;
+    }
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

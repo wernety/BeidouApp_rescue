@@ -140,7 +140,7 @@ public class ChatActivity extends AppCompatActivity {
         toID = intent.getStringExtra("uid");
         toNickname = intent.getStringExtra("nickname");
         toType = intent.getStringExtra("type");
-        loginId = intent.getStringExtra("loginId");
+        loginId = application.getUserID();
         if (toType.equals("group")) {
             String groupInfo = intent.getStringExtra("groupInfo");
             Log.d("group", groupInfo);
@@ -235,7 +235,6 @@ public class ChatActivity extends AppCompatActivity {
                         values.put("time", String.valueOf(timeMillis));
                         writableDatabase.insert("chat", null, values);
 
-                        Log.d("zw", "onClick: 写自己的消息");
                         //将最近的一次消息写入数据库
                         manRecords = LitePal.where("toID=? and selfID=?", toID, loginId).find(recentMan.class);
                         if(manRecords.isEmpty()){
@@ -245,9 +244,6 @@ public class ChatActivity extends AppCompatActivity {
                             manRecord.save();
                         }else {
                             manRecord = manRecords.get(0);
-                            manRecord.setToID(toID);
-                            manRecord.setSelfId(loginId);
-                            manRecord.save();
                         }
 
                     }

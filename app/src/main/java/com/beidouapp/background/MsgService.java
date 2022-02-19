@@ -89,8 +89,9 @@ public class MsgService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         application = (DemoApplication) this.getApplicationContext();
         writableDatabase = application.dbHelper.getWritableDatabase();
-        uid = intent.getStringExtra("uid");
-        curToken = intent.getStringExtra("curToken");
+        uid = application.getUserID();
+        curToken = application.getCurToken();
+        Log.d("zw", "onStartCommand:全局的curToken " + curToken);
         networkManager = new NetworkManager();
         NetStatus = networkManager.NetworkDetect(this);
         msgLink = new Link("ws://120.27.242.92:8080/chatWS/" + uid, NetStatus);
