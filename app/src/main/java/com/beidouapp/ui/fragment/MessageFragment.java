@@ -146,19 +146,26 @@ public class MessageFragment extends Fragment {
      */
     private void RefreshContactList(Context context) {
         ContactList.clear();
-        manRecords = LitePal.findAll(recentMan.class);
-        int num = manRecords.size();
-        for(int i=0;i<num;i++){
-            recentMan manRecord = manRecords.get(i);
-            Cursor query = writableDatabase.query("chat", null, "toID=?",
-                    new String[]{manRecord.getUid()}, null, null, "time desc");
-            query.moveToFirst();
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("title", manRecord.getUid());
-            map.put("content", query.getString(query.getColumnIndex("contentChat")));
-            map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
-            ContactList.add(map);
+
+        try {
+            manRecords = LitePal.findAll(recentMan.class);
+            int num = manRecords.size();
+            for(int i=0;i<num;i++){
+                recentMan manRecord = manRecords.get(i);
+                Cursor query = writableDatabase.query("chat", null, "toID=?",
+                        new String[]{manRecord.getUid()}, null, null, "time desc");
+                query.moveToFirst();
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("title", manRecord.getUid());
+                map.put("content", query.getString(query.getColumnIndex("contentChat")));
+                map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
+                ContactList.add(map);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+
         initContactListView();
 /*现在要改的是要将各个数据库的初始化环节整理一下，
     对于chat表，建议单独在MainActivity写一个广播接受类，在接受的时候，就能够写库
