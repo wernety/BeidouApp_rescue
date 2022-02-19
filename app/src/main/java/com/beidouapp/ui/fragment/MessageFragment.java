@@ -143,6 +143,7 @@ public class MessageFragment extends Fragment {
      * @param context
      */
     private void RefreshContactList(Context context) {
+        Cursor query;
         ContactList.clear();
 
         try {
@@ -150,8 +151,14 @@ public class MessageFragment extends Fragment {
             int num = manRecords.size();
             for(int i=0;i<num;i++){
                 recentMan manRecord = manRecords.get(i);
-                Cursor query = writableDatabase.query("chat", null, "toID=? and selfID=?",
-                        new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
+                Log.d("zw", "RefreshContactList: 此时好友类型为" + manRecord.getType());
+                if(manRecord.getType().equals("0")){
+                    query = writableDatabase.query("chat", null, "toID=? and selfID=?",
+                            new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
+                }else{
+                    query = writableDatabase.query("chat_group", null, "groupID=? and selfID=?",
+                            new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
+                }
                 query.moveToFirst();
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("title", manRecord.getToID());
@@ -161,6 +168,7 @@ public class MessageFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d("zw", "RefreshContactList: 加载消息Fragment失败");
         }
         initContactListView();
 /*现在要改的是要将各个数据库的初始化环节整理一下，

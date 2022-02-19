@@ -72,6 +72,8 @@ public class MsgService extends Service {
 
 
 
+
+
     // 通过Binder来保持Activity和Service的通信
     public class MsgBinder extends Binder {
         public MsgService getService() {
@@ -371,6 +373,26 @@ public class MsgService extends Service {
                         if (message4Receive.getType().equals("MSG")) {
                             if (message4Receive.getReceiveType().equals("group")) {
                                 Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
+                                String toID = message4Receive.getData().getGroupId();
+                                manRecords = LitePal.where("toID=? and selfID=?", toID, uid).find(recentMan.class);
+                                if(manRecords.isEmpty()){
+                                    manRecord = new recentMan();
+                                    manRecord.setToID(toID);
+                                    manRecord.setSelfId(uid);
+                                    manRecord.setType("1");
+                                    manRecord.save();//最近群聊群名入库
+                                }else {
+                                    manRecord = manRecords.get(0);
+                                }
+                                ContentValues values = new ContentValues();
+                                values.put("groupID", toID);
+                                values.put("selfID", uid);
+                                values.put("flag", message4Receive.getData().getSendUserId());//别人发的,flag设置为账号（手机号）
+                                values.put("contentChat", message4Receive.getData().getSendText());
+                                values.put("message_type", "text");
+                                values.put("time", message4Receive.getData().getSendTime());
+                                writableDatabase.insert("chat_group", null, values);//最近获得的群聊消息入库
+                                Log.d("websocket", "群聊消息入库成功");
                             }else{
                                 if(!message4Receive.getData().getSendUserId().isEmpty()){
                                     String toID = message4Receive.getData().getSendUserId();
@@ -379,11 +401,11 @@ public class MsgService extends Service {
                                         manRecord = new recentMan();
                                         manRecord.setToID(toID);
                                         manRecord.setSelfId(uid);
-                                        manRecord.save();
+                                        manRecord.setType("0");
+                                        manRecord.save();//最近单聊用户入库
                                     }else {
                                         manRecord = manRecords.get(0);
                                     }
-                                    manRecord.save();//最近单聊用户入库
                                     ContentValues values = new ContentValues();
                                     values.put("toID", toID);
                                     values.put("selfID", uid);

@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
 
         while (bundle.getString("curToken") == null)
         {
-            Log.d("zw", "switchFragment: 设置fragment里面的bundle是：" + bundle.toString());
+//            Log.d("zw", "switchFragment: 设置fragment里面的bundle是：" + bundle.toString());
         }
         application.setCurToken(bundle.getString("curToken"));
         currentFragment.setArguments(bundle);

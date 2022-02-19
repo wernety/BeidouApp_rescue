@@ -16,6 +16,7 @@ public class MyLocationListener extends BDAbstractLocationListener {
     private double altitude;
     private float speed;
     private String time;
+    private float direction;
 
     @Override
     public void onReceiveLocation(BDLocation bdLocation) {
@@ -30,6 +31,7 @@ public class MyLocationListener extends BDAbstractLocationListener {
         this.altitude = bdLocation.getAltitude();
         this.speed = bdLocation.getSpeed();
         this.time = bdLocation.getTime();
+        this.direction = bdLocation.getDirection();
         Log.d("zw", "onReceiveLocation: 此时的几个关键信息为" + this.latitude + "接下来： " + this.longitude);
     }
 
@@ -40,6 +42,7 @@ public class MyLocationListener extends BDAbstractLocationListener {
         list.add(String.valueOf(altitude));
         list.add(String.valueOf(speed));
         list.add(String.valueOf(time));
+        list.add(String.valueOf(direction));
         return list;
     }
 }

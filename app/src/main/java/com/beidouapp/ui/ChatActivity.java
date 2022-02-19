@@ -107,7 +107,7 @@ public class ChatActivity extends AppCompatActivity {
         getInfo();
 //        Log.d("uid, chat", toID);
         initUI();
-        initChatMessageList();
+        initChatMessageList(toType);
         initListener();
         BindMsgService();
     }
@@ -141,7 +141,7 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = getIntent();
         toID = intent.getStringExtra("uid");
         toNickname = intent.getStringExtra("nickname");
-        toType = intent.getStringExtra("type");
+        toType = intent.getStringExtra("type"); //single or group
         loginId = application.getUserID();
         if (toType.equals("group")) {
             String groupInfo = intent.getStringExtra("groupInfo");
@@ -202,16 +202,32 @@ public class ChatActivity extends AppCompatActivity {
                         Message4Send message4Send = new Message4Send(toID,"group", "text", content);
                         Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send,true);
-
                         msgService.sendMessage(json);
-
                         ChatMessage chatMessage = new ChatMessage();
                         chatMessage.setContent(content);
                         chatMessage.setIsMeSend(1);
                         chatMessage.setTime(System.currentTimeMillis()+"");
                         chatMessageList.add(chatMessage);
+                        timeMillis = System.currentTimeMillis();
                         Log.d("zw", "onClick: 群ID" + toID);
-
+                        ContentValues values = new ContentValues();
+                        values.put("groupID", toID);
+                        values.put("selfID", loginId);
+                        values.put("flag", "1");//自己发的是1
+                        values.put("contentChat", content);
+                        values.put("message_type", "text");
+                        values.put("time", String.valueOf(timeMillis));
+                        writableDatabase.insert("chat_group", null, values);
+                        manRecords = LitePal.where("toID=? and selfID=?", toID, loginId).find(recentMan.class);
+                        if(manRecords.isEmpty()){
+                            manRecord = new recentMan();
+                            manRecord.setToID(toID);
+                            manRecord.setSelfId(loginId);
+                            manRecord.setType("1");
+                            manRecord.save();
+                        }else {
+                            manRecord = manRecords.get(0);
+                        }
                     } else {
 
 //                        Log.d("uid, sendto", toID); //toID 对方ID
@@ -243,6 +259,7 @@ public class ChatActivity extends AppCompatActivity {
                             manRecord = new recentMan();
                             manRecord.setToID(toID);
                             manRecord.setSelfId(loginId);
+                            manRecord.setType("0");//0是单聊
                             manRecord.save();
                         }else {
                             manRecord = manRecords.get(0);
@@ -348,46 +365,91 @@ public class ChatActivity extends AppCompatActivity {
     /**
      * 初始化聊天记录
      */
-    private void initChatMessageList() {
-        String flag;
-        String contentChat;
-        String time;
-        String message_type;
-        ChatMessage chatMessage;
-        int i = 0;
-        Log.d("zw", "initChatMessageList: 此时初始化入库");
-        try {
-            Cursor query = writableDatabase.query("chat", null, "toID=? and selfID=?",
-                    new String[]{toID,loginId}, null, null, "time desc");
-            query.moveToFirst();
-            do{
-                i++;
-                flag = query.getString(query.getColumnIndex("flag"));
-                contentChat = query.getString(query.getColumnIndex("contentChat"));
-                time = query.getString(query.getColumnIndex("time"));
-                message_type = query.getString(query.getColumnIndex("message_type"));
-                if (flag.equals("0")){
-                    chatMessage = new ChatMessage(toNickname, contentChat, time, 0);
-                }else{
-                    chatMessage = new ChatMessage(loginId, contentChat, time, 1);
-                }
-                templeList.add(chatMessage);
-                if (i == 11){break;}
-            }while (query.moveToNext());
+    private void initChatMessageList(String str) {
+        if(str.equals("single")){
+            String flag;
+            String contentChat;
+            String time;
+            String message_type;
+            ChatMessage chatMessage;
+            int i = 0;
+            Log.d("zw", "initChatMessageList: 此时初始化入库");
+            try {
+                Cursor query = writableDatabase.query("chat", null, "toID=? and selfID=?",
+                        new String[]{toID,loginId}, null, null, "time desc");
+                query.moveToFirst();
+                do{
+                    i++;
+                    flag = query.getString(query.getColumnIndex("flag"));
+                    contentChat = query.getString(query.getColumnIndex("contentChat"));
+                    time = query.getString(query.getColumnIndex("time"));
+                    message_type = query.getString(query.getColumnIndex("message_type"));
+                    if (flag.equals("0")){
+                        chatMessage = new ChatMessage(toNickname, contentChat, time, 0);
+                    }else{
+                        chatMessage = new ChatMessage(loginId, contentChat, time, 1);
+                    }
+                    templeList.add(chatMessage);
+                    if (i == 11){break;}
+                }while (query.moveToNext());
 
-        }catch (Exception e){
-            e.printStackTrace();
-            Log.d("zw", "initChatMessageList: 取消息出错");
-        }
-        if (templeList.size() == 0){
-            Log.d("zw", "initChatMessageList: 此时数据库关于此人聊天记录为空");
-        }
-        try {
-            Collections.reverse(templeList);
-            chatMessageList = templeList;
-        }catch (Exception e){
-            e.printStackTrace();
-            Log.d("zw", "initChatMessageList: 倒序发生异常");
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.d("zw", "initChatMessageList: 取消息出错");
+            }
+            if (templeList.size() == 0){
+                Log.d("zw", "initChatMessageList: 此时数据库关于此人聊天记录为空");
+            }
+            try {
+                Collections.reverse(templeList);
+                chatMessageList = templeList;
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.d("zw", "initChatMessageList: 倒序发生异常");
+            }
+        }else {
+            String flag;
+            String contentChat;
+            String time;
+            String message_type;
+            ChatMessage chatMessage; //加载
+            int i = 0;
+            Log.d("zw", "initChatMessageList: 此时初始化入库");
+            try {
+                Cursor query = writableDatabase.query("chat_group", null, "groupID=? and selfID=?",
+                        new String[]{toID,loginId}, null, null, "time desc");
+                query.moveToFirst();
+                do{
+                    i++;
+                    flag = query.getString(query.getColumnIndex("flag"));
+                    contentChat = query.getString(query.getColumnIndex("contentChat"));
+                    time = query.getString(query.getColumnIndex("time"));
+                    message_type = query.getString(query.getColumnIndex("message_type"));
+                    if (flag.equals("1")){
+                        chatMessage = new ChatMessage(loginId, contentChat, time, 1);
+                    }else{
+//                        Cursor cursor = writableDatabase.query("friend",null,"friend_id=? AND selfID=?",
+//                                new String[]{flag, loginId}, null, null, null); //将电话转换成名字
+                        chatMessage = new ChatMessage(flag, contentChat, time, 0);
+                    }
+                    templeList.add(chatMessage);
+                    if (i == 11){break;}
+                }while (query.moveToNext());
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.d("zw", "initChatMessageList: 取消息出错");
+            }
+            if (templeList.size() == 0){
+                Log.d("zw", "initChatMessageList: 此时数据库关于此人聊天记录为空");
+            }
+            try {
+                Collections.reverse(templeList);
+                chatMessageList = templeList;
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.d("zw", "initChatMessageList: 倒序发生异常");
+            }
         }
 
         initChatMsgListView();

@@ -247,7 +247,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Log.d("zw", "onCreateView: 此时的位置信息是" + lonAndLat.toString());
         mMap.getUiSettings().setCompassEnabled(false);
         testBDRequest();
-        show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
+        show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), 0);
 
         handlermyloc();
         timInit();
@@ -398,7 +398,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 //                            transToBD();
                         }finally {
-                            show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
+                            show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), Float.parseFloat(lonAndLat.get(5)));
                         }
                         show_info_text(lonAndLat);
                         break;
@@ -489,16 +489,40 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     /**不论有无网络，都可以根据gps发送定位，但是gps格式的位置需要改成百度上的坐标系
      *
      */
-    private void show_my_loc(String lat, String lon) {
+    private void show_my_loc(String lat, String lon, float dir) {
         int mXDirection;
 
         locDataBuilder = new MyLocationData.Builder()
                 .accuracy(30)
                 .latitude(Double.parseDouble(lat))
-                .longitude(Double.parseDouble(lon));
+                .longitude(Double.parseDouble(lon))
+                .direction(dir);
+
+
+        MyLocationConfiguration configuration = new MyLocationConfiguration(
+                MyLocationConfiguration.LocationMode.NORMAL,
+                true,
+                null,
+                0xAAFFFF88,
+                0xAA00FF00);
+        // 在定义了以上属性之后，通过如下方法来设置生效：
+        mMap.setMyLocationConfiguration(configuration);
+
+        MyLocationData myLocData = locDataBuilder.build();
+        mMap.setMyLocationData(myLocData);
+
+        if (ifFirst) {
+            LatLng ll = new LatLng(myLocData.latitude, myLocData.longitude);
+            MapStatus.Builder builder = new MapStatus.Builder();
+            builder.target(ll);
+            builder.zoom(20.0f);    // 放大为20层级
+            mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+            //放大层级
+            ifFirst = false;
+        }
 
         //初始化方位角 由底层传感器获得
-        iniMyLocMap();
+//        iniMyLocMap();
 
     }
 
@@ -636,7 +660,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onStart() {
         super.onStart();
         Log.d("zw", "onStart: Fragment开始实现");
-        myOrientationListener.start();
     }
 
     @Override
@@ -735,7 +758,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.dingwei: {
-                show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
+                show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), Float.parseFloat(lonAndLat.get(5)));
                 testRequest();
 //                sendRequestForLoc(username);
                 break;
@@ -900,7 +923,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     private void testRequest() {
-        show_my_loc(String.valueOf(latitude), String.valueOf(lontitude));
         show_other_loc("30.518848","114.350055");
     }
 

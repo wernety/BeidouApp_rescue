@@ -11,7 +11,8 @@ import org.litepal.crud.LitePalSupport;
  */
 public class recentMan extends LitePalSupport {
     private String selfId;//自己的ID
-    private String toID;//其他人的ID
+    private String toID;//其他人或者群的ID
+    private String type;//0是人，1是群
 
 
 //    recentMan(String uid){
@@ -27,11 +28,19 @@ public class recentMan extends LitePalSupport {
         this.toID = toID;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getSelfId() {
         return selfId;
     }
 
     public String getToID() {
         return toID;
+    }
+
+    public String getType() {
+        return type;
     }
 }
