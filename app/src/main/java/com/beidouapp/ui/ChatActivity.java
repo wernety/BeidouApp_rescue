@@ -143,19 +143,6 @@ public class ChatActivity extends AppCompatActivity {
         toNickname = intent.getStringExtra("nickname");
         toType = intent.getStringExtra("type"); //single or group
         loginId = application.getUserID();
-//        if (toType.equals("group")) {
-//            String groupInfo = intent.getStringExtra("groupInfo");
-//            Log.d("group", groupInfo);
-//            JSONObject object = JSON.parseObject(groupInfo);
-//            JSONArray array = (JSONArray) object.get("data");
-//            List<Group.GroupUsers> groupUsers = (List<Group.GroupUsers>) JSONArray.parseArray(array.toString(), Group.GroupUsers.class);
-//            int size = groupUsers.size();
-//            for (int i = 0; i < size; i++) {
-//                Group.GroupUsers user = groupUsers.get(i);
-//                userMap.put(user.getUserId(), user.getUserName());
-//            }
-//        }
-
     }
 
 
