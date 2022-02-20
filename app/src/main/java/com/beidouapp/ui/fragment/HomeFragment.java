@@ -681,6 +681,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onStop() {
         super.onStop();
         myOrientationListener.stop();
+
     }
 
     /**
