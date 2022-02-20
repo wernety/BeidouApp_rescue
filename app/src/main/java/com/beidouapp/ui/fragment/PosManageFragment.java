@@ -39,7 +39,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_pos_manage, container, false);
        ini(view);
        curFragment = selfFragment;
@@ -52,13 +52,13 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
         btnSelfLoc = view.findViewById(R.id.btn_self);
         btnStarLoc.setOnClickListener(this);
         btnSelfLoc.setOnClickListener(this);
-        starFragment = new starFragment();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_star:{
+                starFragment = new starFragment();
                 Log.d("zw", "onClick: 切换收藏位置点");
                 replaceFragement(starFragment);
                 break;

@@ -26,6 +26,8 @@ public class MyLocationListener extends BDAbstractLocationListener {
                 .accuracy(bdLocation.getRadius()).direction(100).latitude(bdLocation.getLatitude())
                 .longitude(bdLocation.getLongitude()).build();
 
+
+
         this.latitude = bdLocation.getLatitude();
         this.longitude = bdLocation.getLongitude();
         this.altitude = bdLocation.getAltitude();

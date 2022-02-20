@@ -1,10 +1,14 @@
 package com.beidouapp.ui.fragment;
 
+import static android.content.Context.SENSOR_SERVICE;
+import static androidx.core.content.ContextCompat.getSystemService;
 import static com.beidouapp.model.utils.JSONUtils.Receive;
 import static com.beidouapp.model.utils.JSONUtils.receivePosFromBDJson;
 import static com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY;
 
 import android.Manifest;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.Address;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -199,6 +203,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private List<LatLng> traceList;
     private LocationClient locationClient;
     private MyLocationListener myLocationListener;
+    private float mCurrentDir;
 
 
     public HomeFragment() {
@@ -247,7 +252,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Log.d("zw", "onCreateView: 此时的位置信息是" + lonAndLat.toString());
         mMap.getUiSettings().setCompassEnabled(false);
         testBDRequest();
-        show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), 0);
+        show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), mCurrentDir);
 
         handlermyloc();
         timInit();
@@ -287,10 +292,18 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         locationClient = new LocationClient(getActivity().getApplicationContext());
         LocationClientOption option = new LocationClientOption();
         option.setOpenGps(true);
+        option.setNeedDeviceDirect(true);
         option.setCoorType("bd09ll");
-//        locationClient.setLocOption(option);
+        locationClient.setLocOption(option);
         locationClient.registerLocationListener(myLocationListener);
         locationClient.start();
+        myOrientationListener = new MyOrientationListener(getActivity().getApplicationContext());
+        myOrientationListener.setOnOrientationListener(new MyOrientationListener.OnOrientationListener() {
+            @Override
+            public void onOrientationChanged(float x) {
+                mCurrentDir = x;
+            }
+        });
     }
 
 
@@ -398,7 +411,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 //                            transToBD();
                         }finally {
-                            show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), Float.parseFloat(lonAndLat.get(5)));
+                            show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), mCurrentDir);
                         }
                         show_info_text(lonAndLat);
                         break;
@@ -424,7 +437,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 handlermyloc.sendMessage(messageMyloc);
             }
         };
-        timer.schedule(locFresh, 0, 10 * 1000);
+        timer.schedule(locFresh, 0, 2*1000);
     }
 
 
@@ -513,6 +526,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         if (ifFirst) {
             LatLng ll = new LatLng(myLocData.latitude, myLocData.longitude);
+//            LatLng ll = new LatLng(myLocData.longitude, myLocData.latitude);
             MapStatus.Builder builder = new MapStatus.Builder();
             builder.target(ll);
             builder.zoom(20.0f);    // 放大为20层级
@@ -659,13 +673,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
+        myOrientationListener.start();
         Log.d("zw", "onStart: Fragment开始实现");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-//        myOrientationListener.stop();
+        myOrientationListener.stop();
     }
 
     /**
@@ -758,7 +773,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.dingwei: {
-                show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), Float.parseFloat(lonAndLat.get(5)));
+                show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), mCurrentDir);
                 testRequest();
 //                sendRequestForLoc(username);
                 break;
@@ -1340,24 +1355,33 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             public void handleMessage(Message message){
                 switch (message.what){
                     case 1:{
+                        Log.d("zw", "handleMessage: 开始绘制其他人的位置点");
                         mMap.clear();
                         int num = posLists.size();
-                        for(int i = 0;i<num;i++){
-                            posFromBD.Position pos = posLists.get(i);
-                            String deviceID = pos.getDeviceId();
-                            String lat = pos.getLat();
-                            String lon = pos.getLng();
-                            LatLng latlon = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));
-                            markerOptions = new MarkerOptions();
-                            markerOptions.position(latlon);
-                            BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.icon_mark);
-                            markerOptions.icon(bitmapDescriptor);
-                            markerOptions.zIndex(17);   //层级
-                            Bundle bundle = new Bundle();
-                            bundle.putString("deviceID", deviceID);
-                            markerOptions.extraInfo(bundle);
+                        Log.d("zw", "handleMessage: 此时要绘制的点的个数为："+ num);
+                        try {
+                            for(int i = 0;i<num;i++){
+                                posFromBD.Position pos = posLists.get(i);
+                                String deviceID = pos.getDeviceId();
+                                String lat = pos.getLat();
+                                String lon = pos.getLng();
+//                                LatLng latlon = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));
+                                LatLng latlon = new LatLng(Double.parseDouble(lon), Double.parseDouble(lat));
+                                markerOptions = new MarkerOptions();
 
-                            Marker marker = (Marker) mMap.addOverlay(markerOptions);
+                                markerOptions.position(latlon);
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.icon_mark);
+                                markerOptions.icon(bitmapDescriptor);
+                                markerOptions.zIndex(17);   //层级
+                                Bundle bundle = new Bundle();
+                                bundle.putString("deviceID", deviceID);
+                                markerOptions.extraInfo(bundle);
+
+                                Marker marker = (Marker) mMap.addOverlay(markerOptions);
+                            }
+                        }catch (Exception e){
+                            Log.d("zw", "handleMessage: 绘制其他人位置报错");
+                            e.printStackTrace();
                         }
                         break;
                     }

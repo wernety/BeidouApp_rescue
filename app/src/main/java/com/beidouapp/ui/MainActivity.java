@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
     private void initUser() {
         Intent intent = getIntent();
         application.setUserID(intent.getStringExtra("uid"));
+        Log.d("zw", "initUser: 此时的用户是" + application.getUserID());
         application.setToken(intent.getStringExtra("token"));
         user4Login = new User4Login(intent.getStringExtra("uid"),
                 "upw");

@@ -68,7 +68,6 @@ public class MyOrientationListener implements SensorEventListener {
     public interface OnOrientationListener
     {
         void onOrientationChanged(float x);
-
     }
 
     @Override

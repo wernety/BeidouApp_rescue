@@ -154,8 +154,9 @@ public class MessageFragment extends Fragment {
         ContactList.clear();
 
         try {
-            manRecords = LitePal.findAll(recentMan.class);
+            manRecords = LitePal.where("selfID=?",application.getUserID()).find(recentMan.class);
             int num = manRecords.size();
+            Log.d("zw", "RefreshContactList: litepal数据库记录条数：" + num);
             for(int i=0;i<num;i++){
                 recentMan manRecord = manRecords.get(i);
                 Log.d("zw", "RefreshContactList: 此时好友类型为" + manRecord.getType());
