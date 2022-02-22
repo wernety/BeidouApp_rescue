@@ -278,14 +278,14 @@ public class OkHttpUtils {
     /**
      * delete请求
      * @param url
-     * @param json
+     * @param token
      * @param callback
      */
-    public void delete(String url, String json, MyCallback callback) {
-        RequestBody requestBody = FormBody.create(MediaType.parse("application/json; charset=utf-8"), json);
+    public void delete(String url, String token, MyCallback callback) {
         Request request = new Request.Builder()
                 .url(url)
-                .delete(requestBody)
+                .addHeader("Authorization", "Bearer " + token)
+                .delete(RequestBody.create(null, ""))
                 .build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {

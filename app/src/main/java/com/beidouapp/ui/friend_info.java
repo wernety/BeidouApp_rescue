@@ -3,6 +3,7 @@ package com.beidouapp.ui;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -14,6 +15,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.model.utils.OkHttpUtils;
+import com.beidouapp.model.utils.id2name;
 
 import java.io.IOException;
 
@@ -29,12 +31,14 @@ public class  friend_info extends AppCompatActivity {
     private String Nickname;
     private String Type;
     private String loginId;
+    private DemoApplication application;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_friend_info);
+        application = (DemoApplication) friend_info.this.getApplicationContext();
 
 
         initUI();
@@ -96,12 +100,11 @@ public class  friend_info extends AppCompatActivity {
         Append_or_Delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONObject object = new JSONObject();
-                object.put("userId", loginId);
-                object.put("friendId", ID);
+                SQLiteDatabase writableDatabase = application.dbHelper.getWritableDatabase();
                 try {
-                    OkHttpUtils.getInstance(friend_info.this).delete("http://120.27.242.92:8080/friends",
-                            object.toJSONString(), new OkHttpUtils.MyCallback() {
+                    OkHttpUtils.getInstance(friend_info.this).delete("http://139.196.122.222:8080/beisan/relation/"
+                            + application.getIndexID() + "/" + id2name.findIndexId(writableDatabase,loginId,ID),
+                            application.getToken(), new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
                                     String body = response.body().string();
