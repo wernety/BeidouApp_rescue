@@ -24,8 +24,6 @@ public class DemoApplication extends Application {
     db.insert()
     */
 
-
-    //global variable userID
     private String userID;
     private String userPass;
     private String curToken;
