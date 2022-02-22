@@ -384,6 +384,15 @@ public class RelationFragment extends Fragment {
                                         friend.getNickName(),
                                         "1");
                             }
+                            Group group;
+                            size = groups.size();
+                            for (int i = 0; i < size; i++) {
+                                group = groups.get(i);
+                                id2name.write2DB(writableDatabase,loginId,
+                                        group.getSelfGroupId(),
+                                        group.getSelfGroupName(),
+                                        "1");
+                            }
 
                         }
                     }
