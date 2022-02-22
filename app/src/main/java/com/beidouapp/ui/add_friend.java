@@ -28,6 +28,7 @@ public class add_friend extends AppCompatActivity {
     private String loginId;
     private String friendId;
     private String friendName;
+    private DemoApplication application;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,7 @@ public class add_friend extends AppCompatActivity {
         setContentView(R.layout.activity_add_friend);
         Intent intent = getIntent();
         loginId = intent.getStringExtra("id");
+        application = (DemoApplication) this.getApplicationContext();
 
         initUI();
         initListener();
@@ -45,7 +47,6 @@ public class add_friend extends AppCompatActivity {
         back = (ImageView) findViewById(R.id.iv_back_add_friend);
         confirm = (Button) findViewById(R.id.btn_add_friend);
         input_id = (EditText) findViewById(R.id.edt_add_friend);
-        input_name = (EditText) findViewById(R.id.edt_add_friend_name);
     }
 
     private void initListener() {
@@ -60,15 +61,9 @@ public class add_friend extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 friendId = input_id.getText().toString();
-                friendName = input_name.getText().toString();
-                JSONObject object = new JSONObject();
-                object.put("userId", loginId);
-                object.put("friendId", friendId);
-                object.put("friendName", friendName);
-                Log.d("zz",object.toJSONString());
                 try {
-                    OkHttpUtils.getInstance(add_friend.this).post("http://120.27.242.92:8080/friends",
-                            object.toJSONString(), new OkHttpUtils.MyCallback() {
+                    OkHttpUtils.getInstance(add_friend.this).post("http://139.196.122.222:8080/beisan/relation/"
+                            + loginId + "/" + friendId, new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
                                     Log.d("zz","添加好友中");
@@ -83,7 +78,7 @@ public class add_friend extends AppCompatActivity {
                                 @Override
                                 public void failed(IOException e) {
                                 }
-                            });
+                            }, application.getToken());
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.d("zz","添加好友失败");

@@ -1,11 +1,14 @@
 package com.beidouapp.ui;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,7 +27,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.orgAndUidAndKey;
+import com.beidouapp.model.User;
 import com.beidouapp.model.User4Login;
+import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 
@@ -46,6 +51,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText userNameEditText, userPasswordEditText;
     private Button loginButton;
+    private String token;
+    private String username;
+    private String password;
+    private DemoApplication application;
 
 
     @Override
@@ -53,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
-
+        application = (DemoApplication) this.getApplicationContext();
         checkPermissions();
         initUI();                                                                                   //初始化UI
         initListener();                                                                             //初始化监听器
@@ -69,8 +78,8 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String username = userNameEditText.getText().toString();
-                final String password = userPasswordEditText.getText().toString();
+                username = userNameEditText.getText().toString();
+                password = userPasswordEditText.getText().toString();
                 if (TextUtils.isEmpty(username)||TextUtils.isEmpty(password)){
                     Toast.makeText(LoginActivity.this, "进入开发者状态", Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -121,24 +130,58 @@ public class LoginActivity extends AppCompatActivity {
      */
     public void loginByPost(String username, String password){
         try {
+            Handler handler = new Handler() {
+                //           @Override
+                @SuppressLint("HandlerLeak")
+                public void handleMessage(Message message) {
+                    if (message.what == 1) {
+                        try {
+                            OkHttpUtils.getInstance(LoginActivity.this).get("http://139.196.122.222:8080/getInfo",
+                                    token, new OkHttpUtils.MyCallback() {
+                                        @Override
+                                        public void success(Response response) throws IOException {
+                                            JSONObject object = JSON.parseObject(response.body().string());
+                                            int code = object.getInteger("code");
+                                            if (code == 200) {
+                                                User user = JSON.parseObject(object.getString("user"), User.class);
+                                                application.setIndexID(user.getUserId());
+                                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                                intent.putExtra("uid", username);
+                                                intent.putExtra("upw", password);
+                                                intent.putExtra("token", token);
+                                                startActivity(intent);
+                                                finish();
+                                            } else if (code == 500) {
+                                            } else
+                                                Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
+                                        }
+
+                                        @Override
+                                        public void failed(IOException e) {
+
+                                        }
+                                    });
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
             User4Login user4Login = new User4Login(username, password);
             String json = JSONUtils.sendJSON(user4Login);
             Log.d("json", json);
-            OkHttpUtils.getInstance(this).post("http://139.196.122.222:8080/login", json,
+            OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/login", json,
                     new OkHttpUtils.MyCallback() {
                         @Override
                         public void success(Response response) throws IOException {
-//                            Log.d("json", response.body().string());
                             JSONObject object = JSON.parseObject(response.body().string());
                             int code = object.getInteger("code");
                             if (code == 200) {
-                                String token = object.getString("token");
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                intent.putExtra("uid", username);
-                                intent.putExtra("upw", password);
-                                intent.putExtra("token", token);
-                                startActivity(intent);
-                                finish();
+                                token = object.getString("token");
+                                Message message = new Message();
+                                message.what = 1;
+                                handler.sendMessage(message);
                             } else if (code == 500) {
                                 LoginActivity.this.runOnUiThread(new Runnable() {
                                     @Override

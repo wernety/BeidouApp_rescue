@@ -68,33 +68,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/edit_background"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
-
-
-            <EditText
-                android:id="@+id/edt_add_friend_name"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:background="@null"
-                android:drawablePadding="8dp"
-                android:hint="请输入昵称"
-                android:inputType="text"
-                android:padding="10dp"
-                android:paddingLeft="5dp"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-        </LinearLayout>
-
     </LinearLayout>
 
     <androidx.appcompat.widget.Toolbar

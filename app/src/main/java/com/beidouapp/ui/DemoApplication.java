@@ -25,6 +25,7 @@ public class DemoApplication extends Application {
     private String userPass;
     private String org;
     private String userID;
+    private String indexID;
     private String curToken;
     private String Token;
     private List<String> otherLocIDRecord;
@@ -40,25 +41,23 @@ public class DemoApplication extends Application {
     public String getUserID() {
         return userID;
     }
-
     public List<String> getOtherLocIDRecord() {
         return otherLocIDRecord;
     }
-
     public String getOrg() {
         return org;
     }
-
     public List<User> getFriendList() {
         return friendList;
     }
-
     public List<Group> getGroupList() {
         return groupList;
     }
-
     public String getUserPass() {
         return userPass;
+    }
+    public String getIndexID() {
+        return indexID;
     }
 
     public void setToken(String token) {
@@ -70,25 +69,23 @@ public class DemoApplication extends Application {
     public void setUserID(String userID) {
         this.userID = userID;
     }
-
     public void setOtherLocIDRecord(List<String> otherLocIDRecord) {
         this.otherLocIDRecord = otherLocIDRecord;
     }
-
     public void setOrg(String org) {
         this.org = org;
     }
-
     public void setFriendList(List<User> friendList) {
         this.friendList = friendList;
     }
-
     public void setGroupList(List<Group> groupList) {
         this.groupList = groupList;
     }
-
     public void setUserPass(String userPass) {
         this.userPass = userPass;
+    }
+    public void setIndexID(String indexID) {
+        this.indexID = indexID;
     }
 
     @Override

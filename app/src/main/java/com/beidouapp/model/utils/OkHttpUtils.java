@@ -153,6 +153,12 @@ public class OkHttpUtils {
         });
     }
 
+    /**
+     * post传参
+     * @param url
+     * @param json
+     * @param callback
+     */
     public void post(String url, String json, MyCallback callback) {
         RequestBody requestBody = FormBody.create(MediaType.parse("application/json; charset=utf-8"), json);
         Request request = new Request.Builder()
@@ -175,6 +181,39 @@ public class OkHttpUtils {
 
     }
 
+    /**
+     * post使用后端token，无传参
+     * @param url
+     * @param callback
+     * @param token
+     */
+    public void post(String url, MyCallback callback, String token) {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + token)
+                .post(RequestBody.create(null, ""))
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.failed(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                callback.success(response);
+            }
+        });
+    }
+
+    /**
+     * post使用后端token，传参
+     * @param url
+     * @param json
+     * @param callback
+     * @param token
+     */
     public void post(String url, String json, MyCallback callback, String token) {
         RequestBody requestBody = FormBody.create(MediaType.parse("application/json; charset=utf-8"), json);
         Request request = new Request.Builder()

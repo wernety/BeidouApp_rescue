@@ -147,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString("token", token);
         bundle.putString("loginId", user4Login.getUsername());
         bundle.putString("pass", intent.getStringExtra("upw"));  //传密码进去
-
         initFriendGroupOrg();
     }
 
@@ -160,8 +159,6 @@ public class MainActivity extends AppCompatActivity {
         posManageFragment = new PosManageFragment();
         settingsFragment = new SettingsFragment();
         iniPosFragmentListener();
-
-
         switchFragment(homeFragment);
     }
 
@@ -375,8 +372,8 @@ public class MainActivity extends AppCompatActivity {
      * 写入数据库
      */
     private void initFriendGroupOrg() {
-        OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/user/3", token,
-                new OkHttpUtils.MyCallback() {
+        OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/user/" + application.getIndexID(),
+                token, new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {
                         String body = response.body().string();

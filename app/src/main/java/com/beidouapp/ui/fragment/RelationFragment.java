@@ -92,7 +92,7 @@ public class RelationFragment extends Fragment {
         Log.d("token", token);
         initUI();
         initListener();
-        RefreshView(context, token);
+        initView(context, token);
         return view;
     }
 
@@ -257,13 +257,7 @@ public class RelationFragment extends Fragment {
     }
 
 
-
-    /**
-     * 刷新所有View
-     * @param context
-     * @param token
-     */
-    public void RefreshView(Context context, String token) {
+    private void initView(Context context, String token) {
         if (friendList==null&&groupList==null) {
             RefreshListView(context,token);
         } else {
@@ -288,6 +282,16 @@ public class RelationFragment extends Fragment {
                 initRelationListener();
             }
         }
+    }
+
+    /**
+     * 刷新所有View
+     * @param context
+     * @param token
+     */
+    public void RefreshView(Context context, String token) {
+        RefreshListView(context,token);
+        RefreshRecyclerView(context, token);
     }
 
     /**
@@ -329,7 +333,7 @@ public class RelationFragment extends Fragment {
 
 
     public void RefreshListView(Context context, String token) {
-        OkHttpUtils.getInstance(context).get("http://139.196.122.222:8080/system/user/3", token,
+        OkHttpUtils.getInstance(context).get("http://139.196.122.222:8080/system/user/" + application.getIndexID(), token,
                 new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {
@@ -383,6 +387,10 @@ public class RelationFragment extends Fragment {
                 });
     }
 
+
+
+
+
     public void RefreshFriendListView(Context context) {
         OkHttpUtils.getInstance(context).get("http://120.27.242.92:8080/friends/" + loginId, new OkHttpUtils.MyCallback() {
             @Override
@@ -413,7 +421,6 @@ public class RelationFragment extends Fragment {
             }
         });
     }
-
     public void RefreshGroupListView(Context context) {
         OkHttpUtils.getInstance(context).get("http://139.196.122.222:8080/beisan/selfgroup/list/3", token,new OkHttpUtils.MyCallback() {
             @Override
