@@ -34,6 +34,7 @@ import com.beidouapp.model.messages.Friend;
 import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
+import com.beidouapp.model.utils.id2name;
 import com.beidouapp.ui.ChatActivity;
 import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.add_friend;
@@ -373,27 +374,15 @@ public class RelationFragment extends Fragment {
                                 }
                             });
 
-                            ContentValues values;
-                            Cursor cursor;
                             Friend friend;
                             int size = friends.size();
 //                            writableDatabase.delete("friend",null,null);
                             for (int i = 0; i < size; i++) {
                                 friend = friends.get(i);
-                                cursor = writableDatabase.query("friend",null,"selfID=? AND friend_id=?",
-                                        new String[]{loginId,friend.getUserName()},null,null, null);
-                                Log.d("zznhy",String.valueOf(cursor.getCount()));
-                                if (cursor.getCount() == 0) {
-                                    Log.d("zznhy","in");
-                                    values = new ContentValues();
-                                    values.put("selfID", loginId);
-                                    values.put("friend_id", friend.getUserName());
-                                    values.put("friend_name", friend.getNickName());
-                                    values.put("flag", "1");
-                                    writableDatabase.insert("friend", null, values);
-                                }
-//                                cursor.moveToFirst();
-//                                Log.d("zznhy",cursor.getString(cursor.getColumnIndex("friend_name")));
+                                id2name.write2DB(writableDatabase,loginId,
+                                        friend.getUserName(),
+                                        friend.getNickName(),
+                                        "1");
                             }
 
                         }
