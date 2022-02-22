@@ -1,9 +1,7 @@
 package com.beidouapp.ui.fragment;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -30,7 +28,7 @@ import com.beidouapp.model.User;
 import com.beidouapp.model.adapters.FriendListAdapter;
 import com.beidouapp.model.adapters.GroupListAdapter;
 import com.beidouapp.model.adapters.RelationAdapter;
-import com.beidouapp.model.messages.Group;
+import com.beidouapp.model.Group;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;

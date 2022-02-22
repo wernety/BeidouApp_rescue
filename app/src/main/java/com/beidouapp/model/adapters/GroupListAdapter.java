@@ -7,7 +7,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.beidouapp.R;
-import com.beidouapp.model.messages.Group;
+import com.beidouapp.model.Group;
 
 import java.util.List;
 

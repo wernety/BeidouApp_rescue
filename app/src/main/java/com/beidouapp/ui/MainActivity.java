@@ -1,10 +1,7 @@
 package com.beidouapp.ui;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -13,7 +10,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -31,14 +27,10 @@ import com.beidouapp.R;
 import com.beidouapp.background.MsgService;
 import com.beidouapp.model.DataBase.DBHelper;
 import com.beidouapp.model.DataBase.orgAndUidAndKey;
-import com.beidouapp.model.DataBase.recentMan;
-import com.beidouapp.model.Relation;
 import com.beidouapp.model.User;
 import com.beidouapp.model.User4Login;
-import com.beidouapp.model.messages.Group;
-import com.beidouapp.model.messages.Message4Receive;
+import com.beidouapp.model.Group;
 import com.beidouapp.model.messages.regist;
-import com.beidouapp.model.utils.GenerateTokenDemo;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.MD5;
 import com.beidouapp.model.utils.OkHttpUtils;
@@ -51,7 +43,6 @@ import com.beidouapp.ui.fragment.SettingsFragment;
 import com.beidouapp.ui.fragment.starPos;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.beidouapp.model.utils.NetworkManager;
-import com.beidouapp.model.messages.regist;
 
 import org.litepal.LitePal;
 import org.litepal.tablemanager.Connector;

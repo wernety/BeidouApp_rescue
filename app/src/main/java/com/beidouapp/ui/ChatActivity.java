@@ -1,7 +1,6 @@
 package com.beidouapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.collection.ArraySet;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -27,14 +26,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.background.MsgService;
 import com.beidouapp.model.DataBase.recentMan;
 import com.beidouapp.model.adapters.ChatAdapter;
 import com.beidouapp.model.messages.ChatMessage;
-import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.messages.Message4Send;
 import com.beidouapp.model.utils.JSONUtils;

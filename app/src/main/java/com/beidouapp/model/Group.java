@@ -1,4 +1,4 @@
-package com.beidouapp.model.messages;
+package com.beidouapp.model;
 
 public class Group {
     private String selfGroupId;

@@ -7,7 +7,7 @@ import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.beidouapp.model.DataBase.DBHelper;
 import com.beidouapp.model.User;
-import com.beidouapp.model.messages.Group;
+import com.beidouapp.model.Group;
 
 import org.litepal.LitePal;
 
