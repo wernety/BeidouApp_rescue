@@ -25,6 +25,24 @@ public class id2name {
     }
 
     /**
+     * 逆转换
+     * @param writableDatabase
+     * @param loginId
+     * @param friendName
+     * @return
+     */
+    public static String reverse(SQLiteDatabase writableDatabase, String loginId, String friendName) {
+        Cursor cursor = writableDatabase.query("friend",null,"selfID=? AND friend_name=?",
+                new String[]{loginId,friendName},null,null, null);
+        if (cursor.getCount()!=0) {
+            cursor.moveToFirst();
+            return cursor.getString(cursor.getColumnIndex("friend_id"));
+        } else {
+            return friendName;
+        }
+    }
+
+    /**
      * 写入数据库
      * @param writableDatabase
      * @param selfID == 自己的id

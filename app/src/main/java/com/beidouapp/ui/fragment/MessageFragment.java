@@ -131,6 +131,7 @@ public class MessageFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Map<String, Object> contact = ContactList.get(position);
                 uid = contact.get("title").toString();
+                uid = id2name.reverse(writableDatabase,loginId,uid);
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra("uid", uid);
                 intent.putExtra("nickname", uid);
