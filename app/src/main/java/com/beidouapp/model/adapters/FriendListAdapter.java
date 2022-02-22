@@ -7,17 +7,17 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.beidouapp.R;
-import com.beidouapp.model.messages.Friend;
+import com.beidouapp.model.User;
 
 import java.util.List;
 
 public class FriendListAdapter extends BaseAdapter {
-    private List<Friend> data;
+    private List<User> data;
     private Context context;
     private FriendViewHolder viewHolder;
     private View view;
 
-    public FriendListAdapter(Context context, List<Friend> data) {
+    public FriendListAdapter(Context context, List<User> data) {
         this.context = context;
         this.data = data;
     }
@@ -40,7 +40,7 @@ public class FriendListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Friend friend = data.get(position);
+        User friend = data.get(position);
         if (convertView == null) {
             viewHolder = new FriendViewHolder();
             view = View.inflate(context, R.layout.item_friend_or_group, null);

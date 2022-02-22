@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.beidouapp.model.DataBase.DBHelper;
-import com.beidouapp.model.messages.Friend;
+import com.beidouapp.model.User;
 import com.beidouapp.model.messages.Group;
 
 import org.litepal.LitePal;
@@ -28,7 +28,7 @@ public class DemoApplication extends Application {
     private String curToken;
     private String Token;
     private List<String> otherLocIDRecord;
-    private List<Friend> friendList;
+    private List<User> friendList;
     private List<Group> groupList;
 
     public String getToken() {
@@ -49,7 +49,7 @@ public class DemoApplication extends Application {
         return org;
     }
 
-    public List<Friend> getFriendList() {
+    public List<User> getFriendList() {
         return friendList;
     }
 
@@ -79,7 +79,7 @@ public class DemoApplication extends Application {
         this.org = org;
     }
 
-    public void setFriendList(List<Friend> friendList) {
+    public void setFriendList(List<User> friendList) {
         this.friendList = friendList;
     }
 

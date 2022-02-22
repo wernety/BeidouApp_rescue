@@ -30,7 +30,6 @@ import com.beidouapp.model.User;
 import com.beidouapp.model.adapters.FriendListAdapter;
 import com.beidouapp.model.adapters.GroupListAdapter;
 import com.beidouapp.model.adapters.RelationAdapter;
-import com.beidouapp.model.messages.Friend;
 import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
@@ -61,7 +60,7 @@ public class RelationFragment extends Fragment {
     private ListView friendListView;
     private ListView groupListView;
     private List<Relation>  relationList = new ArrayList<>();
-    private List<Friend> friendList = new ArrayList<Friend>();
+    private List<User> friendList = new ArrayList<User>();
     private List<Group> groupList = new ArrayList<Group>();
     private RelationAdapter relationAdapter;
     private FriendListAdapter friendListAdapter;
@@ -122,7 +121,7 @@ public class RelationFragment extends Fragment {
         friendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Friend friend = friendList.get(position);
+                User friend = friendList.get(position);
                 String id = friend.getUserName();
                 String nickname = friend.getNickName();
                 Intent intent = new Intent(context, friend_info.class);
@@ -344,7 +343,7 @@ public class RelationFragment extends Fragment {
                             JSONArray groupArray = (JSONArray) object.get("selfGroup");
                             List<Group> groups = (List<Group>) JSONArray.parseArray(groupArray.toString(), Group.class);
                             JSONArray friendArray = (JSONArray) object.get("friends");
-                            List<Friend> friends = (List<Friend>) JSONArray.parseArray(friendArray.toString(), Friend.class);
+                            List<User> friends = (List<User>) JSONArray.parseArray(friendArray.toString(), User.class);
                             Log.d("zzzml", friends.toString());
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -356,7 +355,7 @@ public class RelationFragment extends Fragment {
                                 }
                             });
 
-                            Friend friend;
+                            User friend;
                             int size = friends.size();
 //                            writableDatabase.delete("friend",null,null);
                             for (int i = 0; i < size; i++) {
@@ -394,7 +393,7 @@ public class RelationFragment extends Fragment {
                 int code = object.getInteger("code");
                 if (code == 200) {
                     JSONArray array = (JSONArray) object.get("data");
-                    List<Friend> friends = (List<Friend>) JSONArray.parseArray(array.toString(), Friend.class);
+                    List<User> friends = (List<User>) JSONArray.parseArray(array.toString(), User.class);
                     int size = friends.size();
                     getActivity().runOnUiThread(new Runnable() {
                         @Override

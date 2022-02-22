@@ -28,7 +28,7 @@ import com.beidouapp.model.Relation;
 import com.beidouapp.model.User;
 import com.beidouapp.model.adapters.Add2GroupAdapter;
 import com.beidouapp.model.adapters.Add2GroupRelAdapter;
-import com.beidouapp.model.messages.Friend;
+import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 
@@ -41,7 +41,7 @@ import okhttp3.Response;
 public class add_group extends AppCompatActivity {
     private ListView listView;
     private RecyclerView recyclerView;
-    private List<Friend> friendList = new ArrayList<Friend>();
+    private List<User> friendList = new ArrayList<User>();
     private List<Relation>  relationList = new ArrayList<>();
     private Add2GroupRelAdapter relationAdapter;
     private Add2GroupAdapter adapter;
@@ -156,7 +156,7 @@ public class add_group extends AppCompatActivity {
                                                 me.put("userId", loginId);
                                                 jsonArray.add(me);
                                                 for (int i = 0; i < size_friend; i++) {
-                                                    Friend temp = friendList.get(i);
+                                                    User temp = friendList.get(i);
                                                     if (temp.isChecked()) {
                                                         JSONObject jsonObject = new JSONObject();
                                                         jsonObject.put("groupId", groupId);
@@ -271,7 +271,7 @@ public class add_group extends AppCompatActivity {
                 if (code == 200) {
                     JSONArray array = (JSONArray) object.get("data");
                     Log.d("zzzz", array.toString());
-                    List<Friend> friends = (List<Friend>) JSONArray.parseArray(array.toString(), Friend.class);
+                    List<User> friends = (List<User>) JSONArray.parseArray(array.toString(), User.class);
                     int size = friends.size();
                     runOnUiThread(new Runnable() {
                         @Override
@@ -312,7 +312,7 @@ public class add_group extends AppCompatActivity {
                     List<Relation> list = (List<Relation>) JSONArray.parseArray(array.toString(),Relation.class);
                     int size = list.size();
                     for (int i = 0; i < size; i++) {
-                        transform(list.get(i));
+                        JSONUtils.transform(list.get(i));
                     }
                     runOnUiThread(new Runnable() {
                         @Override
@@ -333,44 +333,5 @@ public class add_group extends AppCompatActivity {
         });
     }
 
-    public void transform(Relation rel) {
-        //判断是否做过转换
-        if (!rel.isTransformed()) {
-            //判断有没有成员
-            if (rel.getMember() != null && rel.getMember().size() > 0) {
-                //如果没有叶子列表，就创建叶子列表
-                if (rel.getChildren() == null) {
-                    List <Relation> children = new ArrayList<>();
-                    rel.setChildren(children);
-                }
-                //将成员作为叶子加入叶子列表中
-                List<User> memberList = rel.getMember();
-                int size_m = memberList.size();
-                User temp;
-                Relation relation;
-                String Id;
-                String parentId;
-                String label;
-                List<Relation> list = rel.getChildren();
-                for (int i = 0; i < size_m; i++) {
-                    temp = memberList.get(i);
-                    Id = temp.getUserName();
-                    parentId = temp.getDeptId();
-                    label = temp.getNickName();
-                    relation = new Relation(Id, parentId, label);
-                    relation.setTransformed(true);
-                    list.add(relation);
-                    Log.d("relation", label + parentId + Id);
-                }
-                rel.setChildren(list);
-            }
-            rel.setTransformed(true);
-        }
-        if (rel.getChildren() != null && rel.getChildren().size() > 0) {
-            int size_c = rel.getChildren().size();
-            for (int i = 0; i < size_c; i++) {
-                transform(rel.getChildren().get(i));
-            }
-        }
-    }
+
 }

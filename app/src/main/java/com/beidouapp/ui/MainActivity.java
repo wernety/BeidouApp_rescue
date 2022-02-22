@@ -35,7 +35,6 @@ import com.beidouapp.model.DataBase.recentMan;
 import com.beidouapp.model.Relation;
 import com.beidouapp.model.User;
 import com.beidouapp.model.User4Login;
-import com.beidouapp.model.messages.Friend;
 import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.messages.regist;
@@ -397,12 +396,12 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray groupArray = (JSONArray) object.get("selfGroup");
                             List<Group> groups = (List<Group>) JSONArray.parseArray(groupArray.toString(), Group.class);
                             JSONArray friendArray = (JSONArray) object.get("friends");
-                            List<Friend> friends = (List<Friend>) JSONArray.parseArray(friendArray.toString(), Friend.class);
+                            List<User> friends = (List<User>) JSONArray.parseArray(friendArray.toString(), User.class);
                             Log.d("zzzml", friends.toString());
                             application.setFriendList(friends);
                             application.setGroupList(groups);
 
-                            Friend friend;
+                            User friend;
                             int size = friends.size();
                             for (int i = 0; i < size; i++) {
                                 friend = friends.get(i);

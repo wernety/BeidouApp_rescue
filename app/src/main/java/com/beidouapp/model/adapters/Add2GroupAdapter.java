@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.beidouapp.R;
-import com.beidouapp.model.messages.Friend;
+import com.beidouapp.model.User;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ public class Add2GroupAdapter extends BaseAdapter {
     private Context context;
     private View view;
     public Add2GroupViewHolder viewHolder;
-    private List<Friend> data;
+    private List<User> data;
 
-    public Add2GroupAdapter(Context context, List<Friend> data) {
+    public Add2GroupAdapter(Context context, List<User> data) {
         this.context = context;
         this.data = data;
     }
@@ -40,7 +40,7 @@ public class Add2GroupAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Friend person = data.get(position);
+        User person = data.get(position);
         if (convertView == null) {
             viewHolder = new Add2GroupViewHolder();
             view = View.inflate(context, R.layout.item_add_group, null);

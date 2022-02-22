@@ -8,11 +8,13 @@ public class Relation extends BaseModel<Relation> {
     private List<User> member;
     private boolean isTransformed;
     private boolean isOnline;
+    private String userId;
 
-    public Relation(String Id, String parentId, String label) {
+    public Relation(String Id, String parentId, String userId, String label) {
         this.setId(Id);
         this.setParentId(parentId);
         this.setLabel(label);
+        this.setUserId(userId);
     }
 
     public Relation() {
@@ -31,5 +33,13 @@ public class Relation extends BaseModel<Relation> {
     }
     public boolean isTransformed() {
         return isTransformed;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 }

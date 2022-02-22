@@ -116,7 +116,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
                     List<Relation> list = (List<Relation>) JSONArray.parseArray(array.toString(),Relation.class);
                     int size = list.size();
                     for (int i = 0; i < size; i++) {
-                        transform(list.get(i));
+                        JSONUtils.transform(list.get(i));
                     }
                     runOnUiThread(new Runnable() {
                         @Override
@@ -140,7 +140,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
                     List<Relation> list = (List<Relation>) JSONArray.parseArray(array.toString(),Relation.class);
                     int size = list.size();
                     for (int i = 0; i < size; i++) {
-                        transform(list.get(i));
+                        JSONUtils.transform(list.get(i));
                     }
                     runOnUiThread(new Runnable() {
                         @Override
@@ -293,45 +293,5 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
         }
     }
 
-    public void transform(Relation rel) {
-        //判断是否做过转换
-        if (!rel.isTransformed()) {
-            //判断有没有成员
-            if (rel.getMember() != null && rel.getMember().size() > 0) {
-                //如果没有叶子列表，就创建叶子列表
-                if (rel.getChildren() == null) {
-                    List <Relation> children = new ArrayList<>();
-                    rel.setChildren(children);
-                }
-                //将成员作为叶子加入叶子列表中
-                List<User> memberList = rel.getMember();
-                int size_m = memberList.size();
-                User temp;
-                Relation relation;
-                String Id;
-                String parentId;
-                String label;
-                List<Relation> list = rel.getChildren();
-                for (int i = 0; i < size_m; i++) {
-                    temp = memberList.get(i);
-                    Id = temp.getUserName();
-                    parentId = temp.getDeptId();
-                    label = temp.getNickName();
-                    relation = new Relation(Id, parentId, label);
-                    relation.setTransformed(true);
-                    list.add(relation);
-                    Log.d("relation", label + parentId + Id);
-                }
-                rel.setChildren(list);
-            }
-            rel.setTransformed(true);
-        }
-        if (rel.getChildren() != null && rel.getChildren().size() > 0) {
-            int size_c = rel.getChildren().size();
-            for (int i = 0; i < size_c; i++) {
-                transform(rel.getChildren().get(i));
-            }
-        }
-    }
 
 }

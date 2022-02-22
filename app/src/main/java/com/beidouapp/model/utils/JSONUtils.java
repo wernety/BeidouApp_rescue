@@ -113,13 +113,15 @@ public class JSONUtils {
                 String Id;
                 String parentId;
                 String label;
+                String userId;
                 List<Relation> list = rel.getChildren();
                 for (int i = 0; i < size_m; i++) {
                     temp = memberList.get(i);
                     Id = temp.getUserName();
                     parentId = temp.getDeptId();
                     label = temp.getNickName();
-                    relation = new Relation(Id, parentId, label);
+                    userId = temp.getUserId();
+                    relation = new Relation(Id, parentId, userId, label);
                     relation.setTransformed(true);
                     list.add(relation);
                     Log.d("relation", label + parentId + Id);
