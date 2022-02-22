@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     private void iniDbForRecord() {
         application = (DemoApplication) this.getApplicationContext();
         application.dbForRecord = Connector.getDatabase(); //这里是创库顺便创意张空表
-        application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 5);
+        application.dbHelper = new DBHelper(this.getApplicationContext(), "chatRecord.db", null, 6);
         writableDatabase = application.dbHelper.getWritableDatabase();
     }
 
@@ -394,19 +394,20 @@ public class MainActivity extends AppCompatActivity {
                             for (int i = 0; i < size; i++) {
                                 friend = friends.get(i);
                                 id2name.write2DB(writableDatabase,loginId,
+                                        friend.getUserId(),
                                         friend.getUserName(),
                                         friend.getNickName(),
                                         "1");
                             }
-                            Group group;
-                            size = groups.size();
-                            for (int i = 0; i < size; i++) {
-                                group = groups.get(i);
-                                id2name.write2DB(writableDatabase,loginId,
-                                        group.getSelfGroupId(),
-                                        group.getSelfGroupName(),
-                                        "1");
-                            }
+//                            Group group;
+//                            size = groups.size();
+//                            for (int i = 0; i < size; i++) {
+//                                group = groups.get(i);
+//                                id2name.write2DB(writableDatabase,loginId,
+//                                        group.getSelfGroupId(),
+//                                        group.getSelfGroupName(),
+//                                        "1");
+//                            }
 
                         }
                     }

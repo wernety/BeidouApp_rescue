@@ -45,6 +45,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String Friend_info = "CREATE TABLE friend (id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "selfID text," +
+            "friend_index_id text," +
             "friend_id text," +
             "friend_name text,"+
             "flag text" +
