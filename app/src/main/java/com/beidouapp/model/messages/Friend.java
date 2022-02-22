@@ -2,37 +2,29 @@ package com.beidouapp.model.messages;
 
 public class Friend {
     private String userId;
-    private String friendId;
-    private String friendName;
-    private String addTime;
+    private String userName;
+    private String nickName;
     private boolean isChecked;
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
     public String getUserId() {
         return userId;
     }
-
-    public void setFriendId(String friendId) {
-        this.friendId = friendId;
-    }
-    public String getFriendId() {
-        return friendId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public void setFriendName(String friendName) {
-        this.friendName = friendName;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
-    public String getFriendName() {
-        return friendName;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setAddTime(String addTime) {
-        this.addTime = addTime;
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
-    public String getAddTime() {
-        return addTime;
+    public String getNickName() {
+        return nickName;
     }
 
     public void setChecked(boolean checked) {
@@ -41,4 +33,5 @@ public class Friend {
     public boolean isChecked() {
         return isChecked;
     }
+
 }

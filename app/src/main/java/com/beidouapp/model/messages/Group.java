@@ -1,24 +1,25 @@
 package com.beidouapp.model.messages;
 
 public class Group {
-    private String id;
-    private String name;
+    private String selfGroupId;
+    private String selfGroupName;
     private String adminId;
-    private String createUser;
-    private String createTime;
+    private String selfGroupOwner;
+    private String selfCreateTime;
+    private String selfGroupIcon;
 
-    public void setId(String id) {
-        this.id = id;
+    public void setSelfGroupId(String selfGroupId) {
+        this.selfGroupId = selfGroupId;
     }
-    public String getId() {
-        return id;
+    public String getSelfGroupId() {
+        return selfGroupId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setSelfGroupName(String selfGroupName) {
+        this.selfGroupName = selfGroupName;
     }
-    public String getName() {
-        return name;
+    public String getSelfGroupName() {
+        return selfGroupName;
     }
 
     public void setAdminId(String adminId) {
@@ -28,18 +29,25 @@ public class Group {
         return adminId;
     }
 
-    public void setCreateUser(String createUser) {
-        this.createUser = createUser;
+    public void setSelfGroupOwner(String selfGroupOwner) {
+        this.selfGroupOwner = selfGroupOwner;
     }
-    public String getCreateUser() {
-        return createUser;
+    public String getSelfGroupOwner() {
+        return selfGroupOwner;
     }
 
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
+    public void setSelfCreateTime(String selfCreateTime) {
+        this.selfCreateTime = selfCreateTime;
     }
-    public String getCreateTime() {
-        return createTime;
+    public String getSelfCreateTime() {
+        return selfCreateTime;
+    }
+
+    public void setSelfGroupIcon(String selfGroupIcon) {
+        this.selfGroupIcon = selfGroupIcon;
+    }
+    public String getSelfGroupIcon() {
+        return selfGroupIcon;
     }
 
     public static class GroupUsers {

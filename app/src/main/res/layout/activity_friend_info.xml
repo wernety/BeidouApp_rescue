@@ -34,7 +34,6 @@
     </androidx.appcompat.widget.Toolbar>
 
     <View
-        android:id="@+id/divider2"
         android:layout_width="match_parent"
         android:layout_height="5dp"
         android:background="?android:attr/listDivider" />

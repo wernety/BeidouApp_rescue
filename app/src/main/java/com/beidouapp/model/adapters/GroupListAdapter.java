@@ -53,7 +53,7 @@ public class GroupListAdapter extends BaseAdapter {
             view = convertView;
             viewHolder = (GroupViewHolder) convertView.getTag();
         }
-        String name = group.getName();
+        String name = group.getSelfGroupName();
         viewHolder.name.setText(name);
         return view;
     }

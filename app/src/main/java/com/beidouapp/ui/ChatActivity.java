@@ -217,7 +217,6 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     } else {
 
-//                        Log.d("uid, sendto", toID); //toID 对方ID
                         Message4Send message4Send = new Message4Send(toID, "single", "text", content);
                         Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send, true);

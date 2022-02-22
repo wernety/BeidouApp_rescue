@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -53,7 +52,7 @@ public class Add2GroupAdapter extends BaseAdapter {
             viewHolder = (Add2GroupViewHolder) convertView.getTag();
         }
 
-        String name = person.getFriendName();
+        String name = person.getNickName();
         viewHolder.name.setText(name);
         viewHolder.check.setImageResource(R.mipmap.road_check);
         return view;

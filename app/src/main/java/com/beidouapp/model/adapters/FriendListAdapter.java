@@ -53,7 +53,7 @@ public class FriendListAdapter extends BaseAdapter {
             view = convertView;
             viewHolder = (FriendViewHolder) convertView.getTag();
         }
-        String name = friend.getFriendName();
+        String name = friend.getNickName();
         viewHolder.name.setText(name);
         return view;
     }

@@ -14,8 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
@@ -34,6 +32,7 @@ import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.ChatActivity;
+import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.add_friend;
 import com.beidouapp.ui.add_group;
 import com.beidouapp.ui.friend_info;
@@ -62,6 +61,7 @@ public class RelationFragment extends Fragment {
     private RelationAdapter relationAdapter;
     private FriendListAdapter friendListAdapter;
     private GroupListAdapter groupListAdapter;
+    private DemoApplication application;
     private String token;
     private String loginId;
 
@@ -70,8 +70,10 @@ public class RelationFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = this.getArguments();
-        token = bundle.getString("token");
-        loginId = bundle.getString("loginId");
+
+        application = (DemoApplication) getActivity().getApplicationContext();
+        token = application.getToken();
+        loginId = application.getUserID();
     }
 
     @Override
@@ -110,13 +112,8 @@ public class RelationFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Friend friend = friendList.get(position);
-                String id = friend.getFriendId();
-                String nickname = friend.getFriendName();
-//                Intent intent = new Intent(context, ChatActivity.class);
-//                intent.putExtra("uid", id);
-//                intent.putExtra("nickname", nickname);
-//                intent.putExtra("type", "single");
-//                startActivity(intent);
+                String id = friend.getUserName();
+                String nickname = friend.getNickName();
                 Intent intent = new Intent(context, friend_info.class);
                 intent.putExtra("uid", id);
                 intent.putExtra("nickname", nickname);
@@ -129,8 +126,8 @@ public class RelationFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Group group = groupList.get(position);
-                String id = group.getId();
-                String nickname = group.getName();
+                String id = group.getSelfGroupId();
+                String nickname = group.getSelfGroupName();
                 OkHttpUtils.getInstance(context).get("http://120.27.242.92:8080/groupusers/" + id, new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {
@@ -304,8 +301,7 @@ public class RelationFragment extends Fragment {
      * @param token
      */
     public void RefreshView(Context context, String token) {
-        RefreshFriendListView(context);
-        RefreshGroupListView(context);
+        RefreshListView(context,token);
         RefreshRecyclerView(context, token);
     }
 
@@ -346,6 +342,41 @@ public class RelationFragment extends Fragment {
         });
     }
 
+
+    public void RefreshListView(Context context, String token) {
+        OkHttpUtils.getInstance(context).get("http://139.196.122.222:8080/system/user/3", token,
+                new OkHttpUtils.MyCallback() {
+                    @Override
+                    public void success(Response response) throws IOException {
+                        String body = response.body().string();
+                        JSONObject object = JSON.parseObject(body);
+                        Log.d("zzzml", body);
+                        int code = object.getInteger("code");
+                        if (code == 200) {
+                            JSONArray groupArray = (JSONArray) object.get("selfGroup");
+                            List<Group> groups = (List<Group>) JSONArray.parseArray(groupArray.toString(), Group.class);
+                            JSONArray friendArray = (JSONArray) object.get("friends");
+                            List<Friend> friends = (List<Friend>) JSONArray.parseArray(friendArray.toString(), Friend.class);
+                            Log.d("zzzml", friends.toString());
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    friendList = friends;
+                                    groupList = groups;
+                                    initFriendListView();
+                                    initGroupListView();
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void failed(IOException e) {
+
+                    }
+                });
+    }
+
     public void RefreshFriendListView(Context context) {
         OkHttpUtils.getInstance(context).get("http://120.27.242.92:8080/friends/" + loginId, new OkHttpUtils.MyCallback() {
             @Override
@@ -361,7 +392,7 @@ public class RelationFragment extends Fragment {
                         public void run() {
                             friendList = friends;
                             for (int i=0;i<size;i++){
-                                Log.d("ok", friendList.get(i).getFriendName());
+                                Log.d("ok", friendList.get(i).getNickName());
                             }
                             initFriendListView();
                         }
@@ -378,7 +409,7 @@ public class RelationFragment extends Fragment {
     }
 
     public void RefreshGroupListView(Context context) {
-        OkHttpUtils.getInstance(context).get("http://120.27.242.92:8080/groups/users/" + loginId, new OkHttpUtils.MyCallback() {
+        OkHttpUtils.getInstance(context).get("http://139.196.122.222:8080/beisan/selfgroup/list/3", token,new OkHttpUtils.MyCallback() {
             @Override
             public void success(Response response) throws IOException {
                 //Log.d("group", response.body().string());
@@ -402,7 +433,8 @@ public class RelationFragment extends Fragment {
 
             @Override
             public void failed(IOException e) {
-
+                e.printStackTrace();
+                Log.d("zzzml", "failed");
             }
         });
     }

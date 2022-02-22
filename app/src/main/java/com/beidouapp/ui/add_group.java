@@ -160,8 +160,8 @@ public class add_group extends AppCompatActivity {
                                                     if (temp.isChecked()) {
                                                         JSONObject jsonObject = new JSONObject();
                                                         jsonObject.put("groupId", groupId);
-                                                        jsonObject.put("userId", temp.getFriendId());
-                                                        jsonObject.put("userName", temp.getFriendName());
+                                                        jsonObject.put("userId", temp.getUserName());
+                                                        jsonObject.put("userName", temp.getNickName());
                                                         jsonArray.add(jsonObject);
                                                     }
                                                 }
@@ -278,7 +278,7 @@ public class add_group extends AppCompatActivity {
                         public void run() {
                             friendList = friends;
                             for (int i=0;i<size;i++){
-                                Log.d("zzzz", friendList.get(i).getFriendName());
+                                Log.d("zzzz", friendList.get(i).getNickName());
                             }
                             initListView();
                         }
