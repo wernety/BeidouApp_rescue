@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initUser() {
         Intent intent = getIntent();
+        application.setOtherLocIDRecord(new ArrayList<String>());
         application.setUserID(intent.getStringExtra("uid"));
         loginId = application.getUserID();
         application.setToken(intent.getStringExtra("token"));

@@ -56,6 +56,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
     private List<String> deviceIDs;
     private List<Integer> onlineStatus;
     private String pass;
+    private DemoApplication application;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,6 +79,8 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
     }
 
     private void ini() {
+        application = (DemoApplication) getApplicationContext();
+        idList = new ArrayList<>(application.getOtherLocIDRecord());
         Bundle bundle = this.getIntent().getExtras();
         token = bundle.getString("token");
         curToken = bundle.getString("curToken");
@@ -155,7 +158,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
     }
 
     private void initRelationRecyclerView() {
-        locOthersAdapter = new locOthers(relationList,this, deviceIDs, onlineStatus);
+        locOthersAdapter = new locOthers(relationList,this, deviceIDs, onlineStatus, application.getOtherLocIDRecord());
         recyclerView.setAdapter(locOthersAdapter);
     }
 
@@ -252,6 +255,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
                 Intent intent = getIntent();
                 Bundle bundle = new Bundle();
                 ArrayList<String> arrayList = new ArrayList<String>(idList);
+                application.setOtherLocIDRecord(idList);
                 bundle.putStringArrayList("pos", arrayList);
                 intent.putExtras(bundle);
 //                intent.putExtra("pos", "小梓薇");

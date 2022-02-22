@@ -25,7 +25,9 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
     private final float fixLeft = 36;
     private OnItemClickListener onItemClickListener;
     private List<String> OtherDeviceID;
+    private List<String> otherLocIDRecord;
     private List<Integer> OtherStatus;
+
 
     public locOthers(List<Relation> list, Context context) {
         super(list, context);
@@ -35,6 +37,13 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
         super(list,context);
         this.OtherDeviceID = OtherDeviceID;
         this.OtherStatus = OtherStatus;
+//        Log.d("zw", "locOthers: 在locOthers里面的ID有哪些: " + OtherDeviceID);
+    }
+    public locOthers(List<Relation> list, Context context, List<String> OtherDeviceID, List<Integer> OtherStatus, List<String> otherLocIDRecord){
+        super(list,context);
+        this.OtherDeviceID = OtherDeviceID;
+        this.OtherStatus = OtherStatus;
+        this.otherLocIDRecord = otherLocIDRecord;
 //        Log.d("zw", "locOthers: 在locOthers里面的ID有哪些: " + OtherDeviceID);
     }
 
@@ -55,7 +64,24 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
         }else {
             holder.ivNext.setRotation(0);
         }
-        Log.d("zw", "onBindHolder: 在组织列表初始当中的ID号：" + bean.getId());
+//        Log.d("zw", "onBindHolder: 在组织列表初始当中的ID号：" + bean.getId());
+
+        //地图上显示的人，不再次显示
+        try{
+            int cont = otherLocIDRecord.size();
+            Log.d("zw", "onBindHolder: 此时在地图上的数据已经有" + otherLocIDRecord);
+            for(int i=0;i<cont;i++){
+
+                if (otherLocIDRecord.get(i).equals(bean.getId())){
+                    bean.setCheck(true);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.d("zw", "onBindHolder: 此时地图上没有选人");
+        }
+
+        //设置状态
         int num = 0;        //这个num可以作为这个里面的全局变量，因为构造之后不会改变
         int i;
 //        Log.d("zw", "locOthers: 在locOthers里面的ID有哪些: " + OtherDeviceID);
@@ -122,6 +148,7 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
     @NonNull
     @Override
     public RelationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
         return new RelationViewHolder(getLayoutView(R.layout.item_locsend, parent));
     }
 

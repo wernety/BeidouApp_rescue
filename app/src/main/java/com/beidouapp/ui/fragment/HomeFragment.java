@@ -85,6 +85,7 @@ import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.messages.posBD;
 import com.beidouapp.model.utils.MyOrientationListener;
+import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.other_loc;
 import com.beidouapp.ui.trace_activity;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -204,6 +205,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private LocationClient locationClient;
     private MyLocationListener myLocationListener;
     private float mCurrentDir;
+    private DemoApplication application;
 
 
     public HomeFragment() {
@@ -268,6 +270,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     private void iniAll(@NonNull View view) {
+        application = (DemoApplication) getActivity().getApplicationContext();
         mapView = view.findViewById(R.id.mMV);
         btn1 = view.findViewById(R.id.dingwei);
         btn2 = view.findViewById(R.id.download);
@@ -1159,7 +1162,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     }
                 });
                 DecimalFormat df = new DecimalFormat("#0.0000000");
-                textView.setText("纬度：" + df.format(latlon.latitude) +  "经度：" + df.format(latlon.longitude) + "用户：" + deviceID);
+                textView.setText("纬度：" + df.format(latlon.latitude) +  "经度：" + df.format(latlon.longitude) + " ID：" + deviceID);
                 InfoWindow infowindow = new InfoWindow(view, latlon, +47);
                 mMap.showInfoWindow(infowindow);
                 return true;
@@ -1245,8 +1248,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             if (resultCode == 2)
             {
                 handleRecOtherloc();
+                List<String> list;
                 ArrayList<String> idlist = data.getStringArrayListExtra("pos");
-                List<String> list = new ArrayList<String>(idlist);
+                list = new ArrayList<String>(idlist);
                 Log.d("zw", "testBDRequest: 需要获取位置的设备是：" + list);
                 posBD posBD = new posBD(list);
                 String json = JSONUtils.sendJson(posBD);
@@ -1264,7 +1268,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     Log.d("zw", "success: 访问福大北斗的位置信息得到的结果："+ rec);
                                     posFromBD recPos = receivePosFromBDJson(rec);
                                     posLists = recPos.getData().getPosition();
-                                    Log.d("zw", "success: 访问福大北斗的所有位置是" + posLists.toString());
+//                                    Log.d("zw", "success: 访问福大北斗的所有位置是" + posLists.toString());
                                     //获取位置后，显示出marker，带有个人信息的marker
                                     Message message = new Message();
                                     message.what = 1;
@@ -1310,7 +1314,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                             JSONObject object = JSON.parseObject(trace);
                                             JSONObject result = object.getJSONObject("data");
                                             array = result.getJSONArray("position");
-                                            Log.d("zw", "success: 获取的数据大小" + array.size());
 //                                            JSONObject position = array.getJSONObject(0);
                                             traceList = new ArrayList<LatLng>();
                                             int num = array.size()-1;
@@ -1318,7 +1321,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                                 JSONObject position = array.getJSONObject(i);
                                                 String latTemp = position.getString("lat");
                                                 String lngTmp = position.getString("lng");
-                                                traceList.add(new LatLng(Double.parseDouble(lngTmp), Double.parseDouble(latTemp)));
+
+                                                LatLng point = new LatLng(Double.parseDouble(lngTmp), Double.parseDouble(latTemp));
+                                                CoordinateConverter converter = new CoordinateConverter();
+                                                converter.from(CoordinateConverter.CoordType.GPS);
+                                                converter.coord(point);
+                                                LatLng desLatlon = converter.convert();
+                                                Double DlonTmp = desLatlon.longitude;
+                                                Double DlatTmp = desLatlon.latitude;
+
+                                                traceList.add(new LatLng(DlatTmp, DlonTmp));
+//                                                traceList.add(new LatLng(Double.parseDouble(lngTmp), Double.parseDouble(latTemp)));
                                                 //lat和lng要反着设置，这是百度SDK的锅，打印出来又反过来了
                                                 //就是设置是lng：30.400 + lat：115.26，打印的结果却是 lat：30.400 + lng：115.26：
                                                 i=i-2;
@@ -1359,15 +1372,27 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         Log.d("zw", "handleMessage: 开始绘制其他人的位置点");
                         mMap.clear();
                         int num = posLists.size();
-                        Log.d("zw", "handleMessage: 此时要绘制的点的个数为："+ num);
                         try {
                             for(int i = 0;i<num;i++){
                                 posFromBD.Position pos = posLists.get(i);
                                 String deviceID = pos.getDeviceId();
                                 String lat = pos.getLat();
                                 String lon = pos.getLng();
+
+//                                LatLng point = new LatLng(Double.parseDouble(lat),Double.parseDouble(lon));
+                                //百度sdk的问题，latlon是用lon和lat初始化，不是lat和lon
+                                LatLng point = new LatLng(Double.parseDouble(lon), Double.parseDouble(lat));
+                                CoordinateConverter converter = new CoordinateConverter();
+                                converter.from(CoordinateConverter.CoordType.GPS);
+                                converter.coord(point);
+                                LatLng desLatlon = converter.convert();
+                                Double Dlon = desLatlon.longitude;
+                                //这句话其实就是获取那个第一个还是第二个数，也就是说 desLatlon.longitude表示获取latlon中的第二个，等价于lat
+                                //下面等价于lon
+                                Double Dlat = desLatlon.latitude;
 //                                LatLng latlon = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));
-                                LatLng latlon = new LatLng(Double.parseDouble(lon), Double.parseDouble(lat));
+                                //这里Dlat是lng，Dlon是lat
+                                LatLng latlon = new LatLng(Dlat, Dlon);
                                 markerOptions = new MarkerOptions();
 
                                 markerOptions.position(latlon);

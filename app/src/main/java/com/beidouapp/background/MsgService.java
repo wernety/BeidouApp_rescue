@@ -327,6 +327,7 @@ public class MsgService extends Service {
 
         try {
             lonAndLat = stateRequest.loc(this);
+            Log.d("zw", "sendLoc: 此时使用的是gps发送坐标,坐标为" + lonAndLat);
         }catch (Exception e){
             e.printStackTrace();
             List<String> list = new ArrayList<>();

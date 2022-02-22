@@ -6,13 +6,11 @@ import android.database.sqlite.SQLiteDatabase;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.beidouapp.model.DataBase.DBHelper;
-import com.beidouapp.model.Relation;
 import com.beidouapp.model.messages.Friend;
 import com.beidouapp.model.messages.Group;
 
 import org.litepal.LitePal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DemoApplication extends Application {
@@ -24,11 +22,12 @@ public class DemoApplication extends Application {
     db.insert()
     */
 
-    private String userID;
     private String userPass;
+    private String org;
+    private String userID;
     private String curToken;
     private String Token;
-    private String org;
+    private List<String> otherLocIDRecord;
     private List<Friend> friendList;
     private List<Group> groupList;
 
@@ -41,17 +40,25 @@ public class DemoApplication extends Application {
     public String getUserID() {
         return userID;
     }
-    public String getUserPass() {
-        return userPass;
+
+    public List<String> getOtherLocIDRecord() {
+        return otherLocIDRecord;
     }
+
     public String getOrg() {
         return org;
     }
+
     public List<Friend> getFriendList() {
         return friendList;
     }
+
     public List<Group> getGroupList() {
         return groupList;
+    }
+
+    public String getUserPass() {
+        return userPass;
     }
 
     public void setToken(String token) {
@@ -63,17 +70,25 @@ public class DemoApplication extends Application {
     public void setUserID(String userID) {
         this.userID = userID;
     }
-    public void setUserPass(String userPass) {
-        this.userPass = userPass;
+
+    public void setOtherLocIDRecord(List<String> otherLocIDRecord) {
+        this.otherLocIDRecord = otherLocIDRecord;
     }
+
     public void setOrg(String org) {
         this.org = org;
     }
+
     public void setFriendList(List<Friend> friendList) {
         this.friendList = friendList;
     }
+
     public void setGroupList(List<Group> groupList) {
         this.groupList = groupList;
+    }
+
+    public void setUserPass(String userPass) {
+        this.userPass = userPass;
     }
 
     @Override
