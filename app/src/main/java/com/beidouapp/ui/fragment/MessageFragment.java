@@ -32,6 +32,7 @@ import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
+import com.beidouapp.model.utils.id2name;
 import com.beidouapp.ui.ChatActivity;
 import com.beidouapp.ui.DemoApplication;
 
@@ -53,6 +54,7 @@ import okhttp3.Response;
  */
 
 public class MessageFragment extends Fragment {
+    private String loginId;
     private String uid;
     private ListView listView;
     private View view;
@@ -84,6 +86,7 @@ public class MessageFragment extends Fragment {
         super.onCreate(savedInstanceState);
         application = (DemoApplication) getActivity().getApplicationContext();
         writableDatabase = application.dbHelper.getWritableDatabase();
+        loginId = application.getUserID();
     }
 
     @Override
@@ -151,6 +154,7 @@ public class MessageFragment extends Fragment {
      */
     private void RefreshContactList(Context context) {
         Cursor query;
+        String transId;
         ContactList.clear();
 
         try {
@@ -169,7 +173,9 @@ public class MessageFragment extends Fragment {
                 }
                 query.moveToFirst();
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("title", manRecord.getToID());
+
+                transId = id2name.transform(writableDatabase, loginId, manRecord.getToID());
+                map.put("title", transId);
                 map.put("content", query.getString(query.getColumnIndex("contentChat")));
                 map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
                 ContactList.add(map);

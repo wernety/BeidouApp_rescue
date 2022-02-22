@@ -38,6 +38,7 @@ import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.messages.Message4Send;
 import com.beidouapp.model.utils.JSONUtils;
+import com.beidouapp.model.utils.id2name;
 
 import org.litepal.LitePal;
 
@@ -398,6 +399,7 @@ public class ChatActivity extends AppCompatActivity {
             String contentChat;
             String time;
             String message_type;
+            String transId;
             ChatMessage chatMessage; //加载
             int i = 0;
             Log.d("zw", "initChatMessageList: 此时初始化入库");
@@ -416,7 +418,8 @@ public class ChatActivity extends AppCompatActivity {
                     }else{
 //                        Cursor cursor = writableDatabase.query("friend",null,"friend_id=? AND selfID=?",
 //                                new String[]{flag, loginId}, null, null, null); //将电话转换成名字
-                        chatMessage = new ChatMessage(flag, contentChat, time, 0);
+                        transId = id2name.transform(writableDatabase,loginId,flag);
+                        chatMessage = new ChatMessage(transId, contentChat, time, 0);
                     }
                     templeList.add(chatMessage);
                     if (i == 11){break;}

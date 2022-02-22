@@ -1,7 +1,10 @@
 package com.beidouapp.ui.fragment;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -64,6 +67,7 @@ public class RelationFragment extends Fragment {
     private DemoApplication application;
     private String token;
     private String loginId;
+    private SQLiteDatabase writableDatabase;
 
 
     @Override
@@ -74,6 +78,7 @@ public class RelationFragment extends Fragment {
         application = (DemoApplication) getActivity().getApplicationContext();
         token = application.getToken();
         loginId = application.getUserID();
+        writableDatabase = application.dbHelper.getWritableDatabase();
     }
 
     @Override
@@ -367,6 +372,30 @@ public class RelationFragment extends Fragment {
                                     initGroupListView();
                                 }
                             });
+
+                            ContentValues values;
+                            Cursor cursor;
+                            Friend friend;
+                            int size = friends.size();
+//                            writableDatabase.delete("friend",null,null);
+                            for (int i = 0; i < size; i++) {
+                                friend = friends.get(i);
+                                cursor = writableDatabase.query("friend",null,"selfID=? AND friend_id=?",
+                                        new String[]{loginId,friend.getUserName()},null,null, null);
+                                Log.d("zznhy",String.valueOf(cursor.getCount()));
+                                if (cursor.getCount() == 0) {
+                                    Log.d("zznhy","in");
+                                    values = new ContentValues();
+                                    values.put("selfID", loginId);
+                                    values.put("friend_id", friend.getUserName());
+                                    values.put("friend_name", friend.getNickName());
+                                    values.put("flag", "1");
+                                    writableDatabase.insert("friend", null, values);
+                                }
+//                                cursor.moveToFirst();
+//                                Log.d("zznhy",cursor.getString(cursor.getColumnIndex("friend_name")));
+                            }
+
                         }
                     }
 
