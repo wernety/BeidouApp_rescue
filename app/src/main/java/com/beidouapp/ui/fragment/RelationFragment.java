@@ -32,6 +32,7 @@ import com.beidouapp.model.adapters.GroupListAdapter;
 import com.beidouapp.model.adapters.RelationAdapter;
 import com.beidouapp.model.messages.Friend;
 import com.beidouapp.model.messages.Group;
+import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.id2name;
@@ -68,6 +69,7 @@ public class RelationFragment extends Fragment {
     private DemoApplication application;
     private String token;
     private String loginId;
+    private String org;
     private SQLiteDatabase writableDatabase;
 
 
@@ -80,6 +82,9 @@ public class RelationFragment extends Fragment {
         token = application.getToken();
         loginId = application.getUserID();
         writableDatabase = application.dbHelper.getWritableDatabase();
+        friendList = application.getFriendList();
+        groupList = application.getGroupList();
+        org = application.getOrg();
     }
 
     @Override
@@ -255,51 +260,6 @@ public class RelationFragment extends Fragment {
     }
 
 
-    /**
-     * 组织关系json格式转换
-     * @param rel
-     */
-    public void transform(Relation rel) {
-        //判断是否做过转换
-        if (!rel.isTransformed()) {
-            //判断有没有成员
-            if (rel.getMember() != null && rel.getMember().size() > 0) {
-                //如果没有叶子列表，就创建叶子列表
-                if (rel.getChildren() == null) {
-                    List <Relation> children = new ArrayList<>();
-                    rel.setChildren(children);
-                }
-                //将成员作为叶子加入叶子列表中
-                List<User> memberList = rel.getMember();
-                int size_m = memberList.size();
-                User temp;
-                Relation relation;
-                String Id;
-                String parentId;
-                String label;
-                List<Relation> list = rel.getChildren();
-                for (int i = 0; i < size_m; i++) {
-                    temp = memberList.get(i);
-                    Id = temp.getUserName();
-                    parentId = temp.getDeptId();
-                    label = temp.getNickName();
-                    relation = new Relation(Id, parentId, label);
-                    relation.setTransformed(true);
-                    list.add(relation);
-                    Log.d("relation", label + parentId + Id);
-                }
-                rel.setChildren(list);
-            }
-            rel.setTransformed(true);
-        }
-        if (rel.getChildren() != null && rel.getChildren().size() > 0) {
-            int size_c = rel.getChildren().size();
-            for (int i = 0; i < size_c; i++) {
-                transform(rel.getChildren().get(i));
-            }
-        }
-    }
-
 
     /**
      * 刷新所有View
@@ -307,8 +267,30 @@ public class RelationFragment extends Fragment {
      * @param token
      */
     public void RefreshView(Context context, String token) {
-        RefreshListView(context,token);
-        RefreshRecyclerView(context, token);
+        if (friendList==null&&groupList==null) {
+            RefreshListView(context,token);
+        } else {
+            initFriendListView();
+            initGroupListView();
+        }
+        if (org==null){
+            RefreshRecyclerView(context, token);
+        } else {
+            Log.d("ZZJY", org);
+            JSONObject object = JSON.parseObject(org);
+            int code = object.getInteger("code");
+            if (code == 200) {
+                JSONArray array = (JSONArray) object.get("data");
+                List<Relation> list = (List<Relation>) JSONArray.parseArray(array.toString(),Relation.class);
+                int size = list.size();
+                for (int i = 0; i < size; i++) {
+                    JSONUtils.transform(list.get(i));
+                }
+                relationList = list;
+                initRelationRecyclerView();
+                initRelationListener();
+            }
+        }
     }
 
     /**
@@ -327,7 +309,7 @@ public class RelationFragment extends Fragment {
                     List<Relation> list = (List<Relation>) JSONArray.parseArray(array.toString(),Relation.class);
                     int size = list.size();
                     for (int i = 0; i < size; i++) {
-                        transform(list.get(i));
+                        JSONUtils.transform(list.get(i));
                     }
                     getActivity().runOnUiThread(new Runnable() {
                         @Override

@@ -25,19 +25,25 @@ import android.view.MenuItem;
 import android.view.Window;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
 import com.beidouapp.background.MsgService;
 import com.beidouapp.model.DataBase.DBHelper;
+import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.DataBase.recentMan;
+import com.beidouapp.model.Relation;
 import com.beidouapp.model.User;
 import com.beidouapp.model.User4Login;
+import com.beidouapp.model.messages.Friend;
+import com.beidouapp.model.messages.Group;
 import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.messages.regist;
 import com.beidouapp.model.utils.GenerateTokenDemo;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.MD5;
 import com.beidouapp.model.utils.OkHttpUtils;
+import com.beidouapp.model.utils.id2name;
 import com.beidouapp.ui.fragment.HomeFragment;
 import com.beidouapp.ui.fragment.MessageFragment;
 import com.beidouapp.ui.fragment.PosManageFragment;
@@ -80,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
     private String token;
     private Bundle bundle;
     private User4Login user4Login;
+    private String loginId;
+    private orgAndUidAndKey record;
+    private List<orgAndUidAndKey> records;
+    private String orgRecord;
 
     private MsgService msgService;
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -135,17 +145,19 @@ public class MainActivity extends AppCompatActivity {
     private void initUser() {
         Intent intent = getIntent();
         application.setUserID(intent.getStringExtra("uid"));
-        Log.d("zw", "initUser: 此时的用户是" + application.getUserID());
+        loginId = application.getUserID();
         application.setToken(intent.getStringExtra("token"));
+        application.setUserPass(intent.getStringExtra("upw"));
         user4Login = new User4Login(intent.getStringExtra("uid"),
                 "upw");
         token = intent.getStringExtra("token");
-//        pass = intent.getStringExtra("upw");
         bundle = new Bundle();
         bundle.putString("curToken", curToken);
         bundle.putString("token", token);
         bundle.putString("loginId", user4Login.getUsername());
         bundle.putString("pass", intent.getStringExtra("upw"));  //传密码进去
+
+        initFriendGroupOrg();
     }
 
     private void initUI() {
@@ -366,4 +378,97 @@ public class MainActivity extends AppCompatActivity {
      * 这个广播接收器专门用来写库的，当有消息接受到的时候，就进入库中
      */
 
+
+    /**
+     * 初始化好友、群聊、组织信息
+     * 写入数据库
+     */
+    private void initFriendGroupOrg() {
+        OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/user/3", token,
+                new OkHttpUtils.MyCallback() {
+                    @Override
+                    public void success(Response response) throws IOException {
+                        String body = response.body().string();
+                        JSONObject object = JSON.parseObject(body);
+                        Log.d("zzzml", body);
+                        int code = object.getInteger("code");
+                        if (code == 200) {
+                            JSONArray groupArray = (JSONArray) object.get("selfGroup");
+                            List<Group> groups = (List<Group>) JSONArray.parseArray(groupArray.toString(), Group.class);
+                            JSONArray friendArray = (JSONArray) object.get("friends");
+                            List<Friend> friends = (List<Friend>) JSONArray.parseArray(friendArray.toString(), Friend.class);
+                            Log.d("zzzml", friends.toString());
+                            application.setFriendList(friends);
+                            application.setGroupList(groups);
+
+                            Friend friend;
+                            int size = friends.size();
+                            for (int i = 0; i < size; i++) {
+                                friend = friends.get(i);
+                                id2name.write2DB(writableDatabase,loginId,
+                                        friend.getUserName(),
+                                        friend.getNickName(),
+                                        "1");
+                            }
+                            Group group;
+                            size = groups.size();
+                            for (int i = 0; i < size; i++) {
+                                group = groups.get(i);
+                                id2name.write2DB(writableDatabase,loginId,
+                                        group.getSelfGroupId(),
+                                        group.getSelfGroupName(),
+                                        "1");
+                            }
+
+                        }
+                    }
+                    @Override
+                    public void failed(IOException e) {
+
+                    }
+                });
+
+        OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/dept/user",
+                application.getToken(), new OkHttpUtils.MyCallback() {
+            @Override
+            public void success(Response response) throws IOException {
+                orgRecord = response.body().string();
+                JSONObject object = JSON.parseObject(orgRecord);
+                int code = object.getInteger("code");
+                if (code == 200) {
+                    OrgWriteToDb(orgRecord,curToken,application.getUserID(),application.getUserPass());
+                    application.setOrg(orgRecord);
+                }
+            }
+            @Override
+            public void failed(IOException e) {
+
+            }
+        });
+    }
+
+
+    private void OrgWriteToDb(String orgRecord, String curToken, String uid, String pass) {
+        records = LitePal.where("uid = ?", uid).find(orgAndUidAndKey.class);
+        Log.d("zw", "writeToDb: 此时的记录是" + records);
+        if(records.isEmpty())
+        {
+            record = new orgAndUidAndKey();
+            record.setOrg(orgRecord);  //结构应该使用字符串加入进去，直接使用的是服务器回传的response里的body的String
+            record.setCurToken(curToken);
+            record.setUid(uid);
+            record.setPass(pass);
+            record.save();
+            Log.d("zw", "writeToDb: 此时数据库为空，初次设置库：");
+//            record.setPass(); //这里是设置密码，可以用来验证登录
+        }else{
+            //如果存在此账号，修改该账号下的所有信息
+            record = records.get(0);    //首先获取这条记录
+            record.setOrg(orgRecord);
+            record.setCurToken(curToken);
+            record.setPass(pass);
+            record.save();
+            Log.d("zw", "writeToDb: 此时的记录是：" + record.getPass() + " 用户是 " + record.getUid());
+        }
+    }
 }
