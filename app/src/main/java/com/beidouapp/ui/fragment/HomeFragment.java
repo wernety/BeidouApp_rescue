@@ -571,6 +571,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      *
      */
     private void show_info_text(List<String> infoList) {
+        Exception e = new Exception("获取天气炸了");
         java.text.DecimalFormat   df   =new   java.text.DecimalFormat("#.00");
         java.text.DecimalFormat   df2   =new   java.text.DecimalFormat("#.0");
         java.text.DecimalFormat   df3   =new   java.text.DecimalFormat("#");
@@ -587,35 +588,43 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //        Log.d("zw", "show_info_text: 此时的区域为" + district);
         HashMap<String, String> hm = new HashMap<String, String>();
         hm.put("city", district);
-        if (district!=null) {
-            OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://wthrcdn.etouch.cn/weather_mini",hm,new OkHttpUtils.MyCallback() {
-                @Override
-                public void success(Response response) throws IOException {
-                    JSONObject object = JSON.parseObject(response.body().string());
+        try {
+            if (district!=null) {
+
+                OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://wthrcdn.etouch.cn/weather_mini",
+                        hm,
+                        new OkHttpUtils.MyCallback() {
+                            @Override
+                            public void success(Response response) throws IOException {
+                                JSONObject object = JSON.parseObject(response.body().string());
 //                    Log.d("查询天气", "success: 结果" + object);
-                    JSONObject result = object.getJSONObject("data");
-                    JSONArray forecast = result.getJSONArray("forecast");
-                    JSONObject today = forecast.getJSONObject(0) ;
+                                JSONObject result = object.getJSONObject("data");
+                                JSONArray forecast = result.getJSONArray("forecast");
+                                JSONObject today = forecast.getJSONObject(0) ;
 //                    Log.d("今日天气", "success: "+ today);
-                    String high = today.getString("high");
-                    String low = today.getString("low");
-                    weatherType = today.getString("type");
-                    String regEx="[^0-9]";
-                    Pattern p = Pattern.compile(regEx);
-                    Matcher m1 = p.matcher(high);
-                    Matcher m2 = p.matcher(low);
-                    high = m1.replaceAll("").trim();
-                    low = m2.replaceAll("").trim();
-                    weatherTemperature = new StringBuilder().append(weatherType).append("  "+low).append("~").append(high).append("℃").toString();
+                                String high = today.getString("high");
+                                String low = today.getString("low");
+                                weatherType = today.getString("type");
+                                String regEx="[^0-9]";
+                                Pattern p = Pattern.compile(regEx);
+                                Matcher m1 = p.matcher(high);
+                                Matcher m2 = p.matcher(low);
+                                high = m1.replaceAll("").trim();
+                                low = m2.replaceAll("").trim();
+                                weatherTemperature = new StringBuilder().append(weatherType).append("  "+low).append("~").append(high).append("℃").toString();
 //                    Log.d("天气温度", "success: "+ weatherTemperature);
-                }
-                @Override
-                public void failed(IOException e) {
-                    Log.d("getmsg", e.getMessage());
-                }
-            });
-        };
-        textView1.setText(weatherTemperature);
+                            }
+                            @Override
+                            public void failed(IOException e) {
+                                Log.d("getmsg", e.getMessage());
+                            }
+                        });
+            };
+            textView1.setText(weatherTemperature);
+        }catch (Exception exception){
+            e.printStackTrace();
+        }
+
     }
 
 
