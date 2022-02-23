@@ -372,68 +372,75 @@ public class MainActivity extends AppCompatActivity {
      * 写入数据库
      */
     private void initFriendGroupOrg() {
-        OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/user/" + application.getIndexID(),
-                token, new OkHttpUtils.MyCallback() {
-                    @Override
-                    public void success(Response response) throws IOException {
-                        String body = response.body().string();
-                        JSONObject object = JSON.parseObject(body);
-                        Log.d("zzzml", body);
-                        int code = object.getInteger("code");
-                        if (code == 200) {
-                            JSONArray groupArray = (JSONArray) object.get("selfGroup");
-                            List<Group> groups = (List<Group>) JSONArray.parseArray(groupArray.toString(), Group.class);
-                            JSONArray friendArray = (JSONArray) object.get("friends");
-                            List<User> friends = (List<User>) JSONArray.parseArray(friendArray.toString(), User.class);
-                            Log.d("zzzml", friends.toString());
-                            application.setFriendList(friends);
-                            application.setGroupList(groups);
+        try {
+            OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/user/" + application.getIndexID(),
+                    token, new OkHttpUtils.MyCallback() {
+                        @Override
+                        public void success(Response response) throws IOException {
+                            String body = response.body().string();
+                            JSONObject object = JSON.parseObject(body);
+                            Log.d("zzzml", body);
+                            int code = object.getInteger("code");
+                            if (code == 200) {
+                                JSONArray groupArray = (JSONArray) object.get("selfGroup");
+                                List<Group> groups = (List<Group>) JSONArray.parseArray(groupArray.toString(), Group.class);
+                                JSONArray friendArray = (JSONArray) object.get("friends");
+                                List<User> friends = (List<User>) JSONArray.parseArray(friendArray.toString(), User.class);
+                                Log.d("zzzml", friends.toString());
+                                application.setFriendList(friends);
+                                application.setGroupList(groups);
 
-                            User friend;
-                            int size = friends.size();
-                            for (int i = 0; i < size; i++) {
-                                friend = friends.get(i);
-                                id2name.write2DB(writableDatabase,loginId,
-                                        friend.getUserId(),
-                                        friend.getUserName(),
-                                        friend.getNickName(),
+                                User friend;
+                                int size = friends.size();
+                                for (int i = 0; i < size; i++) {
+                                    friend = friends.get(i);
+                                    id2name.write2DB(writableDatabase,loginId,
+                                            friend.getUserId(),
+                                            friend.getUserName(),
+                                            friend.getNickName(),
+                                            "1");
+                                }
+                                Group group;
+                                size = groups.size();
+                                for (int i = 0; i < size; i++) {
+                                    group = groups.get(i);
+                                    id2name.write2DB(writableDatabase,loginId,
+                                        "GROUP",
+                                        group.getSelfGroupId(),
+                                        group.getSelfGroupName(),
                                         "1");
+                                }
                             }
-//                            Group group;
-//                            size = groups.size();
-//                            for (int i = 0; i < size; i++) {
-//                                group = groups.get(i);
-//                                id2name.write2DB(writableDatabase,loginId,
-//                                        group.getSelfGroupId(),
-//                                        group.getSelfGroupName(),
-//                                        "1");
-//                            }
+                        }
+                        @Override
+                        public void failed(IOException e) {
 
                         }
-                    }
-                    @Override
-                    public void failed(IOException e) {
+                    });
 
-                    }
-                });
+            OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/dept/user",
+                    application.getToken(), new OkHttpUtils.MyCallback() {
+                        @Override
+                        public void success(Response response) throws IOException {
+                            orgRecord = response.body().string();
+                            JSONObject object = JSON.parseObject(orgRecord);
+                            int code = object.getInteger("code");
+                            if (code == 200) {
+                                OrgWriteToDb(orgRecord,curToken,application.getUserID(),application.getUserPass());
+                                application.setOrg(orgRecord);
+                            }
+                        }
+                        @Override
+                        public void failed(IOException e) {
 
-        OkHttpUtils.getInstance(MainActivity.this).get("http://139.196.122.222:8080/system/dept/user",
-                application.getToken(), new OkHttpUtils.MyCallback() {
-            @Override
-            public void success(Response response) throws IOException {
-                orgRecord = response.body().string();
-                JSONObject object = JSON.parseObject(orgRecord);
-                int code = object.getInteger("code");
-                if (code == 200) {
-                    OrgWriteToDb(orgRecord,curToken,application.getUserID(),application.getUserPass());
-                    application.setOrg(orgRecord);
-                }
-            }
-            @Override
-            public void failed(IOException e) {
+                        }
+                    });
 
-            }
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
     }
 
 

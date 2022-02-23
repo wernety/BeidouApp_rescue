@@ -206,12 +206,11 @@ public class MessageFragment extends Fragment {
                 if(manRecord.getType().equals("0")){
                     query = writableDatabase.query("chat", null, "toID=? and selfID=?",
                             new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
-                    transId = id2name.transform(writableDatabase, loginId, manRecord.getToID());
                 }else{
                     query = writableDatabase.query("chat_group", null, "groupID=? and selfID=?",
                             new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
-                    transId = manRecord.getToID();
                 }
+                transId = id2name.transform(writableDatabase, loginId, manRecord.getToID());
                 query.moveToFirst();
                 Map<String, Object> map = new HashMap<String, Object>();
                 Log.d("zzjyy", transId);
