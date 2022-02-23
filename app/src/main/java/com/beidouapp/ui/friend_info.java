@@ -88,6 +88,7 @@ public class  friend_info extends AppCompatActivity {
                 intent.putExtra("nickname", Nickname);
                 intent.putExtra("type", "single");
                 startActivity(intent);
+                finish();
             }
         });
         back.setOnClickListener(new View.OnClickListener() {

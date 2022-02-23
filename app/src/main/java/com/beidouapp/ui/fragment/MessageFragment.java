@@ -3,6 +3,7 @@ package com.beidouapp.ui.fragment;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -10,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -65,6 +67,7 @@ public class MessageFragment extends Fragment {
     private SQLiteDatabase writableDatabase;
     private List<recentMan> manRecords;
     private ChatReceiver chatReceiver;
+    private BaseAdapter adapter;
 
     @Nullable
     @Override
@@ -146,6 +149,41 @@ public class MessageFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("删除会话？");
+                builder.setPositiveButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+                builder.setNegativeButton("删除", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Map<String, Object> contact = ContactList.get(position);
+                        if (ContactList.remove(position)!=null){
+                            Log.d("zzjyy","success");
+                            try {
+                                String toID = contact.get("title").toString();
+                                toID = id2name.reverse(writableDatabase,loginId,toID);
+                                LitePal.deleteAll(recentMan.class, "toID=? and selfID=?", toID, loginId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.d("zzjyy","failed");
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+                builder.create().show();
+                return true;
+            }
+        });
     }
 
 
@@ -168,14 +206,15 @@ public class MessageFragment extends Fragment {
                 if(manRecord.getType().equals("0")){
                     query = writableDatabase.query("chat", null, "toID=? and selfID=?",
                             new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
+                    transId = id2name.transform(writableDatabase, loginId, manRecord.getToID());
                 }else{
                     query = writableDatabase.query("chat_group", null, "groupID=? and selfID=?",
                             new String[]{manRecord.getToID(), application.getUserID()}, null, null, "time desc");
+                    transId = manRecord.getToID();
                 }
                 query.moveToFirst();
                 Map<String, Object> map = new HashMap<String, Object>();
-
-                transId = id2name.transform(writableDatabase, loginId, manRecord.getToID());
+                Log.d("zzjyy", transId);
                 map.put("title", transId);
                 map.put("content", query.getString(query.getColumnIndex("contentChat")));
                 map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
@@ -208,7 +247,7 @@ public class MessageFragment extends Fragment {
      * 初始化ListView
      */
     private void initContactListView () {
-        BaseAdapter adapter = new MessageAdapter(context, ContactList);
+        adapter = new MessageAdapter(context, ContactList);
         listView.setAdapter(adapter);
         listView.setSelection(ContactList.size());
         ListViewUtils.setListViewHeightBasedOnChildren(listView);

@@ -52,6 +52,7 @@ public class add_group extends AppCompatActivity {
     private String groupName;
     private String groupId;
     private String token;
+    private DemoApplication application;
 
 
     @Override
@@ -59,9 +60,10 @@ public class add_group extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_add_group);
+        application = (DemoApplication) this.getApplicationContext();
         Intent intent = getIntent();
         loginId = intent.getStringExtra("id");
-        token = intent.getStringExtra("token");
+        token = application.getToken();
 
 
         initUI();
@@ -137,16 +139,11 @@ public class add_group extends AppCompatActivity {
 
                             groupName = editText.getText().toString();
                             JSONObject object = new JSONObject();
-                            object.put("name", groupName);
-                            object.put("adminId", loginId);
-                            Log.d("zz",groupName);
-                            Log.d("zz",loginId);
-                            Log.d("zz",object.toJSONString());
-                            OkHttpUtils.getInstance(add_group.this).post("http://120.27.242.92:8080/friends",
+                            object.put("selfGroupName", groupName);
+                            OkHttpUtils.getInstance(add_group.this).post("http://139.196.122.222:8080/beisan/selfgroup",
                                     object.toJSONString(), new OkHttpUtils.MyCallback() {
                                         @Override
                                         public void success(Response response) throws IOException {
-                                            Log.d("zz","创建群聊中");
                                             JSONObject object = JSON.parseObject(response.body().string());
                                             int code = object.getInteger("code");
                                             if (code == 200) {
@@ -185,7 +182,7 @@ public class add_group extends AppCompatActivity {
                                         public void failed(IOException e) {
 
                                         }
-                                    });
+                                    }, token);
 
                         } catch (Exception e) {
                             e.printStackTrace();
