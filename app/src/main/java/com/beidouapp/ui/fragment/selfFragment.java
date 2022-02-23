@@ -28,6 +28,7 @@ import com.beidouapp.model.adapters.selfPosAdapter;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.selfPosJson;
+import com.beidouapp.ui.DemoApplication;
 
 import org.litepal.LitePal;
 
@@ -49,6 +50,7 @@ public class selfFragment extends Fragment {
     private List<Pos> selfPosRecords;
     private Pos selfPosRecord;
     private Context context;
+    private DemoApplication application;
 
 
     @Nullable
@@ -72,6 +74,7 @@ public class selfFragment extends Fragment {
      * @param view
      */
     private void ini(View view) {
+        application = (DemoApplication) getActivity().getApplicationContext();
         selfRv = view.findViewById(R.id.rv_selfloc);
         selfRv.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext().getApplicationContext(),
                 RecyclerView.VERTICAL, false));
@@ -83,7 +86,8 @@ public class selfFragment extends Fragment {
      * 数据初始化
      */
     private void iniData() {
-        posRecords = LitePal.findAll(Pos.class);
+        posRecords = LitePal.where("uid=?",application.getUserID()).find(Pos.class);
+        //注意这里可能为空哦
         int num = posRecords.size();
         for(int i=0;i<num;i++){
             posRecord = posRecords.get(i);

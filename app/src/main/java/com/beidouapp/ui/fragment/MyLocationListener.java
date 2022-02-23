@@ -8,6 +8,7 @@ import com.baidu.mapapi.map.MyLocationData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MyLocationListener extends BDAbstractLocationListener {
     private static MyLocationData locData;
@@ -17,6 +18,7 @@ public class MyLocationListener extends BDAbstractLocationListener {
     private float speed;
     private String time;
     private float direction;
+    private String district;
 
     @Override
     public void onReceiveLocation(BDLocation bdLocation) {
@@ -34,17 +36,23 @@ public class MyLocationListener extends BDAbstractLocationListener {
         this.speed = bdLocation.getSpeed();
         this.time = bdLocation.getTime();
         this.direction = bdLocation.getDirection();
-        Log.d("zw", "onReceiveLocation: 此时的几个关键信息为" + this.latitude + "接下来： " + this.longitude);
+        this.district = bdLocation.getDistrict();
+//        Log.d("zw", "onReceiveLocation: 此时的几个关键信息为" + this.latitude + "接下来： " + this.longitude +
+//                "此时所处的区域为" + bdLocation.getDistrict() + "此时的时间为" + this.time);
     }
 
     public List<String> getLatLng(){
         List<String> list = new ArrayList<String>();
-        list.add(String.valueOf(latitude));
-        list.add(String.valueOf(longitude));
-        list.add(String.valueOf(altitude));
-        list.add(String.valueOf(speed));
-        list.add(String.valueOf(time));
-        list.add(String.valueOf(direction));
+        list.add(String.valueOf(this.latitude));
+        list.add(String.valueOf(this.longitude));
+        list.add(String.valueOf(this.altitude));
+        list.add(String.valueOf(this.speed));
+        list.add(String.valueOf(this.time));
+        list.add(String.valueOf(this.direction));
         return list;
+    }
+
+    public String getDistrict() {
+        return district;
     }
 }

@@ -70,10 +70,6 @@ public class MsgService extends Service {
     private Handler write2DBHandler;
 
 
-
-
-
-
     // 通过Binder来保持Activity和Service的通信
     public class MsgBinder extends Binder {
         public MsgService getService() {

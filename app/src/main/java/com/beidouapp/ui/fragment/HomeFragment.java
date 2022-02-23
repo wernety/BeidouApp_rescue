@@ -65,6 +65,7 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.map.offline.MKOLSearchRecord;
@@ -85,6 +86,8 @@ import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.messages.posBD;
 import com.beidouapp.model.utils.MyOrientationListener;
+import com.beidouapp.model.utils.id2name;
+import com.beidouapp.model.utils.selfPosJson;
 import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.other_loc;
 import com.beidouapp.ui.trace_activity;
@@ -194,18 +197,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             "休息点",
             "救援集合点"
     };
-    private Thread threadForTrace;
     private String tracerId;
     private long startTime;
     private long endTime;
     private JSONArray array;
     private Handler handlerOtherTracePos;
-    private Thread threadDrawTrace;
+    private Thread threadForUploadSelfLoc;
+    private Thread threadForTrace;
     private List<LatLng> traceList;
     private LocationClient locationClient;
     private MyLocationListener myLocationListener;
     private float mCurrentDir;
     private DemoApplication application;
+    private Overlay mPolyline;
+    private BaiduMap.OnPolylineClickListener listenerTrace;
 
 
     public HomeFragment() {
@@ -295,8 +300,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         locationClient = new LocationClient(getActivity().getApplicationContext());
         LocationClientOption option = new LocationClientOption();
         option.setOpenGps(true);
+        option.setIsNeedAddress(true);
         option.setNeedDeviceDirect(true);
         option.setCoorType("bd09ll");
+        option.setLocationNotify(true);
         locationClient.setLocOption(option);
         locationClient.registerLocationListener(myLocationListener);
         locationClient.start();
@@ -305,6 +312,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onOrientationChanged(float x) {
                 mCurrentDir = x;
+                Log.d("zw", "onOrientationChanged: 此时的方向" + mCurrentDir);
             }
         });
     }
@@ -394,6 +402,21 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         break;
                     }
                     case 1: {
+//                        locationClient.stop();
+//                        myLocationListener = new MyLocationListener();
+//                        if (locationClient == null)
+//                        {
+//                            locationClient = new LocationClient(getActivity().getApplicationContext());
+//                        }
+//                        LocationClientOption option = new LocationClientOption();
+//                        option.setOpenGps(true);
+//                        option.setIsNeedAddress(true);
+//                        option.setNeedDeviceDirect(true);
+//                        option.setCoorType("bd09ll");
+//                        locationClient.setLocOption(option);
+//                        locationClient.registerLocationListener(myLocationListener);
+//                        locationClient.start();
+
 
 //                        Log.d("zw", "onCreateView: 重新定位时的一些位置信息" + lonAndLat.toString());
                         try {
@@ -460,7 +483,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 Log.d("zw", "loc: + 没有权限");
             }
             else{
-                Log.d("zw", "loc: 此时的provider为空");
+//                Log.d("zw", "loc: 此时的provider为空");
             }
             Location location = lm.getLastKnownLocation(provider);
             if(location != null){
@@ -493,9 +516,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             list2 = loc(getActivity().getApplicationContext());
             list.set(2, list2.get(2));
             list.set(3, list2.get(3));
-            list.set(4, list2.get(4));
+//            list.set(4, list2.get(4));
         }catch (Exception e){e.printStackTrace();}
-        Log.d("loc2函数返回list结果", "loc2: "+list);
+//        Log.d("loc2函数返回list结果", "loc2: "+list);
         return list;
     }
 
@@ -549,6 +572,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      */
     private void show_info_text(List<String> infoList) {
         java.text.DecimalFormat   df   =new   java.text.DecimalFormat("#.00");
+        java.text.DecimalFormat   df2   =new   java.text.DecimalFormat("#.0");
+        java.text.DecimalFormat   df3   =new   java.text.DecimalFormat("#");
         latitude = Double.parseDouble(infoList.get(0));
         lontitude = Double.parseDouble(infoList.get(1));
         latitude = Double.parseDouble(df.format(latitude));
@@ -556,24 +581,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         altitude = Double.parseDouble(infoList.get(2));
         speed = Double.parseDouble(infoList.get(3));
         textView2.setText(new StringBuilder().append("E").append(lontitude).append("°  ").append("N").append(latitude).append("°").toString());
-        textView3.setText(new StringBuilder().append("海拔：").append(altitude).append("米").toString());
-        textView4.setText(new StringBuilder().append("速度：").append(speed).append("m/s").toString());
-        String ak = "p1IDmZkDyWYyOn3LXkAquiIYVMg1r32V";
-        OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://api.map.baidu.com/geocoder?output=json&location=32.133381,111.313438&ak=esNPFDwwsXWtsQfw4NMNmur1", new OkHttpUtils.MyCallback() {
-                    @Override
-                    public void success(Response response) throws IOException {
-                        JSONObject object = JSON.parseObject(response.body().string());
-//                        Log.d("获取到区域", "success: 百度逆地址解析" + object);
-                        JSONObject result = object.getJSONObject("result");
-                        JSONObject addressComponent = result.getJSONObject("addressComponent");
-                        district = addressComponent.getString("district");
-//                        Log.d("获取到区域", "success: "+ district);
-                    }
-            @Override
-            public void failed(IOException e) {
-                Log.d("getmsg", e.getMessage());
-            }
-        });
+        textView3.setText(new StringBuilder().append("海拔：").append(df2.format(altitude)).append("米").toString());
+        textView4.setText(new StringBuilder().append("速度：").append(df3.format(speed)).append("m/s").toString());
+        district = myLocationListener.getDistrict();
+//        Log.d("zw", "show_info_text: 此时的区域为" + district);
         HashMap<String, String> hm = new HashMap<String, String>();
         hm.put("city", district);
         if (district!=null) {
@@ -996,7 +1007,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //
 //                mMap.animateMapStatus(mapStatusUpdate);
 
-                mMap.clear();
+//                mMap.clear();
 
                 markerOptions = new MarkerOptions();
 
@@ -1042,8 +1053,35 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 btnCommit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
+                        //根据选择切换标识颜色
+                        switch ((int) legendChoose.getSelectedItemId()){
+                            case 0: {
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.black);
+                                marker.setIcon(bitmapDescriptor);
+                                break;
+                            }
+                            case 1:{
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.red);
+                                marker.setIcon(bitmapDescriptor);
+                                break;
+                            }
+                            case 2:{
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.deepblue);
+                                marker.setIcon(bitmapDescriptor);
+                                break;
+                            }
+                            case 3:{
+                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.yellow);
+                                marker.setIcon(bitmapDescriptor);
+                            } default:break;
+                        }
+
+
                         posRecords = LitePal.where("latitude=? or lontitude=?",
                                 String.valueOf(latLng.latitude), String.valueOf(latLng.longitude)).find(Pos.class);
+
+                        //写本地库
                         if (posRecords.isEmpty()){
                             posRecord = new Pos();
                             posRecord.setLatitude(String.valueOf(latLng.latitude));
@@ -1089,28 +1127,36 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             posRecord.setLegend((int) legendChoose.getSelectedItemId());
                             posRecord.save();
                         }
-                        //根据选择切换标识颜色
-                        switch ((int) legendChoose.getSelectedItemId()){
-                            case 0: {
-                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.black);
-                                marker.setIcon(bitmapDescriptor);
-                                break;
+                        //写库结束
+
+
+                        //新线程上传自建点
+                        threadForUploadSelfLoc = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    selfPosJson selfPosJson = new selfPosJson(uid, posRecord.getLontitude(),
+                                            posRecord.getLatitude(), (int) legendChoose.getSelectedItemId(), posRecord.getText(), posRecord.getLocInfo());
+                                    String json = JSONUtils.sendJson(selfPosJson);
+                                    OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/selfPosition", json, new OkHttpUtils.MyCallback() {
+                                        @Override
+                                        public void success(Response response) throws IOException {
+                                            //将数据库发送状态修改成已发送
+                                            Log.d("zw", "success: 发送自建点成功，还没到发布那一步");
+                                        }
+
+                                        @Override
+                                        public void failed(IOException e) {
+                                            Log.d("zw", "failed: 发送自建点连接网络就失败了");
+                                        }
+                                    });
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                    Log.d("zw", "run: 上传自建点失败");
+                                }
                             }
-                            case 1:{
-                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.red);
-                                marker.setIcon(bitmapDescriptor);
-                                break;
-                            }
-                            case 2:{
-                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.deepblue);
-                                marker.setIcon(bitmapDescriptor);
-                                break;
-                            }
-                            case 3:{
-                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.yellow);
-                                marker.setIcon(bitmapDescriptor);
-                            } default:break;
-                        }
+                        });
+                        threadForUploadSelfLoc.start();
 
                         mMap.hideInfoWindow();
                     }
@@ -1144,13 +1190,31 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 Log.d("zw", "onMarkerClick: marker响应事件中的deviceID" + deviceID);
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
                 View view = inflater.inflate(R.layout.item_markerclick, null);
-                TextView textView = (TextView) view.findViewById(R.id.tv_markerclick);
+                TextView tv_markerClickLatitude = (TextView) view.findViewById(R.id.tv_markerClickLatitude);
+                TextView tv_markerClickLontitude = (TextView) view.findViewById(R.id.tv_markerClickLontitude);
+                TextView tv_markerClickID = (TextView) view.findViewById(R.id.tv_markerClickID);
                 Button btnDelete = view.findViewById(R.id.btn_markerclickDelete);
                 Button btnExit = view.findViewById(R.id.btn_makerclickExit);
+                String finalDeviceID = deviceID;
                 btnDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Log.d("zw", "onClick: 真的取消标记");
+                        //取消标记会将对应全局变量里面的团队位置ID记录删除
+                        try {
+                            List<String> otherLocIDRecord = application.getOtherLocIDRecord();
+                            int size = otherLocIDRecord.size();
+                            int No;
+                            for (int i=0;i<size;i++){
+                                if (otherLocIDRecord.get(i).equals(finalDeviceID)){
+                                    otherLocIDRecord.remove(i);
+                                    Log.d("zw", "onClick: 此时的otherlocid是" + otherLocIDRecord);
+                                    application.setOtherLocIDRecord(otherLocIDRecord);
+                                }
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                         marker.remove();
                         mMap.hideInfoWindow();
                     }
@@ -1161,14 +1225,52 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         mMap.hideInfoWindow();
                     }
                 });
-                DecimalFormat df = new DecimalFormat("#0.0000000");
-                textView.setText("纬度：" + df.format(latlon.latitude) +  "经度：" + df.format(latlon.longitude) + " ID：" + deviceID);
+                DecimalFormat df = new DecimalFormat("#0.000");
+                String nickName = id2name.transform(application.dbHelper.getWritableDatabase(), application.getUserID(), deviceID);
+                tv_markerClickLatitude.setText(df.format(latlon.latitude));
+                tv_markerClickLontitude.setText(df.format(latlon.longitude));
+                tv_markerClickID.setText(nickName);
                 InfoWindow infowindow = new InfoWindow(view, latlon, +47);
                 mMap.showInfoWindow(infowindow);
                 return true;
             }
         };
+
+        listenerTrace = new BaiduMap.OnPolylineClickListener() {
+            @Override
+            public boolean onPolylineClick(Polyline polyline) {
+                Log.d("zw", "onPolylineClick: 轨迹选中响应");
+                List<LatLng> points = polyline.getPoints();
+                LatLng point = points.get(0);
+                String string = polyline.getExtraInfo().getString("traceID");
+                String nickName = id2name.transform(application.dbHelper.getWritableDatabase(), application.getUserID(), string);
+                LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
+                View view = inflater.inflate(R.layout.item_traceclick, null);
+                TextView tv_traceClickID = view.findViewById(R.id.tv_traceClickID);
+                Button btn_traceClickExit = view.findViewById(R.id.btn_traceClickExit);
+                Button btn_traceClickCancel = view.findViewById(R.id.btn_traceClickCancel);
+                tv_traceClickID.setText(nickName);
+                btn_traceClickExit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mMap.hideInfoWindow();
+                    }
+                });
+
+                btn_traceClickCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        polyline.remove();
+                        mMap.hideInfoWindow();
+                    }
+                });
+                InfoWindow infoWindow = new InfoWindow(view, point, -47);
+                mMap.showInfoWindow(infoWindow);
+                return true;
+            }
+        };
         mMap.setOnMarkerClickListener(listenerMark);
+        mMap.setOnPolylineClickListener(listenerTrace);
     }
 
     private void otherInit() {
@@ -1247,45 +1349,52 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             Log.d("zw", "onActivityResult: 现在的resultcode是：" + resultCode);
             if (resultCode == 2)
             {
-                handleRecOtherloc();
-                List<String> list;
-                ArrayList<String> idlist = data.getStringArrayListExtra("pos");
-                list = new ArrayList<String>(idlist);
-                Log.d("zw", "testBDRequest: 需要获取位置的设备是：" + list);
-                posBD posBD = new posBD(list);
-                String json = JSONUtils.sendJson(posBD);
-                Log.d("zw", "testBDRequest: 准备发送给福大的json格式是：" + json);
+                Exception e = new Exception("请求名单为空异常");
                 try {
-                    Thread threadPos = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).postBD("http://119.3.130.87:50099/whbdApi/device/pos/getCurrent",
-                                    json,
-                                    new OkHttpUtils.MyCallback() {
-                                @Override
-                                public void success(Response response) throws IOException {
-                                    String rec = response.body().string();
-                                    Log.d("zw", "success: 访问福大北斗的位置信息得到的结果："+ rec);
-                                    posFromBD recPos = receivePosFromBDJson(rec);
-                                    posLists = recPos.getData().getPosition();
+                    handleRecOtherloc();
+                    List<String> list;
+                    ArrayList<String> idlist = data.getStringArrayListExtra("pos");
+                    if (idlist.isEmpty())throw e;
+                    list = new ArrayList<String>(idlist);
+                    Log.d("zw", "testBDRequest: 需要获取位置的设备是：" + list);
+                    posBD posBD = new posBD(list);
+                    String json = JSONUtils.sendJson(posBD);
+                    Log.d("zw", "testBDRequest: 准备发送给福大的json格式是：" + json);
+                    try {
+                        Thread threadPos = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                OkHttpUtils.getInstance(getActivity().getApplicationContext()).postBD("http://119.3.130.87:50099/whbdApi/device/pos/getCurrent",
+                                        json,
+                                        new OkHttpUtils.MyCallback() {
+                                            @Override
+                                            public void success(Response response) throws IOException {
+                                                String rec = response.body().string();
+                                                Log.d("zw", "success: 访问福大北斗的位置信息得到的结果："+ rec);
+                                                posFromBD recPos = receivePosFromBDJson(rec);
+                                                posLists = recPos.getData().getPosition();
 //                                    Log.d("zw", "success: 访问福大北斗的所有位置是" + posLists.toString());
-                                    //获取位置后，显示出marker，带有个人信息的marker
-                                    Message message = new Message();
-                                    message.what = 1;
-                                    handlerecOtherloc.sendMessage(message);
-                                }
+                                                //获取位置后，显示出marker，带有个人信息的marker
+                                                Message message = new Message();
+                                                message.what = 1;
+                                                handlerecOtherloc.sendMessage(message);
+                                            }
 
-                                @Override
-                                public void failed(IOException e) {
-                                    Log.d("zw", "failed: 访问福大北斗获取位置信息失败");
-                                }
-                            }, curToken);
-                        }
-                    });
-                    threadPos.start();
-                }catch (Exception e){
-                    Log.d("zw", "testBDRequest: 访问福大北斗位置信息线程崩溃");
-                    e.printStackTrace();
+                                            @Override
+                                            public void failed(IOException e) {
+                                                Log.d("zw", "failed: 访问福大北斗获取位置信息失败");
+                                            }
+                                        }, curToken);
+                            }
+                        });
+                        threadPos.start();
+                    }catch (Exception exception){
+                        Log.d("zw", "testBDRequest: 访问福大北斗位置信息线程崩溃");
+                        exception.printStackTrace();
+                    }
+                }catch (Exception exception){
+                    exception.printStackTrace();
+                    Log.d("zw", "onActivityResult: 请求名单为空2");
                 }
             }
             else if(resultCode == 0)
@@ -1353,10 +1462,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     Log.d("zw", "onActivityResult: 访问福大北斗获取历史位置失败");
                     e.printStackTrace();
                 }
-
-
-
-
             }
         }
     }
@@ -1427,6 +1532,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             public void handleMessage(Message message){
                 switch (message.what){
                     case 1:{
+                        if (mPolyline!=null)
+                        {
+                            mPolyline.remove();
+                        }
                         Log.d("zw", "handleMessage: 此时获取的轨迹列表大小" + traceList.toString());
                         mMap.clear();
                         OverlayOptions mOverlayOptions = new PolylineOptions()
@@ -1437,10 +1546,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 .points(traceList);
 //在地图上绘制折线
 //mPloyline 折线对象
-                        Overlay mPolyline = mMap.addOverlay(mOverlayOptions);
+                        mPolyline = mMap.addOverlay(mOverlayOptions);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("traceID", tracerId);
+                        mPolyline.setExtraInfo(bundle);
                         Log.d("zw", "handleMessage: 绘制的折线是否可见" + mPolyline.isVisible());
-
-
                         break;
                     }
                     default:{break;}

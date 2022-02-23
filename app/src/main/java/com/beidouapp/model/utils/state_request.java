@@ -95,7 +95,7 @@ public class state_request {
     public List<String> loc(Context context) {
         List<String> list = new ArrayList<String>();
         //criteria = createFineCriteria();
-        Log.i("8023", criteria.toString());
+//        Log.i("8023", criteria.toString());
         lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         //String provider = lm.getBestProvider(criteria, true);
         String provider = "passive";
@@ -136,7 +136,7 @@ public class state_request {
                 // Toast.makeText(context, "1.请打开我的位置", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Log.i("8023","gangan");
+//            Log.i("8023","gangan");
         }
         return list;
     }

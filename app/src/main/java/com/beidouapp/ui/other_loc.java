@@ -158,7 +158,7 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
     }
 
     private void initRelationRecyclerView() {
-        locOthersAdapter = new locOthers(relationList,this, deviceIDs, onlineStatus, application.getOtherLocIDRecord());
+        locOthersAdapter = new locOthers(relationList,this, deviceIDs, onlineStatus, application);
         recyclerView.setAdapter(locOthersAdapter);
     }
 

@@ -1,6 +1,7 @@
 package com.beidouapp.model.adapters;
 
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.beidouapp.R;
 import com.beidouapp.model.Relation;
 import com.beidouapp.model.base.BaseTreeAdapter;
+import com.beidouapp.ui.DemoApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.List;
 public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Relation>{
 
     private final float fixLeft = 36;
+    private  DemoApplication application;
     private OnItemClickListener onItemClickListener;
     private List<String> OtherDeviceID;
     private List<String> otherLocIDRecord;
@@ -39,11 +42,13 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
         this.OtherStatus = OtherStatus;
 //        Log.d("zw", "locOthers: 在locOthers里面的ID有哪些: " + OtherDeviceID);
     }
-    public locOthers(List<Relation> list, Context context, List<String> OtherDeviceID, List<Integer> OtherStatus, List<String> otherLocIDRecord){
+
+    public locOthers(List<Relation> list, Context context, List<String> OtherDeviceID,
+                     List<Integer> OtherStatus,  DemoApplication application){
         super(list,context);
         this.OtherDeviceID = OtherDeviceID;
         this.OtherStatus = OtherStatus;
-        this.otherLocIDRecord = otherLocIDRecord;
+        this.application = application;
 //        Log.d("zw", "locOthers: 在locOthers里面的ID有哪些: " + OtherDeviceID);
     }
 
@@ -67,11 +72,11 @@ public class locOthers extends BaseTreeAdapter <locOthers.RelationViewHolder, Re
 //        Log.d("zw", "onBindHolder: 在组织列表初始当中的ID号：" + bean.getId());
 
         //地图上显示的人，不再次显示
+        otherLocIDRecord = application.getOtherLocIDRecord();
         try{
             int cont = otherLocIDRecord.size();
             Log.d("zw", "onBindHolder: 此时在地图上的数据已经有" + otherLocIDRecord);
             for(int i=0;i<cont;i++){
-
                 if (otherLocIDRecord.get(i).equals(bean.getId())){
                     bean.setCheck(true);
                 }
