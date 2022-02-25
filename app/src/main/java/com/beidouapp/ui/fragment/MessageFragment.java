@@ -133,11 +133,11 @@ public class MessageFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Map<String, Object> contact = ContactList.get(position);
-                uid = contact.get("title").toString();
-                uid = id2name.reverse(writableDatabase,loginId,uid);
+                String nick = contact.get("title").toString();
+                uid = id2name.reverse(writableDatabase,loginId,nick);
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra("uid", uid);
-                intent.putExtra("nickname", uid);
+                intent.putExtra("nickname", nick);
                 manRecords = LitePal.where("toID=?", uid).find(recentMan.class);
                 recentMan manRecord = manRecords.get(0);
                 Log.d("zw", "onItemClick: 此时传入到chatActivity的类型是："+manRecord.getType());

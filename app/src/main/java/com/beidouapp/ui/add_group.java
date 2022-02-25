@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
+import com.beidouapp.model.Group;
 import com.beidouapp.model.Relation;
 import com.beidouapp.model.User;
 import com.beidouapp.model.adapters.Add2GroupAdapter;
@@ -31,10 +33,14 @@ import com.beidouapp.model.adapters.Add2GroupRelAdapter;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
+import com.beidouapp.model.utils.id2name;
+import com.loper7.date_time_picker.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Response;
 
@@ -52,7 +58,9 @@ public class add_group extends AppCompatActivity {
     private String groupName;
     private String groupId;
     private String token;
+    private String org;
     private DemoApplication application;
+    private SQLiteDatabase writableDatabase;
 
 
     @Override
@@ -64,11 +72,12 @@ public class add_group extends AppCompatActivity {
         Intent intent = getIntent();
         loginId = intent.getStringExtra("id");
         token = application.getToken();
-
+        friendList = application.getFriendList();
+        org = application.getOrg();
+        writableDatabase = application.dbHelper.getWritableDatabase();
 
         initUI();
-        RefreshFriendListView(this);
-        RefreshRecyclerView(this, token);
+        initView();
         initListener();
     }
 
@@ -99,7 +108,7 @@ public class add_group extends AppCompatActivity {
             public void onClick(View view) {
                 int size_friend = friendList.size();
                 int size_relation = relationList.size();
-                JSONArray jsonArray = new JSONArray();
+                HashMap<String, String> dataMap = new HashMap<>();
 
                 Handler handler = new Handler() {
                     //           @Override
@@ -107,8 +116,8 @@ public class add_group extends AppCompatActivity {
                     public void handleMessage(Message message) {
                         if (message.what == 1) {
                             try {
-                                OkHttpUtils.getInstance(add_group.this).post("http://120.27.242.92:8080/groupusers",
-                                        jsonArray.toJSONString(), new OkHttpUtils.MyCallback() {
+                                OkHttpUtils.getInstance(add_group.this).put("http://139.196.122.222:8080/beisan/selfgroup/addSelfGroupUserList",
+                                        dataMap, token, new OkHttpUtils.MyCallback() {
                                             @Override
                                             public void success(Response response) throws IOException {
                                                 JSONObject object = JSON.parseObject(response.body().string());
@@ -148,30 +157,22 @@ public class add_group extends AppCompatActivity {
                                             int code = object.getInteger("code");
                                             if (code == 200) {
                                                 groupId = object.getString("data");
-                                                JSONObject me = new JSONObject();
-                                                me.put("groupId", groupId);
-                                                me.put("userId", loginId);
-                                                jsonArray.add(me);
+                                                dataMap.put("groupId", groupId);
+
+                                                List<String> userList = new ArrayList<>();
                                                 for (int i = 0; i < size_friend; i++) {
                                                     User temp = friendList.get(i);
                                                     if (temp.isChecked()) {
-                                                        JSONObject jsonObject = new JSONObject();
-                                                        jsonObject.put("groupId", groupId);
-                                                        jsonObject.put("userId", temp.getUserName());
-                                                        jsonObject.put("userName", temp.getNickName());
-                                                        jsonArray.add(jsonObject);
+                                                        userList.add(temp.getUserId());
                                                     }
                                                 }
                                                 for (int i = 0; i < size_relation; i++) {
                                                     Relation temp = relationList.get(i);
                                                     if (temp.isCheck()) {
-                                                        JSONObject jsonObject = new JSONObject();
-                                                        jsonObject.put("groupId", groupId);
-                                                        jsonObject.put("userId", temp.getId());
-                                                        jsonObject.put("userName", temp.getLabel());
-                                                        jsonArray.add(jsonObject);
+                                                        userList.add(temp.getUserId());
                                                     }
                                                 }
+                                                dataMap.put("userIds", userList.toString().replace("[", "").replace("]", ""));
                                                 Message message = new Message();
                                                 message.what = 1;
                                                 handler.sendMessage(message);
@@ -240,6 +241,33 @@ public class add_group extends AppCompatActivity {
         relationAdapter.notifyDataSetChanged();
     }
 
+
+    private void initView() {
+        if (friendList==null) {
+            RefreshFriendListView(add_group.this);
+        } else {
+            initListView();
+        }
+        if (org==null){
+            RefreshRecyclerView(add_group.this, token);
+        } else {
+            Log.d("ZZJY", org);
+            JSONObject object = JSON.parseObject(org);
+            int code = object.getInteger("code");
+            if (code == 200) {
+                JSONArray array = (JSONArray) object.get("data");
+                List<Relation> list = (List<Relation>) JSONArray.parseArray(array.toString(),Relation.class);
+                int size = list.size();
+                for (int i = 0; i < size; i++) {
+                    JSONUtils.transform(list.get(i));
+                }
+                relationList = list;
+                initRelationRecyclerView();
+                initRelationListener();
+            }
+        }
+    }
+
     /**
      * 初始化listview
      */
@@ -260,37 +288,46 @@ public class add_group extends AppCompatActivity {
 
 
     public void RefreshFriendListView(Context context) {
-        OkHttpUtils.getInstance(context).get("http://120.27.242.92:8080/friends/" + loginId, new OkHttpUtils.MyCallback() {
-            @Override
-            public void success(Response response) throws IOException {
-                JSONObject object = JSON.parseObject(response.body().string());
-                int code = object.getInteger("code");
-                if (code == 200) {
-                    JSONArray array = (JSONArray) object.get("data");
-                    Log.d("zzzz", array.toString());
-                    List<User> friends = (List<User>) JSONArray.parseArray(array.toString(), User.class);
-                    int size = friends.size();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            friendList = friends;
-                            for (int i=0;i<size;i++){
-                                Log.d("zzzz", friendList.get(i).getNickName());
+        OkHttpUtils.getInstance(context).get("http://139.196.122.222:8080/system/user/" + application.getIndexID(), token,
+                new OkHttpUtils.MyCallback() {
+                    @Override
+                    public void success(Response response) throws IOException {
+                        String body = response.body().string();
+                        JSONObject object = JSON.parseObject(body);
+                        Log.d("zzzml", body);
+                        int code = object.getInteger("code");
+                        if (code == 200) {
+                            JSONArray friendArray = (JSONArray) object.get("friends");
+                            List<User> friends = (List<User>) JSONArray.parseArray(friendArray.toString(), User.class);
+                            Log.d("zzzml", friends.toString());
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    friendList = friends;
+                                    initListView();
+                                }
+                            });
+
+                            User friend;
+                            int size = friends.size();
+//                            writableDatabase.delete("friend",null,null);
+                            for (int i = 0; i < size; i++) {
+                                friend = friends.get(i);
+                                id2name.write2DB(writableDatabase,loginId,
+                                        friend.getUserId(),
+                                        friend.getUserName(),
+                                        friend.getNickName(),
+                                        "1");
                             }
-                            initListView();
+
                         }
-                    });
+                    }
 
-                }
-                Log.d("zzzz","zzzzzz");
+                    @Override
+                    public void failed(IOException e) {
 
-
-            }
-
-            @Override
-            public void failed(IOException e) {
-            }
-        });
+                    }
+                });
     }
 
     /**

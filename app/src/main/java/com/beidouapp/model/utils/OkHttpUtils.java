@@ -301,6 +301,72 @@ public class OkHttpUtils {
         });
     }
 
+    /**
+     * put请求
+     * @param url
+     * @param params
+     * @param callback
+     */
+    public void put(String url, HashMap<String, String> params, MyCallback callback) {
+        FormBody.Builder formBody = new FormBody.Builder();
+        if (!params.isEmpty()) {
+            for (Map.Entry<String, String> entry:params.entrySet()) {
+                formBody.add(entry.getKey(), entry.getValue());
+            }
+        }
+        RequestBody requestBody = formBody.build();
+        Request request = new Request.Builder()
+                .put(requestBody)
+                .url(url)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.failed(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                callback.success(response);
+            }
+        });
+    }
+
+    /**
+     * put with token
+     * @param url
+     * @param params
+     * @param token
+     * @param callback
+     */
+    public void put(String url, HashMap<String, String> params, String token, MyCallback callback) {
+        FormBody.Builder formBody = new FormBody.Builder();
+        if (!params.isEmpty()) {
+            for (Map.Entry<String, String> entry:params.entrySet()) {
+                formBody.add(entry.getKey(), entry.getValue());
+            }
+        }
+        RequestBody requestBody = formBody.build();
+        Request request = new Request.Builder()
+                .addHeader("Authorization", "Bearer " + token)
+                .put(requestBody)
+                .url(url)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.failed(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                callback.success(response);
+            }
+        });
+    }
+
 
 
     public interface MyCallback {

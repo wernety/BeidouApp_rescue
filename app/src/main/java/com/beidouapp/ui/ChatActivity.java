@@ -61,7 +61,6 @@ public class ChatActivity extends AppCompatActivity {
     private String toType;  //消息类型
     private String loginId;  //自己的ID
     private long timeMillis;
-    private Map<String, String> userMap = new HashMap<String, String>();
     private TextView title;
     private ListView listView;
     private EditText input;
@@ -305,7 +304,7 @@ public class ChatActivity extends AppCompatActivity {
                     chatMessage.setContent(message4Receive.getData().getSendText());
                     chatMessage.setIsMeSend(0);
                     chatMessage.setTime(System.currentTimeMillis()+"");
-                    chatMessage.setName(userMap.get(message4Receive.getData().getSendUserId()));
+                    chatMessage.setName(id2name.transform(writableDatabase,loginId,message4Receive.getData().getSendUserId()));
                     chatMessageList.add(chatMessage);
                     initChatMsgListView();
 
