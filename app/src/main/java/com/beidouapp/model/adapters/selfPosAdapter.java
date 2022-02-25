@@ -63,7 +63,7 @@ public class selfPosAdapter extends RecyclerView.Adapter<selfPosAdapter.selfView
             @Override
             public boolean onLongClick(View v) {
                 if (onItemClickListener!=null){
-                    onItemClickListener.onItemClick(v, (int)v.getTag());
+                    onItemClickListener.onItemLongClick(v, (int)v.getTag());
                 }
                 return false;
             }

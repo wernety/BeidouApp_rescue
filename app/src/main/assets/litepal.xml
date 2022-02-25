@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <litepal>
     <dbname value="1"></dbname>
-    <version value="6"></version>
+    <version value="9"></version>
 
 
     <list>
         <mapping class="com.beidouapp.model.DataBase.orgAndUidAndKey"></mapping>
         <mapping class="com.beidouapp.model.DataBase.Pos"></mapping>
         <mapping class="com.beidouapp.model.DataBase.recentMan"></mapping>
+        <mapping class="com.beidouapp.model.DataBase.starposDB"></mapping>
     </list>
 </litepal>

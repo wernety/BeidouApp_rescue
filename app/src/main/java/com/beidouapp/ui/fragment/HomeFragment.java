@@ -163,7 +163,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private double lontitude;       //维度
     private double altitude;       //海拔
     private double speed;       //速度
-    private String district;
+    private String district = new String();
     private String weatherType;
     private String weatherTemperature;
     private BaiduMap.OnMapLongClickListener listener;   //地图长安监听
@@ -294,6 +294,35 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     private void iniMap() {
+        mMap.setMaxAndMinZoomLevel(17,11);
+        //设置状态变化，当缩放等级为17级别的时候禁止缩放
+        mMap.setOnMapStatusChangeListener(new BaiduMap.OnMapStatusChangeListener() {
+            @Override
+            public void onMapStatusChangeStart(MapStatus mapStatus) {
+                float zoom = mMap.getMapStatus().zoom;
+                if (zoom>17){
+                    Log.d("zw", "onMapStatusChangeStart: 此时地图的缩放等级为" + zoom);
+                    MapStatus.Builder builder = new MapStatus.Builder();
+                    builder.zoom(17.0f);    // 放大为20层级
+                    mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                }
+            }
+
+            @Override
+            public void onMapStatusChangeStart(MapStatus mapStatus, int i) {
+
+            }
+
+            @Override
+            public void onMapStatusChange(MapStatus mapStatus) {
+
+            }
+
+            @Override
+            public void onMapStatusChangeFinish(MapStatus mapStatus) {
+
+            }
+        });
         mMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
         mMap.setMyLocationEnabled(true);
         myLocationListener = new MyLocationListener();
@@ -555,7 +584,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //            LatLng ll = new LatLng(myLocData.longitude, myLocData.latitude);
             MapStatus.Builder builder = new MapStatus.Builder();
             builder.target(ll);
-            builder.zoom(20.0f);    // 放大为20层级
+            builder.zoom(14.0f);    // 放大为20层级
             mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
             //放大层级
             ifFirst = false;
@@ -571,7 +600,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      *
      */
     private void show_info_text(List<String> infoList) {
-        Exception e = new Exception("获取天气炸了");
         java.text.DecimalFormat   df   =new   java.text.DecimalFormat("#.00");
         java.text.DecimalFormat   df2   =new   java.text.DecimalFormat("#.0");
         java.text.DecimalFormat   df3   =new   java.text.DecimalFormat("#");
@@ -588,9 +616,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //        Log.d("zw", "show_info_text: 此时的区域为" + district);
         HashMap<String, String> hm = new HashMap<String, String>();
         hm.put("city", district);
+        Log.d("zw", "show_info_text: 此时的所在区域是：" + district);
         try {
-            if (district!=null) {
-
+            if (!district.isEmpty()) {
                 OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://wthrcdn.etouch.cn/weather_mini",
                         hm,
                         new OkHttpUtils.MyCallback() {
@@ -619,10 +647,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 Log.d("getmsg", e.getMessage());
                             }
                         });
-            };
+
             textView1.setText(weatherTemperature);
-        }catch (Exception exception){
-            e.printStackTrace();
+
+        }}catch (Exception exception){
+            exception.printStackTrace();
+            Log.d("zw", "show_info_text: 此时获取天气失败");
         }
 
     }
@@ -1145,7 +1175,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             public void run() {
                                 try {
                                     selfPosJson selfPosJson = new selfPosJson(uid, posRecord.getLontitude(),
-                                            posRecord.getLatitude(), (int) legendChoose.getSelectedItemId(), posRecord.getText(), posRecord.getLocInfo());
+                                            posRecord.getLatitude(), (int) legendChoose.getSelectedItemId(), posRecord.getText(), posRecord.getLocInfo(), 0);
                                     String json = JSONUtils.sendJson(selfPosJson);
                                     OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/selfPosition", json, new OkHttpUtils.MyCallback() {
                                         @Override

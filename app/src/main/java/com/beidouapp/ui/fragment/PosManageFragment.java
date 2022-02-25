@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.beidouapp.R;
 
@@ -30,6 +32,8 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
     private Fragment lastFragment = null;
     private BackToMainListener BackToMainListener;
     private starFragment starFragment;
+    private ImageButton btnAddStarLoc;
+    private TextView searchLoc;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,8 +54,11 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
     private void ini(View view) {
         btnStarLoc = view.findViewById(R.id.btn_star);
         btnSelfLoc = view.findViewById(R.id.btn_self);
+        btnAddStarLoc = view.findViewById(R.id.add_starLoc);
+        searchLoc = view.findViewById(R.id.search_loc);
         btnStarLoc.setOnClickListener(this);
         btnSelfLoc.setOnClickListener(this);
+        btnAddStarLoc.setOnClickListener(this);
     }
 
     @Override
@@ -59,6 +66,17 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
         switch (v.getId()){
             case R.id.btn_star:{
                 starFragment = new starFragment();
+                starFragment.setOnFragmentClick(new starFragment.OnFragmentClick() {
+                    @Override
+                    public void mapNeedChange(starPos starPos) {
+                        Log.d("zw", "mapNeedChange: starPos第二次回调成功");
+                        if(BackToMainListener != null){
+                            Log.d("zw", "mapNeedChange: starPos第三次回调开始");
+                            BackToMainListener.changeMap(starPos);
+//                    Log.d("zw", "mapNeedChange: 第三次回调的参数是：" + selfPos.toString());
+                        }
+                    }
+                });
                 Log.d("zw", "onClick: 切换收藏位置点");
                 replaceFragement(starFragment);
                 break;
@@ -79,7 +97,14 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
                 });
                 replaceFragement(selfFragment);
                 break;
-            } default:break;
+            }
+            case R.id.add_starLoc:{
+                String s = searchLoc.getText().toString();
+                if (!s.isEmpty()){
+
+                }
+            }
+            default:break;
         }
     }
 

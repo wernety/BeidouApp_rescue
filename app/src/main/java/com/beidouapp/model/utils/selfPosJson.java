@@ -40,6 +40,20 @@ public class selfPosJson {
         this.coord_status = 1;
     }
 
+    public selfPosJson(String release_user_ID, String coord_lng, String coord_lat,
+                       int coord_legend, String coord_name, String coord_desc, int coord_status){
+        this.release_user_ID = release_user_ID;
+        this.coord_lng = coord_lng;
+        this.coord_lat = coord_lat;
+        this.lat_dir = "E";
+        this.lng_dir = "W";
+        this.coord_legend = coord_legend;
+        this.coord_name = coord_name;
+        this.coord_desc = coord_desc;
+        this.coord_status = coord_status;
+    }
+
+
     public void setRelease_user_ID(String release_user_ID) {
         this.release_user_ID = release_user_ID;
     }

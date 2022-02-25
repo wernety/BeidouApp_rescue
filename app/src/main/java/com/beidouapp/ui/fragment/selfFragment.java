@@ -170,7 +170,9 @@ public class selfFragment extends Fragment {
                 selfPosJson selfPosJson = new selfPosJson(selfPosRecord.getUid(), selfPosRecord.getLontitude(),
                         selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), selfPosRecord.getText(), selfPosRecord.getLocInfo());
                 String json = JSONUtils.sendJson(selfPosJson);
-                OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("", json, new OkHttpUtils.MyCallback() {
+                OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/selfPosition",
+                        json,
+                        new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {
                         //将数据库发送状态修改成已发送
