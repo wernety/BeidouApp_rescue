@@ -82,22 +82,20 @@
         </Button>
 
         <EditText
-            android:id="@+id/edit_text"
+            android:id="@+id/edit_phone"
             android:layout_width="fill_parent"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
-            android:background="@drawable/edit_background"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
+            android:background="@drawable/edit_background"
             android:drawablePadding="10dp"
             android:gravity="center_vertical"
             android:hint="请输入11位手机号"
             android:inputType="number"
             android:maxLength="13"
             android:paddingLeft="8dp"
-            android:textSize="14sp"
-            android:enabled="false"
-            />
+            android:textSize="14sp" />
     </RelativeLayout>
     <TextView
         android:text="绑定邮箱"
@@ -125,17 +123,15 @@
             android:layout_width="fill_parent"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
-            android:background="@drawable/edit_background"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
+            android:background="@drawable/edit_background"
             android:drawablePadding="10dp"
             android:gravity="center_vertical"
             android:hint="请输入邮箱"
             android:inputType="textEmailAddress"
             android:paddingLeft="8dp"
-            android:textSize="14sp"
-            android:enabled="false"
-            />
+            android:textSize="14sp" />
 
     </RelativeLayout>
 </LinearLayout>
