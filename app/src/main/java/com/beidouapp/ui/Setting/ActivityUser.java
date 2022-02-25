@@ -90,7 +90,7 @@ public class ActivityUser extends AppCompatActivity {
             }
         }else {
             user = new User();
-            user.setUserID(userId);
+            user.setUserId(userId);
         }
     }
 
