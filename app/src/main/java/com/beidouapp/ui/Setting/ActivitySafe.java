@@ -86,7 +86,7 @@ public class ActivitySafe extends AppCompatActivity {
             edit_email.setText(user.getEmail());
         }else {
             user = new User();
-            user.setUserID(userId);
+            user.setUserId(userId);
         }
     }
 
