@@ -543,11 +543,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         list = myLocationListener.getLatLng();
         try {
             list2 = loc(getActivity().getApplicationContext());
-            list.set(2, list2.get(2));
-            list.set(3, list2.get(3));
+            if (list2.get(2) != null)
+            {
+                list.set(2, list2.get(2));
+                list.set(3, list2.get(3));
+            }
 //            list.set(4, list2.get(4));
         }catch (Exception e){e.printStackTrace();}
-//        Log.d("loc2函数返回list结果", "loc2: "+list);
+        Log.d("loc2函数返回list结果", "loc2: "+list);
         return list;
     }
 
@@ -560,39 +563,43 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private void show_my_loc(String lat, String lon, float dir) {
         int mXDirection;
 
-        locDataBuilder = new MyLocationData.Builder()
-                .accuracy(30)
-                .latitude(Double.parseDouble(lat))
-                .longitude(Double.parseDouble(lon))
-                .direction(dir);
+        if (lat.equals("0")&&lon.equals("0"))
+        {
+            Log.d("zw", "show_my_loc: 此时的坐标为0，0");
+        }else{
+            locDataBuilder = new MyLocationData.Builder()
+                    .accuracy(30)
+                    .latitude(Double.parseDouble(lat))
+                    .longitude(Double.parseDouble(lon))
+                    .direction(dir);
 
 
-        MyLocationConfiguration configuration = new MyLocationConfiguration(
-                MyLocationConfiguration.LocationMode.NORMAL,
-                true,
-                null,
-                0xAAFFFF88,
-                0xAA00FF00);
-        // 在定义了以上属性之后，通过如下方法来设置生效：
-        mMap.setMyLocationConfiguration(configuration);
+            MyLocationConfiguration configuration = new MyLocationConfiguration(
+                    MyLocationConfiguration.LocationMode.NORMAL,
+                    true,
+                    null,
+                    0xAAFFFF88,
+                    0xAA00FF00);
+            // 在定义了以上属性之后，通过如下方法来设置生效：
+            mMap.setMyLocationConfiguration(configuration);
 
-        MyLocationData myLocData = locDataBuilder.build();
-        mMap.setMyLocationData(myLocData);
+            MyLocationData myLocData = locDataBuilder.build();
+            mMap.setMyLocationData(myLocData);
 
-        if (ifFirst) {
-            LatLng ll = new LatLng(myLocData.latitude, myLocData.longitude);
+            if (ifFirst) {
+                LatLng ll = new LatLng(Double.parseDouble(lon), Double.parseDouble(lat));
 //            LatLng ll = new LatLng(myLocData.longitude, myLocData.latitude);
-            MapStatus.Builder builder = new MapStatus.Builder();
-            builder.target(ll);
-            builder.zoom(14.0f);    // 放大为20层级
-            mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-            //放大层级
-            ifFirst = false;
-        }
+                MapStatus.Builder builder = new MapStatus.Builder();
+                builder.target(ll);
+                builder.zoom(14.0f);    // 放大为14层级
+                mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                //放大层级
+                ifFirst = false;
+            }
 
-        //初始化方位角 由底层传感器获得
+            //初始化方位角 由底层传感器获得
 //        iniMyLocMap();
-
+        }
     }
 
     /**网络状态下的辅助信息栏的显示
@@ -616,7 +623,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //        Log.d("zw", "show_info_text: 此时的区域为" + district);
         HashMap<String, String> hm = new HashMap<String, String>();
         hm.put("city", district);
-        Log.d("zw", "show_info_text: 此时的所在区域是：" + district);
+//        Log.d("zw", "show_info_text: 此时的所在区域是：" + district);
         try {
             if (!district.isEmpty()) {
                 OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://wthrcdn.etouch.cn/weather_mini",
@@ -777,7 +784,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         BitmapDescriptor bitmap;
         Bundle bundle = new Bundle();
-        bundle.putString("uid", selfPos.getUid());
+        bundle.putString("deviceID", selfPos.getUid());
         bundle.putString("Text", selfPos.getText());
         switch ((int) selfPos.getLegend()){
             case 0: {
@@ -801,12 +808,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         }
 
-        OverlayOptions option = new MarkerOptions()
-                .position(point)
-                .icon(bitmap)
-                .extraInfo(bundle);
+//        OverlayOptions option = new MarkerOptions()
+//                .position(point)
+//                .icon(bitmap)
+//                .extraInfo(bundle);
+
+        markerOptions = new MarkerOptions();
+//
+        markerOptions.position(point);
+//        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.icon_mark);
+        markerOptions.icon(bitmap);
+        markerOptions.zIndex(17);   //层级
+        markerOptions.extraInfo(bundle);
+
+        Marker marker = (Marker) mMap.addOverlay(markerOptions);
+
 //在地图上添加Marker，并显示
-        mMap.addOverlay(option);
+//        Overlay markerForResponseFromLocManager = mMap.addOverlay(option);
         Log.d("zw", "show_selfbuild_loc: 设置回传的位置成功");
     }
 
@@ -1117,7 +1135,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         }
 
 
-                        posRecords = LitePal.where("latitude=? or lontitude=?",
+                        posRecords = LitePal.where("latitude=? and lontitude=?",
                                 String.valueOf(latLng.latitude), String.valueOf(latLng.longitude)).find(Pos.class);
 
                         //写本地库

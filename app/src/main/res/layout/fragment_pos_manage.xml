@@ -37,11 +37,12 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <SearchView
+        <EditText
             android:id="@+id/search_loc"
             android:layout_width="wrap_content"
             android:layout_height="58dp"
-            android:layout_weight="3"/>
+            android:layout_weight="3"
+            android:hint="搜索类型点"/>
 
         <ImageButton
             android:id="@+id/add_starLoc"

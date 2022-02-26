@@ -2,13 +2,12 @@ package com.beidouapp.model.DataBase;
 
 import org.litepal.crud.LitePalSupport;
 
-
 /**
- * 此表用来储存用户已经下载的收藏点的表
- * 加载的时候，需要根据selfID进行选取
+ * 此数据库将用来存储从亮哥那儿post来的收藏点信息
+ * 其中的selfID可以不使用
  */
-public class starposDB extends LitePalSupport {
-    private String selfID;
+public class starLocFormOtherDB extends LitePalSupport {
+    private String selfID;      //这里的uid不用设置
     private String latitude;
     private String lontitude;
     private String text;  //显示长江大桥等名称
@@ -16,7 +15,7 @@ public class starposDB extends LitePalSupport {
     private String uid;
     private String status;  //设置状态
     private String locInfo; // 自建点详细信息
-    private int legend;// 创建图例    9
+    private int legend;// 创建图例
 
     public String getSelfID() {
         return selfID;
@@ -58,12 +57,12 @@ public class starposDB extends LitePalSupport {
         this.tag = tag;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
     public String getUid() {
         return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getStatus() {
@@ -88,20 +87,5 @@ public class starposDB extends LitePalSupport {
 
     public void setLegend(int legend) {
         this.legend = legend;
-    }
-
-    @Override
-    public String toString() {
-        return "starposDB{" +
-                "selfID='" + selfID + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", lontitude='" + lontitude + '\'' +
-                ", text='" + text + '\'' +
-                ", tag='" + tag + '\'' +
-                ", uid='" + uid + '\'' +
-                ", status='" + status + '\'' +
-                ", locInfo='" + locInfo + '\'' +
-                ", legend=" + legend +
-                '}';
     }
 }

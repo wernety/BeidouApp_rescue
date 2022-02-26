@@ -62,10 +62,10 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:18.0.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'                 //必须 1.0.0 以上
     implementation 'io.github.scwang90:refresh-layout-kernel:2.0.5'      //核心必须依赖
-    implementation 'io.github.scwang90:refresh-header-classics:2.0.5'
-    implementation 'com.android.car.ui:car-ui-lib:+'//经典刷新头
+    implementation 'io.github.scwang90:refresh-header-classics:2.0.5'//经典刷新头
+    implementation 'com.github.searchy2:CustomAlertViewDialogue:2.6.1'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
 }

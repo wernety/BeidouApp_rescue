@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.baidu.mapapi.map.InfoWindow;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.Pos;
+import com.beidouapp.model.DataBase.starposDB;
 import com.beidouapp.model.adapters.locOthers;
 import com.beidouapp.model.adapters.selfPosAdapter;
 import com.beidouapp.model.utils.JSONUtils;
@@ -42,6 +43,7 @@ public class selfFragment extends Fragment {
 
     private RecyclerView selfRv;
     private List<Pos> posRecords;
+    private List<starposDB> starPosRecords;
     private Pos posRecord;
     private List<starPos> list = new ArrayList<starPos>();
     private selfPosAdapter selfPosAdapter;
@@ -51,6 +53,7 @@ public class selfFragment extends Fragment {
     private Pos selfPosRecord;
     private Context context;
     private DemoApplication application;
+    private starposDB starposDB;
 
 
     @Nullable
@@ -160,9 +163,11 @@ public class selfFragment extends Fragment {
      * 上传自建点坐标
      */
     private void uploadSelfPos(starPos selfPos) {
-//先查到这个数据，然后上传这个数据的所有，如果上传成功，我们就改变状态（tag标签），并且写库,上传失败则弹出对话框
-        selfPosRecords = LitePal.where("latitude=? or lontitude=?",
-                selfPos.getLatitude(), selfPos.getLontitude()).find(Pos.class);
+//先查到这个数据，然后上传这个数据的所有，如果上传成功，我们就改变状态（tag标签），并且写库,此时写两个库，一个是自建点的库，需要将状态改成1；另一个是收藏点的库，将全部的信息写入进去
+        selfPosRecords = LitePal.where("latitude=? and lontitude=? and uid=?",
+                selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID()).find(Pos.class);
+        starPosRecords = LitePal.where("latitude=? and lontitude=? and selfID=?",
+                selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID()).find(starposDB.class);
         if (!selfPosRecords.isEmpty()){
             selfPosRecord = selfPosRecords.get(0);
                 //发送到亮哥那边去，然后记得在显示的时候要根据设计的图例来显示自建点，先留白
@@ -178,6 +183,31 @@ public class selfFragment extends Fragment {
                         //将数据库发送状态修改成已发送
                         selfPosRecord.setStatus("1");
                         selfPosRecord.save();
+                        if (starPosRecords.isEmpty()){
+                            starposDB = new starposDB();
+                            starposDB.setUid(application.getUserID());
+                            starposDB.setSelfID(application.getUserID());
+                            starposDB.setLontitude(selfPosRecord.getLontitude());
+                            starposDB.setTag(selfPosRecord.getTag());
+                            starposDB.setLegend(selfPosRecord.getLegend());
+                            starposDB.setText(selfPosRecord.getText());
+                            starposDB.setStatus("1");
+                            starposDB.setLatitude(selfPosRecord.getLatitude());
+                            starposDB.setLocInfo(selfPosRecord.getLocInfo());
+                            starposDB.save();
+                        }else{
+                            starposDB = starPosRecords.get(0);
+                            starposDB.setUid(application.getUserID());
+                            starposDB.setSelfID(application.getUserID());
+                            starposDB.setLontitude(selfPosRecord.getLontitude());
+                            starposDB.setTag(selfPosRecord.getTag());
+                            starposDB.setLegend(selfPosRecord.getLegend());
+                            starposDB.setText(selfPosRecord.getText());
+                            starposDB.setStatus("1");
+                            starposDB.setLatitude(selfPosRecord.getLatitude());
+                            starposDB.setLocInfo(selfPosRecord.getLocInfo());
+                            starposDB.save();
+                        }
                     }
 
                     @Override

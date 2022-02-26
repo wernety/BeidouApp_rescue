@@ -22,6 +22,9 @@ import org.litepal.LitePal;
 
 import java.util.List;
 
+/**
+ * 收藏点的fragment
+ */
 public class starFragment extends Fragment {
 
     private RecyclerView starRv;

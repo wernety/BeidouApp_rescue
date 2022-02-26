@@ -331,29 +331,37 @@ public class MsgService extends Service {
             lonAndLat = myLocationListener.getLatLng();
         }
 
-        position position1 = new position(lonAndLat.get(0), lonAndLat.get(1), "E", "W", true,
-                Double.parseDouble(lonAndLat.get(2)), 0, Double.parseDouble(lonAndLat.get(3)), timestamp);
+        if(lonAndLat.get(0).equals("0.0") && lonAndLat.get(1).equals("0.0"))
+        {
+            Log.d("zw", "sendLoc: 此时坐标为0，0");
+        }else
+        {
+            Log.d("zw", "sendLoc: 此时坐标不在0，0点" + lonAndLat.get(0) + "  " + lonAndLat.get(1));
+            position position1 = new position(lonAndLat.get(0), lonAndLat.get(1), "E", "W", true,
+                    Double.parseDouble(lonAndLat.get(2)), 0, Double.parseDouble(lonAndLat.get(3)), timestamp);
 
-        positions.add(position1);
+            positions.add(position1);
 
-        alarm alarm1 = new alarm("1", "xiaoyu1", timestamp);
-        alarm.add(alarm1);
+            alarm alarm1 = new alarm("1", "xiaoyu1", timestamp);
+            alarm.add(alarm1);
 
-        body body = new body(positions,alarm);
-        HeartbeatMsg heartbeatMsg = new HeartbeatMsg(sysProperty,appProperty,body);
-        String json = JSONUtils.sendJSON(heartbeatMsg);
+            body body = new body(positions,alarm);
+            HeartbeatMsg heartbeatMsg = new HeartbeatMsg(sysProperty,appProperty,body);
+            String json = JSONUtils.sendJSON(heartbeatMsg);
 //        Log.d("zw", "sendLoc: 上传位置包的Json" + json);
-        OkHttpUtils.getInstance(MsgService.this).postBD("http://119.3.130.87:50099/whbdApi/device/report/data", json, new OkHttpUtils.MyCallback() {
-            @Override
-            public void success(Response response) throws IOException {
+            OkHttpUtils.getInstance(MsgService.this).postBD("http://119.3.130.87:50099/whbdApi/device/report/data", json, new OkHttpUtils.MyCallback() {
+                @Override
+                public void success(Response response) throws IOException {
 //                Log.d("zw", "位置包上传到福大的返回消息是：" + response.body().string());
-            }
+                }
 
-            @Override
-            public void failed(IOException e) {
+                @Override
+                public void failed(IOException e) {
 //                Log.d("callback:failed", e.getMessage());
-            }
-        }, "f9bddcacc678ea185bf8158d90087fbc");
+                }
+            }, "f9bddcacc678ea185bf8158d90087fbc");
+        }
+
 
     }
 

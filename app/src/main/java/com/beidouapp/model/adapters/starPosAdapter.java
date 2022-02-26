@@ -16,6 +16,9 @@ import com.beidouapp.ui.fragment.starPos;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 这个Adapter是用来加载收藏点那个recycleView的
+ */
 public class starPosAdapter extends RecyclerView.Adapter<starPosAdapter.ViewHoder> {
 
     List<starposDB> mlist = new ArrayList<>();
