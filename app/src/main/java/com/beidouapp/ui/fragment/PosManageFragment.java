@@ -27,6 +27,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.beidouapp.R;
+import com.beidouapp.model.messages.otherStarLocFromLiang;
+import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.ui.otherStarActivity;
 import com.beidouapp.model.DataBase.starLocFormOtherDB;
@@ -59,6 +61,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
     private String stringOtherLoc;
     private Handler handlerForGetOtherLoc;
     private starLocFormOtherDB starLocFormOtherDB;
+    private otherStarLocFromLiang otherStarLocFromLiang;
 
 
     @Override
@@ -126,67 +129,79 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
             }
             case R.id.add_starLoc:{
                 String s = searchLoc.getText().toString();
-                Intent intent = new Intent(getActivity(), otherStarActivity.class);
-                startActivityForResult(intent, 3);
+//                Intent intent = new Intent(getActivity(), otherStarActivity.class);
+//                startActivityForResult(intent, 3);
 //                if (!s.isEmpty()){
-//                    //打开新的activity
-//                    handlerForGetOtherLocIni();
-//                    threadForOtherLoc = new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("", new OkHttpUtils.MyCallback() {
-//                                @Override
-//                                public void success(Response response) throws IOException {
-//                                    stringOtherLoc = response.body().string();
-////将字符串转换成Json对象
-//                                    JSONObject object = JSON.parseObject(stringOtherLoc);
-//                                    JSONArray data = object.getJSONArray("data");
-////                                    JSONObject jsonObject = data.getJSONObject(0);
-//                                    int num = data.size();
-//                                    for (int i=0;i<num;i++){
-//                                        //判断记录是否在库中，如果不在库中，写库,如果在库中，则会修改原来的内容
-//                                        JSONObject jsonObject = data.getJSONObject(i);
-//                                        List<starLocFormOtherDB> starLocFormOtherDBS = LitePal.where("latitude=? and lontitude=?",
-//                                                jsonObject.getString("coord_lat"), jsonObject.getString("coord_lng"))
-//                                                .find(starLocFormOtherDB.class);
-//                                        try {
-//                                            if (starLocFormOtherDBS.isEmpty()){
-//                                                starLocFormOtherDB = new starLocFormOtherDB();
-//                                                starLocFormOtherDB.setLatitude(jsonObject.getString("coord_lat"));
-//                                                starLocFormOtherDB.setLontitude(jsonObject.getString("coord_lng"));
-//                                                starLocFormOtherDB.setLocInfo(jsonObject.getString("coord_desc"));
-//                                                starLocFormOtherDB.setStatus("1");
-//                                                starLocFormOtherDB.setUid(jsonObject.getString("release_user_ID"));
-//                                                starLocFormOtherDB.setLegend(jsonObject.getInteger("coord_legend"));
-////                                            starLocFormOtherDB.setTag();//暂时没有这种描述
-//                                                starLocFormOtherDB.setText(jsonObject.getString("coord_name"));
-//                                                starLocFormOtherDB.save();
-//                                            }else{
-//                                                starLocFormOtherDB.setLocInfo(jsonObject.getString("coord_desc"));
-//                                                starLocFormOtherDB.setStatus("1");
-//                                                starLocFormOtherDB.setUid(jsonObject.getString("release_user_ID"));
-//                                                starLocFormOtherDB.setLegend(jsonObject.getInteger("coord_legend"));
-////                                            starLocFormOtherDB.setTag();//暂时没有这种描述
-//                                                starLocFormOtherDB.setText(jsonObject.getString("coord_name"));
-//                                                starLocFormOtherDB.save();
-//                                            }
-//                                        }catch (
-//                                                Exception e){e.printStackTrace();
-//                                            Log.d("zw", "success: 写从亮哥那里拿来数据进行储存的库失败");}
-//                                    }
-//                                    Message messageForOtherLoc = new Message();
-//                                    messageForOtherLoc.what = 1;
-//                                    handlerForGetOtherLoc.sendMessage(messageForOtherLoc);
-//                                }
-//
-//                                @Override
-//                                public void failed(IOException e) {
-//                                    Log.d(TAG, "failed: 获取收藏点网络连接失败");
-//                                }
-//                            });
-//                        }
-//                    });
-//
+                    //打开新的activity
+                    handlerForGetOtherLocIni();
+                    threadForOtherLoc = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://120.27.249.235:8081/getPositionByStatus/1",
+                                    new OkHttpUtils.MyCallback() {
+                                @Override
+                                public void success(Response response) throws IOException {
+                                    stringOtherLoc = response.body().string();
+                                    Log.d("zw", "success: 此时从亮哥那里获取到的收藏点的数据为：" + stringOtherLoc);
+//将字符串转换成Json对象
+                                    otherStarLocFromLiang = JSONUtils.reciveOtherStarLocFromLiang(stringOtherLoc);
+                                    List<com.beidouapp.model.messages.otherStarLocFromLiang.Data> data = otherStarLocFromLiang.getData();
+                                    int num = data.size();
+                                    for (int i=0;i<num;i++){
+                                        //判断记录是否在库中，如果不在库中，写库,如果在库中，则会修改原来的内容
+                                        com.beidouapp.model.messages.otherStarLocFromLiang.Data data1 = data.get(i);
+//                                        Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordLat());
+//                                        Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordLng());
+                                        List<starLocFormOtherDB> starLocFormOtherDBS = LitePal.where("latitude=? and lontitude=?",
+                                                data1.getCoordLat(), data1.getCoordLng())
+                                                .find(starLocFormOtherDB.class);
+                                        try {
+                                        Log.d("zw", "success: 此时的数据是" + starLocFormOtherDBS );
+                                            if (starLocFormOtherDBS.isEmpty()){
+                                                starLocFormOtherDB = new starLocFormOtherDB();
+                                                starLocFormOtherDB.setLatitude(data1.getCoordLat());
+                                                Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordLat());
+                                                starLocFormOtherDB.setLontitude(data1.getCoordLng());
+                                                Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordLng());
+                                                starLocFormOtherDB.setLocInfo(data1.getCoordDesc());
+                                                Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordDesc());
+                                                starLocFormOtherDB.setStatus("1");
+                                                starLocFormOtherDB.setUid(data1.getReleaseUserID());
+                                                Log.d("zw", "success:此时储存的数据应为 " + data1.getReleaseUserID());
+                                                starLocFormOtherDB.setLegend(data1.getCoordLegend());
+                                                Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordLegend());
+//                                            starLocFormOtherDB.setTag();//暂时没有这种描述
+                                                starLocFormOtherDB.setText(data1.getCoordName());
+                                                Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordName());
+                                                starLocFormOtherDB.save();
+                                            }else{
+                                                starLocFormOtherDB = starLocFormOtherDBS.get(0);
+                                                starLocFormOtherDB.setLocInfo(data1.getCoordDesc());
+                                                starLocFormOtherDB.setStatus("1");
+                                                starLocFormOtherDB.setUid(data1.getReleaseUserID());
+                                                starLocFormOtherDB.setLegend(data1.getCoordLegend());
+//                                            starLocFormOtherDB.setTag();//暂时没有这种描述
+                                                starLocFormOtherDB.setText(data1.getCoordName());
+                                                starLocFormOtherDB.save();
+                                            }
+                                        }catch (Exception e){
+                                            e.printStackTrace();
+                                            Log.d("zw", "success: 写从亮哥那里拿来数据进行储存的库失败");}
+                                    }
+                                    Message messageForOtherLoc = new Message();
+                                    messageForOtherLoc.what = 1;
+                                    handlerForGetOtherLoc.sendMessage(messageForOtherLoc);
+                                }
+
+                                @Override
+                                public void failed(IOException e) {
+                                    Log.d(TAG, "failed: 获取收藏点网络连接失败");
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+                    });
+                    threadForOtherLoc.start();
 //                }
             }
             default:break;
@@ -206,7 +221,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
                     case 1:{
                         //开启activity
                         Intent intent = new Intent(getActivity(), otherStarActivity.class);
-                        startActivity(intent);
+                        startActivityForResult(intent, 3);
                         break;
                     } default:break;
                 }
@@ -250,7 +265,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 3){
-            Log.d("zw", "onActivityResult: 此时是由otherStarActivity传回来的");
+            Log.d("zw", "onActivityResult: 此时是由otherStarActivity传回来的" + resultCode);
             if(resultCode == 1){
                 starFragment = new starFragment();
                 starFragment.setOnFragmentClick(new starFragment.OnFragmentClick() {

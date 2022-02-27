@@ -3,8 +3,10 @@ package com.beidouapp.ui.fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beidouapp.R;
+import com.beidouapp.model.DataBase.Pos;
 import com.beidouapp.model.DataBase.starposDB;
 import com.beidouapp.model.adapters.starPosAdapter;
 import com.beidouapp.ui.DemoApplication;
@@ -75,9 +78,40 @@ public class starFragment extends Fragment {
 
             @Override
             public void onItemLongClick(View v, int pos) {
-
+                PopupMenu popupMenu = new PopupMenu(getActivity().getApplicationContext(), v);
+                popupMenu.getMenuInflater().inflate(R.menu.menu_starfragment,popupMenu.getMenu());
+                starPosdb = starPosDBS.get(pos);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()){
+                            case R.id.deleteStarPos:{
+                                Log.d("zw", "onMenuItemClick: 开始删除收藏点，需要删除数据库");
+                                deleteDB(starPosdb);
+                                starPosAdapter.deleteStarLocData(pos);
+                            } default:break;
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
             }
         });
+    }
+
+    /**
+     * @param
+     * @return null
+     * @Title
+     * @parameter
+     * @Description 删除starPosDB数据库
+     * @author chx
+     * @data 2022/2/27/027  17:42
+     */
+    private void deleteDB(starposDB starPosdb) {
+        Log.d("zw", "deleteDB: 开始删除starPosDB数据库，用户是:" + application.getUserID());
+        LitePal.deleteAll(starposDB.class, "latitude = ? and lontitude=? and selfID=?",
+                starPosdb.getLatitude(), starPosdb.getLontitude(), application.getUserID());
     }
 
 

@@ -176,7 +176,7 @@ public class selfFragment extends Fragment {
                         selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), selfPosRecord.getText(), selfPosRecord.getLocInfo(),1, selfPosRecord.getTag());
                 String json = JSONUtils.sendJson(selfPosJson);
                 Log.d("zw", "uploadSelfPos: 准备发给亮哥的格式是：" + json);
-                OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/selfPosition",
+                OkHttpUtils.getInstance(getActivity().getApplicationContext()).put("http://120.27.249.235:8081/publishPosition",
                         json,
                         new OkHttpUtils.MyCallback() {
                     @Override
