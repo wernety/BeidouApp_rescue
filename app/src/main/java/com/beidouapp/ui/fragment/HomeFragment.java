@@ -9,6 +9,7 @@ import static com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCU
 import android.Manifest;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.icu.text.UFormat;
 import android.location.Address;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -204,6 +205,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Handler handlerOtherTracePos;
     private Thread threadForUploadSelfLoc;
     private Thread threadForTrace;
+    private Thread threadForWeather;
     private List<LatLng> traceList;
     private LocationClient locationClient;
     private MyLocationListener myLocationListener;
@@ -211,6 +213,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private DemoApplication application;
     private Overlay mPolyline;
     private BaiduMap.OnPolylineClickListener listenerTrace;
+    private int n = 0;
+    private Handler handlerMyweather;
 
 
     public HomeFragment() {
@@ -259,7 +263,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Log.d("zw", "onCreateView: 此时的位置信息是" + lonAndLat.toString());
         mMap.getUiSettings().setCompassEnabled(false);
         testBDRequest();
-        show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), mCurrentDir);
 
         handlermyloc();
         timInit();
@@ -274,6 +277,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     }
 
+    /**
+     * @description:
+     * @event
+     * @param view
+     * @param
+     * @return
+     */
     private void iniAll(@NonNull View view) {
         application = (DemoApplication) getActivity().getApplicationContext();
         mapView = view.findViewById(R.id.mMV);
@@ -556,7 +566,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
 
-
     /**不论有无网络，都可以根据gps发送定位，但是gps格式的位置需要改成百度上的坐标系
      *
      */
@@ -586,15 +595,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             MyLocationData myLocData = locDataBuilder.build();
             mMap.setMyLocationData(myLocData);
 
+//            LatLng latLng = new LatLng(Double.parseDouble(lat),Double.parseDouble(lon));
+//            MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
+////
+//            mMap.animateMapStatus(mapStatusUpdate);
+//
             if (ifFirst) {
-                LatLng ll = new LatLng(Double.parseDouble(lon), Double.parseDouble(lat));
+                LatLng ll = new LatLng(Double.parseDouble(lat),Double.parseDouble(lon) );
 //            LatLng ll = new LatLng(myLocData.longitude, myLocData.latitude);
                 MapStatus.Builder builder = new MapStatus.Builder();
                 builder.target(ll);
                 builder.zoom(14.0f);    // 放大为14层级
                 mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
                 //放大层级
-                ifFirst = false;
+                n = n+1;
+                if(n==2){
+                    ifFirst = false;
+                }
             }
 
             //初始化方位角 由底层传感器获得
@@ -626,14 +643,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //        Log.d("zw", "show_info_text: 此时的所在区域是：" + district);
         try {
             if (!district.isEmpty()) {
-                OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://wthrcdn.etouch.cn/weather_mini",
-                        hm,
-                        new OkHttpUtils.MyCallback() {
+                handlerMyweatherIni();
+                threadForWeather = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://wthrcdn.etouch.cn/weather_mini",hm,new OkHttpUtils.MyCallback() {
                             @Override
                             public void success(Response response) throws IOException {
                                 JSONObject object = JSON.parseObject(response.body().string());
-//                    Log.d("查询天气", "success: 结果" + object);
                                 JSONObject result = object.getJSONObject("data");
+//                    Log.d("查询天气", "success: 结果" + object);
                                 JSONArray forecast = result.getJSONArray("forecast");
                                 JSONObject today = forecast.getJSONObject(0) ;
 //                    Log.d("今日天气", "success: "+ today);
@@ -647,6 +666,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 high = m1.replaceAll("").trim();
                                 low = m2.replaceAll("").trim();
                                 weatherTemperature = new StringBuilder().append(weatherType).append("  "+low).append("~").append(high).append("℃").toString();
+                                Message message = new Message();
+                                message.what = 1;
+                                handlerMyweather.sendMessage(message);
 //                    Log.d("天气温度", "success: "+ weatherTemperature);
                             }
                             @Override
@@ -654,17 +676,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 Log.d("getmsg", e.getMessage());
                             }
                         });
-
-            textView1.setText(weatherTemperature);
-
+                    }
+                });
+                threadForWeather.start();
         }}catch (Exception exception){
             exception.printStackTrace();
             Log.d("zw", "show_info_text: 此时获取天气失败");
         }
 
     }
-
-
 
     /**网络情况下的位置显示  show_other_loc show_others_loc
      *
@@ -1199,7 +1219,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                         @Override
                                         public void success(Response response) throws IOException {
                                             //将数据库发送状态修改成已发送
-                                            Log.d("zw", "success: 发送自建点成功，还没到发布那一步");
+                                            Log.d("zw", "success: 发送自建点成功，还没到发布那一步" + json);
                                         }
 
                                         @Override
@@ -1614,8 +1634,30 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
             }
         };
+    }
 
-
+    /**
+     *
+     * @return null
+     * @Title
+     * @parameter null
+     * @Description 初始化处理天气的handler
+     * @author chx
+     * @data 2022/2/27/027  10:32
+     */
+    private void handlerMyweatherIni() {
+        handlerMyweather = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what){
+                    case 1:{
+                        textView1.setText(weatherTemperature);
+                        break;
+                    } default:break;
+                }
+            }
+        };
     }
 
     protected void createLocationRequest() {

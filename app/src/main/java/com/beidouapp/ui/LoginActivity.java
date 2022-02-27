@@ -63,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
         application = (DemoApplication) this.getApplicationContext();
+        application.setFlag(false);
         checkPermissions();
         initUI();                                                                                   //初始化UI
         initListener();                                                                             //初始化监听器
@@ -121,7 +122,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
     }
-
 
     /**
      * Post方式登录
@@ -239,6 +239,17 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-
-
+    @Override
+    protected void onResume() {
+        if(application.getFlag()){
+            application.setFlag(true);
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.putExtra("uid", application.getUserID());
+            intent.putExtra("upw", application.getUserPass());
+            intent.putExtra("token", application.getToken());
+            startActivity(intent);
+            finish();
+        }
+        super.onResume();
+    }
 }

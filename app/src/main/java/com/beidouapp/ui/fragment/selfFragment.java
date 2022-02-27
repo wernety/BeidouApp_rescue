@@ -173,8 +173,9 @@ public class selfFragment extends Fragment {
                 //发送到亮哥那边去，然后记得在显示的时候要根据设计的图例来显示自建点，先留白
             try {
                 selfPosJson selfPosJson = new selfPosJson(selfPosRecord.getUid(), selfPosRecord.getLontitude(),
-                        selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), selfPosRecord.getText(), selfPosRecord.getLocInfo());
+                        selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), selfPosRecord.getText(), selfPosRecord.getLocInfo(),1, selfPosRecord.getTag());
                 String json = JSONUtils.sendJson(selfPosJson);
+                Log.d("zw", "uploadSelfPos: 准备发给亮哥的格式是：" + json);
                 OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/selfPosition",
                         json,
                         new OkHttpUtils.MyCallback() {

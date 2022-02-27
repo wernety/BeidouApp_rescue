@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         application.setOtherLocIDRecord(new ArrayList<String>());
         application.setUserID(intent.getStringExtra("uid"));
+        application.setFlag(true); //这样切换出去不会重新登录
         loginId = application.getUserID();
         application.setToken(intent.getStringExtra("token"));
         application.setUserPass(intent.getStringExtra("upw"));

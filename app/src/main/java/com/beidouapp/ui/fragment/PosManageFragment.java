@@ -277,6 +277,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
         void changeMap(starPos selfPos);
     }
 
+
     public void setBackToMainListener(BackToMainListener backToMainListener){
         this.BackToMainListener = backToMainListener;
     }

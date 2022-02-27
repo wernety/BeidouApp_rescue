@@ -31,6 +31,7 @@ public class DemoApplication extends Application {
     private List<String> otherLocIDRecord;
     private List<User> friendList;
     private List<Group> groupList;
+    private Boolean flag;
 
     public String getToken() {
         return Token;
@@ -71,6 +72,13 @@ public class DemoApplication extends Application {
     }
     public void setOtherLocIDRecord(List<String> otherLocIDRecord) {
         this.otherLocIDRecord = otherLocIDRecord;
+    }
+    public void setFlag(Boolean flag) {
+        this.flag = flag;
+    }
+
+    public Boolean getFlag() {
+        return flag;
     }
     public void setOrg(String org) {
         this.org = org;
