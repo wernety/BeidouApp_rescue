@@ -43,7 +43,7 @@ public class otherStarLocAdapter extends RecyclerView.Adapter<otherStarLocAdapte
         holder.tv_otherStarLocInfo.setText(mlist.get(position).getLocInfo());
         Log.d("zw", "onBindViewHolder: 加载的第一个数据是" + mlist.get(position).getLocInfo());
         holder.tv_otherStarLocTag.setText(mlist.get(position).getTag());
-        Log.d("w", "onBindViewHolder: 加载第二个数据是" + mlist.get(position).getTag());z
+        Log.d("w", "onBindViewHolder: 加载第二个数据是" + mlist.get(position).getTag());
         holder.tv_otherStarLocUid.setText(mlist.get(position).getUid());
 
         holder.tv_otherStarLocInfo.setTag(position);
