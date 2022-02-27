@@ -351,7 +351,50 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onOrientationChanged(float x) {
                 mCurrentDir = x;
-                Log.d("zw", "onOrientationChanged: 此时的方向" + mCurrentDir);
+                int yushu = (int) (x % 45);
+                int chushu = (int) (x / 45);
+                switch ((int) (x / 45)) {
+                    case 0: {
+                        textView5.setText(new StringBuilder().append("方向：").append("北偏东").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "北偏东" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 1: {
+                        textView5.setText(new StringBuilder().append("方向：").append("东偏北").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "东偏北" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 2: {
+                        textView5.setText(new StringBuilder().append("方向：").append("东偏南").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "东偏南" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 3: {
+                        textView5.setText(new StringBuilder().append("方向：").append("南偏东").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "南偏东" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 4: {
+                        textView5.setText(new StringBuilder().append("方向：").append("南偏西").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "南偏西" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 5: {
+                        textView5.setText(new StringBuilder().append("方向：").append("西偏南").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "西偏南" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 6: {
+                        textView5.setText(new StringBuilder().append("方向：").append("西偏北").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "西偏北" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 7: {
+                        textView5.setText(new StringBuilder().append("方向：").append("北偏西").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "北偏西" + (int) (x % 45) + "°");
+                        break;
+                    }
+                }
             }
         });
     }
@@ -594,6 +637,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
             MyLocationData myLocData = locDataBuilder.build();
             mMap.setMyLocationData(myLocData);
+//            Log.d("传感器", "show_my_loc: "+myLocData.toString());
 
 //            LatLng latLng = new LatLng(Double.parseDouble(lat),Double.parseDouble(lon));
 //            MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
@@ -659,12 +703,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 String high = today.getString("high");
                                 String low = today.getString("low");
                                 weatherType = today.getString("type");
-                                String regEx="[^0-9]";
-                                Pattern p = Pattern.compile(regEx);
-                                Matcher m1 = p.matcher(high);
-                                Matcher m2 = p.matcher(low);
-                                high = m1.replaceAll("").trim();
-                                low = m2.replaceAll("").trim();
+                                high = high.substring(2,high.length()-1);
+                                low = low.substring(2,low.length()-1);
                                 weatherTemperature = new StringBuilder().append(weatherType).append("  "+low).append("~").append(high).append("℃").toString();
                                 Message message = new Message();
                                 message.what = 1;

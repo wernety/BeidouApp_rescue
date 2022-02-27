@@ -55,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:autoLink="phone"
                     android:gravity="left"
-                    android:hint="晴  *°C"
+                    android:hint="天气查询中…"
                     android:textColor="@color/info_text_color"
                     android:textSize="@dimen/info_text_size" />
                 <TextView

@@ -5,7 +5,7 @@ plugins {
 android {
     signingConfigs {
         debug {
-            storeFile file('I:\\Android-study\\BeidouApp2\\beidou.jks')
+            storeFile file('F:\\HorizontalProject\\AndroidProject\\BeidouApp\\beidou.jks')
             storePassword '000000'
             keyAlias 'key0'
             keyPassword '000000'
