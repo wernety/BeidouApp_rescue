@@ -235,10 +235,19 @@ public class LoginActivity extends AppCompatActivity {
                     System.exit(0);
                 }
                 break;
-            default:
+            default:break;
         }
     }
 
+    /**
+     * @param
+     * @return null
+     * @Title
+     * @parameter
+     * @Description 杀死程序后能再次进入页面，无需登录
+     * @author chx
+     * @data 2022/2/27/027  15:31
+     */
     @Override
     protected void onResume() {
         if(application.getFlag()){

@@ -107,6 +107,24 @@ public class starPosAdapter extends RecyclerView.Adapter<starPosAdapter.ViewHode
         return mlist.size();
     }
 
+    /**
+     * @param
+     * @return null
+     * @Title
+     * @parameter
+     * @Description
+     * @author chx
+     * @data 2022/2/27/027  17:40
+     */
+    public void deleteStarLocData(int pos){
+        Log.d("zw", "deleteData: 此时开始删除recycleView里面的数据");
+        mlist.remove(pos);
+        notifyItemRemoved(pos);
+        if(pos != getItemCount()) {
+            notifyItemRangeChanged(pos, getItemCount());
+        }
+    }
+
     //回调
     public interface OnItemClickListener{
         void onItemClick(View v, int pos);

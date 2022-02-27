@@ -86,6 +86,11 @@ public class JSONUtils {
         return tracePosFromBD;
     }
 
+    public static otherStarLocFromLiang reciveOtherStarLocFromLiang(String json){
+        otherStarLocFromLiang otherStarLocFromLiang = JSON.parseObject(json, otherStarLocFromLiang.class);
+        return otherStarLocFromLiang;
+    }
+
     public static JSONObject Receive(String json) {
         JSONObject object = JSON.parseObject(json);
         return object;

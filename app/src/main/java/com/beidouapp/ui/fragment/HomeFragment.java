@@ -325,12 +325,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onMapStatusChange(MapStatus mapStatus) {
-
+                float zoom = mMap.getMapStatus().zoom;
+                if (zoom>17){
+                    Log.d("zw", "onMapStatusChangeStart: 此时地图的缩放等级为" + zoom);
+                    MapStatus.Builder builder = new MapStatus.Builder();
+                    builder.zoom(17.0f);    // 放大为20层级
+                    mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                }
             }
 
             @Override
             public void onMapStatusChangeFinish(MapStatus mapStatus) {
-
+                float zoom = mMap.getMapStatus().zoom;
+                if (zoom>17){
+                    Log.d("zw", "onMapStatusChangeStart: 此时地图的缩放等级为" + zoom);
+                    MapStatus.Builder builder = new MapStatus.Builder();
+                    builder.zoom(17.0f);    // 放大为20层级
+                    mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                }
             }
         });
         mMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
@@ -1213,9 +1225,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             public void run() {
                                 try {
                                     selfPosJson selfPosJson = new selfPosJson(uid, posRecord.getLontitude(),
-                                            posRecord.getLatitude(), (int) legendChoose.getSelectedItemId(), posRecord.getText(), posRecord.getLocInfo(), 0);
+                                            posRecord.getLatitude(), (int) legendChoose.getSelectedItemId(), posRecord.getText(), posRecord.getLocInfo(), 0, posRecord.getTag());
                                     String json = JSONUtils.sendJson(selfPosJson);
-                                    OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/selfPosition", json, new OkHttpUtils.MyCallback() {
+                                    OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://120.27.249.235:8081/addPositionOfSelf", json, new OkHttpUtils.MyCallback() {
                                         @Override
                                         public void success(Response response) throws IOException {
                                             //将数据库发送状态修改成已发送

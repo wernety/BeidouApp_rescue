@@ -367,6 +367,28 @@ public class OkHttpUtils {
         });
     }
 
+    public void put(String url, String json, MyCallback callback) {
+        RequestBody requestBody = FormBody.create(MediaType.parse("application/json; charset=utf-8"), json);
+        Request request = new Request.Builder()
+                .url(url)
+                .put(requestBody)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.failed(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                callback.success(response);
+            }
+        });
+
+
+    }
+
 
 
     public interface MyCallback {

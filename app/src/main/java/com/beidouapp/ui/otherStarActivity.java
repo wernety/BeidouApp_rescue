@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beidouapp.R;
@@ -55,6 +57,10 @@ public class otherStarActivity extends AppCompatActivity {
         application = (DemoApplication) getApplicationContext();
         refreshLayout = (RefreshLayout)findViewById(R.id.refreshLayout);
         recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
+                RecyclerView.VERTICAL, false));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
+                DividerItemDecoration.VERTICAL));
         refreshLayout.setEnableRefresh(true);
         refreshLayout.setEnableLoadMore(false);
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
@@ -65,61 +71,64 @@ public class otherStarActivity extends AppCompatActivity {
             }
         });
         starLocFormOtherDBS = LitePal.findAll(starLocFormOtherDB.class);
+        Log.d("zw", "ini: 此时starLocFormOtherDB中的数据为" + starLocFormOtherDBS.get(0).getLatitude());
         otherStarLocAdapter = new otherStarLocAdapter(starLocFormOtherDBS);
+        recyclerView.setAdapter(otherStarLocAdapter);
         otherStarLocAdapter.setOnItemClickListener(new otherStarLocAdapter.setOnItemClickListener() {
             @Override
             public void onItemClick(View v, int pos) {
-                CustomAlertDialogue.Builder alert = new CustomAlertDialogue.Builder(getApplicationContext())
-                        .setStyle(CustomAlertDialogue.Style.DIALOGUE)
-                        .setCancelable(false)
-                        .setTitle("添加")
-                        .setMessage("添加到个人收藏点?")
-                        .setPositiveText("确定")
-                        .setPositiveColor(R.color.negative)
-                        .setPositiveTypeface(Typeface.DEFAULT_BOLD)
-                        .setOnPositiveClicked(new CustomAlertDialogue.OnPositiveClicked() {
-                            @Override
-                            public void OnClick(View view, Dialog dialog) {
-                                //写入到显示个人收藏点的库
-                                List<starposDB> starposDBS = LitePal.where("selfID=? and text=?", application.getUserID(),
-                                        starLocFormOtherDBS.get(pos).getText()).find(starposDB.class);
-                                if (starposDBS.isEmpty()){
-                                    starposDB starposDB = new starposDB();
-                                    starposDB.setLatitude(starLocFormOtherDBS.get(pos).getLatitude());
-                                    starposDB.setStatus("1");
-                                    starposDB.setLegend(starLocFormOtherDBS.get(pos).getLegend());
-                                    starposDB.setLocInfo(starLocFormOtherDBS.get(pos).getLocInfo());
-                                    starposDB.setTag(starLocFormOtherDBS.get(pos).getTag());
-                                    starposDB.setText(starLocFormOtherDBS.get(pos).getText());
-                                    starposDB.setLontitude(starLocFormOtherDBS.get(pos).getLontitude());
-                                    starposDB.setSelfID(application.getUserID());
-                                    starposDB.setUid(starLocFormOtherDBS.get(pos).getUid());
-                                    starposDB.save();
-                                }else{
-                                    Toast.makeText(otherStarActivity.this, "已经存储过", Toast.LENGTH_LONG).show();
+                try {
+                    CustomAlertDialogue.Builder alert = new CustomAlertDialogue.Builder(otherStarActivity.this)
+                            .setStyle(CustomAlertDialogue.Style.DIALOGUE)
+                            .setCancelable(false)
+                            .setTitle("添加")
+                            .setMessage("添加到个人收藏点?")
+                            .setPositiveText("确定")
+                            .setPositiveColor(R.color.negative)
+                            .setPositiveTypeface(Typeface.DEFAULT_BOLD)
+                            .setOnPositiveClicked(new CustomAlertDialogue.OnPositiveClicked() {
+                                @Override
+                                public void OnClick(View view, Dialog dialog) {
+                                    //写入到显示个人收藏点的库
+                                    List<starposDB> starposDBS = LitePal.where("selfID=? and text=?", application.getUserID(),
+                                            starLocFormOtherDBS.get(pos).getText()).find(starposDB.class);
+                                    if (starposDBS.isEmpty()){
+                                        starposDB starposDB = new starposDB();
+                                        starposDB.setLatitude(starLocFormOtherDBS.get(pos).getLatitude());
+                                        starposDB.setStatus("1");
+                                        starposDB.setLegend(starLocFormOtherDBS.get(pos).getLegend());
+                                        starposDB.setLocInfo(starLocFormOtherDBS.get(pos).getLocInfo());
+                                        starposDB.setTag(starLocFormOtherDBS.get(pos).getTag());
+                                        starposDB.setText(starLocFormOtherDBS.get(pos).getText());
+                                        starposDB.setLontitude(starLocFormOtherDBS.get(pos).getLontitude());
+                                        starposDB.setSelfID(application.getUserID());
+                                        starposDB.setUid(starLocFormOtherDBS.get(pos).getUid());
+                                        starposDB.save();
+                                    }else{
+                                        Toast.makeText(otherStarActivity.this, "已经存储过", Toast.LENGTH_LONG).show();
+                                    }
+
+                                    dialog.dismiss();
+                                    intent = getIntent();
+                                    setResult(1, intent);
                                 }
-
-                                dialog.dismiss();
-                                intent = getIntent();
-                                setResult(1, intent);
-                                onStop();
-                                finish();
-                            }
-                        })
-                        .setNegativeText("取消")
-                        .setNegativeColor(R.color.positive)
-                        .setOnNegativeClicked(new CustomAlertDialogue.OnNegativeClicked() {
-                            @Override
-                            public void OnClick(View view, Dialog dialog) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setDecorView(getWindow().getDecorView())
-                        .build();
-                alert.show();
-
+                            })
+                            .setNegativeText("取消")
+                            .setNegativeColor(R.color.positive)
+                            .setOnNegativeClicked(new CustomAlertDialogue.OnNegativeClicked() {
+                                @Override
+                                public void OnClick(View view, Dialog dialog) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setDecorView(getWindow().getDecorView())
+                            .build();
+                    alert.show();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
-        recyclerView.setAdapter(otherStarLocAdapter);
+
     }
 }
