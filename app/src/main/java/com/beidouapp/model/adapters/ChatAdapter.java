@@ -69,12 +69,12 @@ public class ChatAdapter extends BaseAdapter {
             if (isMeSend == 0) {
                 convertView = inflater.inflate(R.layout.item_chat_receive_text, parent, false);
                 holder.tv_content = convertView.findViewById(R.id.tv_content);
-                holder.tv_sendtime = convertView.findViewById(R.id.tv_sendtime);
+//                holder.tv_sendtime = convertView.findViewById(R.id.tv_sendtime);
                 holder.tv_display_name = convertView.findViewById(R.id.tv_display_name);
             } else {
                 convertView = inflater.inflate(R.layout.item_chat_send_text, parent, false);
                 holder.tv_content = convertView.findViewById(R.id.tv_content);
-                holder.tv_sendtime = convertView.findViewById(R.id.tv_sendtime);
+//                holder.tv_sendtime = convertView.findViewById(R.id.tv_sendtime);
                 //holder.tv_isRead = convertView.findViewById(R.id.tv_isRead);
             }
             convertView.setTag(holder);
@@ -82,7 +82,7 @@ public class ChatAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.tv_sendtime.setText(time);
+//        holder.tv_sendtime.setText(time);
         holder.tv_content.setVisibility(View.VISIBLE);
         holder.tv_content.setText(content);
 

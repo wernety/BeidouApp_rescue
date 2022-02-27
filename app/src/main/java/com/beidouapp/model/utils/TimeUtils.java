@@ -39,6 +39,37 @@ public class TimeUtils {
         return temp;
     }
 
+    public static String SetChatTime(String createTime) {
+        //createTime单位毫秒
+        String temp = "";
+        try {
+            long now = System.currentTimeMillis() ;
+            long publish = Long.parseLong(createTime);
+            long diff = Math.abs((now - publish)/1000);
+            long months = diff / (60 * 60 * 24*30);
+            long days = diff / (60 * 60 * 24);
+            long hours = (diff - days * (60 * 60 * 24)) / (60 * 60);
+            long minutes = (diff - days * (60 * 60 * 24) - hours * (60 * 60)) / 60;
+            if (minutes > 5) {
+                if (months > 0) {
+                    temp = months + "月前";
+                } else if (days > 0) {
+                    temp = days + "天前";
+                } else if (hours > 0) {
+                    temp = hours + "小时前";
+                } else {
+                    temp = minutes + "分钟前";
+                }
+            } else {
+                temp = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return formatTime(createTime);
+        }
+        return temp;
+    }
+
 
     /**
      * 将时间戳转换成分秒时
