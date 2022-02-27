@@ -173,6 +173,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
 //                                            starLocFormOtherDB.setTag();//暂时没有这种描述
                                                 starLocFormOtherDB.setText(data1.getCoordName());
                                                 Log.d("zw", "success:此时储存的数据应为 " + data1.getCoordName());
+                                                starLocFormOtherDB.setTag(data1.getCoordTag());
                                                 starLocFormOtherDB.save();
                                             }else{
                                                 starLocFormOtherDB = starLocFormOtherDBS.get(0);
