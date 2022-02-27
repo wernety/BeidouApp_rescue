@@ -34,6 +34,7 @@ import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.ListViewUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
+import com.beidouapp.model.utils.TimeUtils;
 import com.beidouapp.model.utils.id2name;
 import com.beidouapp.ui.ChatActivity;
 import com.beidouapp.ui.DemoApplication;
@@ -216,7 +217,7 @@ public class MessageFragment extends Fragment {
                 Log.d("zzjyy", transId);
                 map.put("title", transId);
                 map.put("content", query.getString(query.getColumnIndex("contentChat")));
-                map.put("time", formatTime(query.getString(query.getColumnIndex("time"))));
+                map.put("time", TimeUtils.diffTime(query.getString(query.getColumnIndex("time"))));
                 ContactList.add(map);
             }
         } catch (Exception e) {
@@ -228,18 +229,6 @@ public class MessageFragment extends Fragment {
     对于chat表，建议单独在MainActivity写一个广播接受类，在接受的时候，就能够写库
     对于recentMan表，也是如此，在广播接受的时候，写库
 */
-    }
-
-    /**
-     * 将时间戳转换成分秒时
-     * @param timeMillis
-     * @return
-     */
-    private String formatTime(String timeMillis) {
-        long timeMillisl=Long.parseLong(timeMillis);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date(timeMillisl);
-        return simpleDateFormat.format(date);
     }
 
     /**
