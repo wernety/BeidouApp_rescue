@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         }else {
             fragmentTransaction.show(currentFragment);
         }
-        if (lastFragment !=null){
+        if (lastFragment !=null && lastFragment!= currentFragment){
             fragmentTransaction.hide(lastFragment);
         }
         lastFragment = currentFragment;
