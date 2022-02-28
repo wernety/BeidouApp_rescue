@@ -2,11 +2,8 @@ package com.beidouapp.background;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.Bundle;
@@ -22,13 +19,11 @@ import com.beidouapp.model.messages.HeartbeatMsg;
 import com.beidouapp.model.messages.HeartbeatMsg.*;
 import com.beidouapp.model.messages.Message4Receive;
 import com.beidouapp.model.utils.JSONUtils;
-import com.beidouapp.model.utils.LocationUtils;
+import com.beidouapp.model.utils.NetworkChangeReceiver;
 import com.beidouapp.model.utils.NetworkManager;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.state_request;
-import com.beidouapp.ui.ChatActivity;
 import com.beidouapp.ui.DemoApplication;
-import com.beidouapp.ui.fragment.HomeFragment;
 import com.beidouapp.ui.fragment.MyLocationListener;
 
 import org.litepal.LitePal;
@@ -55,7 +50,7 @@ import okhttp3.WebSocketListener;
  * BEIDOU:
  */
 
-public class MsgService extends Service {
+public class MsgService extends Service implements NetworkChangeReceiver.NetStateChangeObserver {
     private NetworkManager networkManager;
     private int NetStatus;
     public Link msgLink;
@@ -68,6 +63,7 @@ public class MsgService extends Service {
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
     private Handler write2DBHandler;
+
 
 
     // 通过Binder来保持Activity和Service的通信
@@ -90,6 +86,7 @@ public class MsgService extends Service {
     public void onCreate(){
         super.onCreate();
         initTimer();
+        NetworkChangeReceiver.registerReceiver(MsgService.this);
     }
 
     @Override
@@ -99,10 +96,8 @@ public class MsgService extends Service {
         uid = application.getUserID();
         curToken = application.getCurToken();
         initHandler();
-
         Log.d("zw", "onStartCommand:全局的curToken " + curToken);
-        networkManager = new NetworkManager();
-        NetStatus = networkManager.NetworkDetect(this);
+        NetStatus = NetworkManager.getConnectivityStatus(MsgService.this);
         msgLink = new Link("ws://120.27.242.92:8080/chatWS/" + uid, NetStatus);
         msgLink.linkServer();
         return super.onStartCommand(intent, flags, startId);
@@ -111,6 +106,7 @@ public class MsgService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        NetworkChangeReceiver.unRegisterReceiver(MsgService.this);
     }
 
 
@@ -121,19 +117,15 @@ public class MsgService extends Service {
      * @param message
      */
     public void sendMessage(String message){
-//        if (NetStatus == 1) {
-//            msgLink.webSocket.send(message);
-//        }
-//        if (NetStatus == 2) {
+        if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE) {
             msgLink.webSocket.send(message);
-//        }
-//
-//        if (NetStatus == 3) {
-//        }
-//        if (NetStatus == 4) {
-//        }
-//        if (NetStatus == 0) {
-//        }
+        }
+        if (NetStatus == NetworkManager.TYPE_BLUETOOTH) {
+            msgLink.webSocket.send(message);
+        }
+        if (NetStatus == NetworkManager.TYPE_NOT_CONNECT) {
+            msgLink.webSocket.send(message);
+        }
     }
 
 
@@ -151,15 +143,13 @@ public class MsgService extends Service {
      * 连接网络
      */
     public class Link {
-        private String IP = "";
-        //private int PORT = 0;
-        private int netStatus = 0;
+        private String url = "";
+        private int netStatus;
         private OkHttpClient client;
         public WebSocket webSocket;
 
-        public Link(String IP, int netStatus){
-            this.IP = IP;
-            //this.PORT = PORT;
+        public Link(String url, int netStatus){
+            this.url = url;
             this.netStatus = netStatus;
         }
 
@@ -169,20 +159,9 @@ public class MsgService extends Service {
 
         public void linkServer(){
             switch (netStatus){
-                case 0:{break;}
-                case 1:{NetLinking();break;}
-//                case 2:{BluetoothLinking();break;}
-                case 2:{NetLinking();break;}
-//                case 3:{BeidouLinking();break;}
-                case 3:{NetLinking();break;}
-                default:break;
-            }
-        }
-
-        public void dislinkServer(){
-            switch (netStatus){
-                case 0:{break;}
-                case 1:{NetDislink();break;}
+                case NetworkManager.TYPE_NOT_CONNECT:{BeidouLinking();break;}
+                case NetworkManager.TYPE_WIFI_MOBILE:{NetLinking();break;}
+                case NetworkManager.TYPE_BLUETOOTH:{BluetoothLinking();break;}
                 default:break;
             }
         }
@@ -202,7 +181,7 @@ public class MsgService extends Service {
             }
 
             Request request = new Request.Builder()
-                    .url(IP)
+                    .url(url)
                     .build();
             webSocket = client.newWebSocket(request, new WebSocketListener() {
                 @Override
@@ -250,10 +229,6 @@ public class MsgService extends Service {
 
 
         }
-        private void NetDislink(){
-
-        }
-
         private void BeidouLinking(){}
         private void BluetoothLinking(){}
 
@@ -435,4 +410,22 @@ public class MsgService extends Service {
 
     }
 
+
+
+    @Override
+    public void onDisconnect() {
+        NetStatus = NetworkManager.TYPE_NOT_CONNECT;
+    }
+
+    @Override
+    public void onWIFIMobileConnect() {
+        NetStatus = NetworkManager.TYPE_WIFI_MOBILE;
+        msgLink.setNetStatus(NetStatus);
+        msgLink.linkServer();
+    }
+
+    @Override
+    public void onBlueToothConnect() {
+        NetStatus = NetworkManager.TYPE_BLUETOOTH;
+    }
 }

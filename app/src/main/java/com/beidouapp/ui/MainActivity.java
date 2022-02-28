@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     private PosManageFragment posManageFragment;
     private String token;
     private Bundle bundle;
-    private User4Login user4Login;
     private String loginId;
     private orgAndUidAndKey record;
     private List<orgAndUidAndKey> records;
@@ -133,22 +132,23 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initUser() {
-        Intent intent = getIntent();
         application.setOtherLocIDRecord(new ArrayList<String>());
-        application.setUserID(intent.getStringExtra("uid"));
         application.setFlag(true); //这样切换出去不会重新登录
         loginId = application.getUserID();
-        application.setToken(intent.getStringExtra("token"));
-        application.setUserPass(intent.getStringExtra("upw"));
-        user4Login = new User4Login(intent.getStringExtra("uid"),
-                "upw");
-        token = intent.getStringExtra("token");
+        token = application.getToken();
         bundle = new Bundle();
         bundle.putString("curToken", curToken);
         bundle.putString("token", token);
-        bundle.putString("loginId", user4Login.getUsername());
-        bundle.putString("pass", intent.getStringExtra("upw"));  //传密码进去
+        bundle.putString("loginId", loginId);
+        bundle.putString("pass", application.getUserPass());  //传密码进去
         initFriendGroupOrg();
+
+
+        id2name.write2DB(writableDatabase,loginId,
+                application.getIndexID(),
+                loginId,
+                application.getNickName(),
+                "1");
     }
 
     private void initUI() {
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void StartMsgService(){
         intentservice = new Intent(MainActivity.this, MsgService.class);
-        intentservice.putExtra("uid", user4Login.getUsername());
+        intentservice.putExtra("uid", loginId);
         bindService(intentservice, serviceConnection, BIND_AUTO_CREATE);
         startService(intentservice);
     }

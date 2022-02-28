@@ -145,10 +145,11 @@ public class LoginActivity extends AppCompatActivity {
                                             if (code == 200) {
                                                 User user = JSON.parseObject(object.getString("user"), User.class);
                                                 application.setIndexID(user.getUserId());
+                                                application.setNickName(user.getNickName());
+                                                application.setUserID(user.getUserName());
+                                                application.setUserPass(password);
+                                                application.setToken(token);
                                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                                intent.putExtra("uid", username);
-                                                intent.putExtra("upw", password);
-                                                intent.putExtra("token", token);
                                                 startActivity(intent);
                                                 finish();
                                             } else if (code == 500) {

@@ -7,26 +7,30 @@ import android.util.Log;
 
 public class NetworkManager {
 
-    public int NetStatus = 0;
+    public static final int TYPE_WIFI_MOBILE = 1;
+    public static final int TYPE_BLUETOOTH = 2;
+    public static final int TYPE_NOT_CONNECT = 0;
 
-    //判断是否联网
-    public static boolean isNetworkAvailable(Context context){
+    /**
+     * 判断类型
+     * @param context
+     * @return
+     */
+    public static int getConnectivityStatus(Context context){
+        ConnectivityManager connectivityManager = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        if (context == null){
-            return false;
-        }else {
-            ConnectivityManager connectivityManager = (ConnectivityManager)
-                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-
-            if (networkInfo != null && networkInfo.isAvailable()) {
-                if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
-                    Log.i("MainActivity", "当前没有联网");
-                    return true;
-                }
+        if (networkInfo != null) {
+            if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI
+                    || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+                return TYPE_WIFI_MOBILE;
+            }
+            if (networkInfo.getType() == ConnectivityManager.TYPE_BLUETOOTH) {
+                return TYPE_BLUETOOTH;
             }
         }
-        return false;
+        return TYPE_NOT_CONNECT;
     }
 
     // wifi判断
@@ -62,29 +66,4 @@ public class NetworkManager {
         return false;
     }
 
-    //北斗判断
-    public static boolean isBeidou(Context context){
-        return false;
-    }
-
-
-    public int NetworkDetect(Context context){
-        int status = 0;
-        if (isNetworkAvailable(context)){
-            if (isWIFI(context)){
-                status = 1;
-            }
-            else if (isMobile(context)){
-                status = 2;
-            }
-            else if (isBluetooth(context)){
-                status = 3;
-            }
-            else if (isBeidou(context)){
-                status = 4;
-            }
-        }
-        this.NetStatus = status;
-        return status;
-    }
 }

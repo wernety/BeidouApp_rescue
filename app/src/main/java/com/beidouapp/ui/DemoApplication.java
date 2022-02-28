@@ -28,6 +28,7 @@ public class DemoApplication extends Application {
     private String indexID;
     private String curToken;
     private String Token;
+    private String nickName;
     private List<String> otherLocIDRecord;
     private List<User> friendList;
     private List<Group> groupList;
@@ -59,6 +60,9 @@ public class DemoApplication extends Application {
     }
     public String getIndexID() {
         return indexID;
+    }
+    public String getNickName() {
+        return nickName;
     }
 
     public void setToken(String token) {
@@ -94,6 +98,9 @@ public class DemoApplication extends Application {
     }
     public void setIndexID(String indexID) {
         this.indexID = indexID;
+    }
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     @Override
