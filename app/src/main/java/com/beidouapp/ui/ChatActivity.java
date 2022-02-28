@@ -217,7 +217,7 @@ public class ChatActivity extends AppCompatActivity {
                         Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send, true);
 
-                        msgService.sendMessage(json);
+                        boolean isSent = msgService.sendMessage(json);
 
                         ChatMessage chatMessage = new ChatMessage();
                         chatMessage.setContent(content);
@@ -226,15 +226,16 @@ public class ChatActivity extends AppCompatActivity {
                         chatMessage.setTime(String.valueOf(timeMillis)+"");
                         chatMessageList.add(chatMessage);
                         //插入数据
-                        ContentValues values = new ContentValues();
-                        values.put("toID", toID);
-                        values.put("selfID", loginId);
-                        values.put("flag", 1);//自己发的是1
-                        values.put("contentChat", content);
-                        values.put("message_type", "text");
-                        values.put("time", String.valueOf(timeMillis));
-                        writableDatabase.insert("chat", null, values);
-
+                        if (isSent) {
+                            ContentValues values = new ContentValues();
+                            values.put("toID", toID);
+                            values.put("selfID", loginId);
+                            values.put("flag", 1);//自己发的是1
+                            values.put("contentChat", content);
+                            values.put("message_type", "text");
+                            values.put("time", String.valueOf(timeMillis));
+                            writableDatabase.insert("chat", null, values);
+                        }
                         //将最近的一次消息写入数据库
                         manRecords = LitePal.where("toID=? and selfID=?", toID, loginId).find(recentMan.class);
                         if(manRecords.isEmpty()){

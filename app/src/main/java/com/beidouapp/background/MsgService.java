@@ -86,7 +86,8 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
     public void onCreate(){
         super.onCreate();
         initTimer();
-        NetworkChangeReceiver.registerReceiver(MsgService.this);
+        NetworkChangeReceiver.registerReceiver(this);
+        NetworkChangeReceiver.registerObserver(this);
     }
 
     @Override
@@ -106,7 +107,8 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
     @Override
     public void onDestroy(){
         super.onDestroy();
-        NetworkChangeReceiver.unRegisterReceiver(MsgService.this);
+        NetworkChangeReceiver.unRegisterObserver(this);
+        NetworkChangeReceiver.unRegisterReceiver(this);
     }
 
 
@@ -116,16 +118,17 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      * 根据网络状态
      * @param message
      */
-    public void sendMessage(String message){
+    public boolean sendMessage(String message){
         if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE) {
-            msgLink.webSocket.send(message);
+            return msgLink.webSocket.send(message);
         }
         if (NetStatus == NetworkManager.TYPE_BLUETOOTH) {
-            msgLink.webSocket.send(message);
+            return msgLink.webSocket.send(message);
         }
         if (NetStatus == NetworkManager.TYPE_NOT_CONNECT) {
-            msgLink.webSocket.send(message);
+            return msgLink.webSocket.send(message);
         }
+        return false;
     }
 
 
