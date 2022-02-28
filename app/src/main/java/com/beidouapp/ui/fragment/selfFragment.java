@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.platform.comapi.basestruct.Point;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.Pos;
 import com.beidouapp.model.DataBase.starposDB;
@@ -54,6 +56,7 @@ public class selfFragment extends Fragment {
     private Context context;
     private DemoApplication application;
     private starposDB starposDB;
+    private OnFragmentLongClick onFragmentLongClick;
 
 
     @Nullable
@@ -137,11 +140,13 @@ public class selfFragment extends Fragment {
                                 break;
                             }
                             case R.id.deleteSelfPos:{
+                                //后面的数据记录删除后，前面的数据记录也得删除
                                 deleteDbRecord(selfPos);
 //                                selfPosAdapter.notifyItemRemoved(pos);
 //                                selfPosAdapter.notifyItemRangeChanged(pos, selfPosAdapter.getItemCount());
                                 Log.d("zw", "onMenuItemClick: 此时删除的位置应该是:" + pos);
 //                                selfPosAdapter.notifyDataSetChanged();
+                                deleteMapMarker(selfPos);
                                 selfPosAdapter.deleteData(pos);
                                 break;
                             }
@@ -233,6 +238,21 @@ public class selfFragment extends Fragment {
     }
 
     /**
+     * @return null
+     * @Title
+     * @parameter
+     * @Description 删除地图上的marker
+     * @author chx
+     * @data 2022/2/28/028  10:53
+     */
+    private void deleteMapMarker(starPos selfPos) {
+        if (onFragmentLongClick != null){
+            LatLng latLng = new LatLng(Double.parseDouble(selfPos.getLontitude()), Double.parseDouble(selfPos.getLatitude()));
+            onFragmentLongClick.mapNeedDeleteMarker(latLng);
+        }
+    }
+
+    /**
      * 显示位置点详细信息
      */
     private void showInfo(starPos selfPos) {
@@ -282,4 +302,24 @@ public class selfFragment extends Fragment {
     public interface OnFragmentClick{
         void mapNeedChange(starPos selfPos);
     }
+
+
+    /**
+     * @param
+     * @return null
+     * @Title
+     * @Description 回调接口，用于在地图上删除marker
+     * @author chx
+     * @data 2022/2/28/028  10:51
+     */
+    public void setOnFragmentLongClick(OnFragmentLongClick onFragmentLongClick){
+        this.onFragmentLongClick = onFragmentLongClick;
+    }
+
+    public interface OnFragmentLongClick{
+        void mapNeedDeleteMarker(LatLng latLng);
+    }
+
+
+
 }

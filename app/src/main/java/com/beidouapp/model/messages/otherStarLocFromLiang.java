@@ -26,6 +26,16 @@ public class otherStarLocFromLiang {
         private String coordName;
         private int id;
         private String coordLat;
+        private String CoordTag;
+
+        public String getCoordTag() {
+            return CoordTag;
+        }
+
+        public void setCoordTag(String coordTag) {
+            CoordTag = coordTag;
+        }
+
         public void setCoordDesc(String coordDesc) {
             this.coordDesc = coordDesc;
         }

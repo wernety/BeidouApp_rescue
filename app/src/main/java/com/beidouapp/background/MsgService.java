@@ -121,19 +121,19 @@ public class MsgService extends Service {
      * @param message
      */
     public void sendMessage(String message){
-        if (NetStatus == 1) {
+//        if (NetStatus == 1) {
+//            msgLink.webSocket.send(message);
+//        }
+//        if (NetStatus == 2) {
             msgLink.webSocket.send(message);
-        }
-        if (NetStatus == 2) {
-            msgLink.webSocket.send(message);
-        }
-
-        if (NetStatus == 3) {
-        }
-        if (NetStatus == 4) {
-        }
-        if (NetStatus == 0) {
-        }
+//        }
+//
+//        if (NetStatus == 3) {
+//        }
+//        if (NetStatus == 4) {
+//        }
+//        if (NetStatus == 0) {
+//        }
     }
 
 
@@ -171,8 +171,10 @@ public class MsgService extends Service {
             switch (netStatus){
                 case 0:{break;}
                 case 1:{NetLinking();break;}
-                case 2:{BluetoothLinking();break;}
-                case 3:{BeidouLinking();break;}
+//                case 2:{BluetoothLinking();break;}
+                case 2:{NetLinking();break;}
+//                case 3:{BeidouLinking();break;}
+                case 3:{NetLinking();break;}
                 default:break;
             }
         }
