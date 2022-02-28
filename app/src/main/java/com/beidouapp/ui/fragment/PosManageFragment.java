@@ -4,6 +4,9 @@ import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -46,7 +49,7 @@ import okhttp3.Response;
  * Use the  factory method to
  * create an instance of this fragment.
  */
-public class PosManageFragment extends Fragment implements View.OnClickListener {
+public class PosManageFragment extends Fragment implements View.OnClickListener, SensorEventListener {
 
 
     private Button btnSelfLoc;
@@ -297,6 +300,15 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
         }
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 
 
     //回调接口，回调给MainActivity

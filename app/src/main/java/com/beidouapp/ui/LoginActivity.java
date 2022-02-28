@@ -86,10 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                 username = userNameEditText.getText().toString();
                 password = userPasswordEditText.getText().toString();
                 if (TextUtils.isEmpty(username)||TextUtils.isEmpty(password)){
-                    Toast.makeText(LoginActivity.this, "进入开发者状态", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
+                    Toast.makeText(LoginActivity.this, "大哥，用户或者密码少填了一个", Toast.LENGTH_LONG).show();
                 }else {
                     loginByPost(username, password);
                 }
