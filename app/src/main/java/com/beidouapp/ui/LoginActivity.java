@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -51,6 +52,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText userNameEditText, userPasswordEditText;
     private Button loginButton;
+    private Button swichButton;
+    private boolean mode = true; //true为隐藏密码
     private String token;
     private String username;
     private String password;
@@ -73,6 +76,7 @@ public class LoginActivity extends AppCompatActivity {
         userNameEditText = (EditText) findViewById(R.id.edt_username);
         userPasswordEditText = (EditText) findViewById(R.id.edt_password);
         loginButton = (Button) findViewById(R.id.btn_login);
+        swichButton = (Button) findViewById(R.id.btn_swich_psw);
     }
 
     private void initListener(){
@@ -91,7 +95,29 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+        swichButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (v.getId() == R.id.btn_swich_psw) {//从隐藏变显示
+                    if (mode) {
+                        userPasswordEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                        //为了点击之后输入框光标不变
+                        userPasswordEditText.setSelection(userPasswordEditText.getText().length());
+                        swichButton.setBackgroundResource(R.drawable.no_eye);
+                        mode = !mode;
+                    } else {
+                        userPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        //为了点击之后输入框光标不变
+                        userPasswordEditText.setSelection(userPasswordEditText.getText().length());
+                        swichButton.setBackgroundResource(R.drawable.eye);
+                        mode = !mode;
+                    }
+                }
+            }
+        });
     }
+
 
     private void checkPermissions(){
         List<String> permissionList = new ArrayList<>();
