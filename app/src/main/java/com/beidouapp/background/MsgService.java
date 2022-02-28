@@ -134,15 +134,6 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
 
 
     /**
-     * 发送消息通知
-     * @param content
-     */
-    private void SendNotification(String content) {
-    }
-
-
-
-    /**
      * 连接网络
      */
     public class Link {
@@ -213,8 +204,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 public void onClosing(WebSocket webSocket, int code, String reason) {
                     super.onClosing(webSocket, code, reason);
                     Log.d("WebSocket", "onClosing");
-                    if (NetworkManager.isWIFI(MsgService.this) ||
-                    NetworkManager.isMobile(MsgService.this)) {
+                    if (netStatus == NetworkManager.TYPE_WIFI_MOBILE) {
                         NetLinking();
                     }
                 }
@@ -223,8 +213,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
                     super.onFailure(webSocket, t, response);
                     Log.d("WebSocket", "onFailure");
-                    if (NetworkManager.isWIFI(MsgService.this) ||
-                            NetworkManager.isMobile(MsgService.this)) {
+                    if (netStatus == NetworkManager.TYPE_WIFI_MOBILE) {
                         NetLinking();
                     }
                 }
@@ -418,6 +407,8 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
     @Override
     public void onDisconnect() {
         NetStatus = NetworkManager.TYPE_NOT_CONNECT;
+        msgLink.setNetStatus(NetStatus);
+        msgLink.linkServer();
     }
 
     @Override
@@ -430,5 +421,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
     @Override
     public void onBlueToothConnect() {
         NetStatus = NetworkManager.TYPE_BLUETOOTH;
+        msgLink.setNetStatus(NetStatus);
+        msgLink.linkServer();
     }
 }
