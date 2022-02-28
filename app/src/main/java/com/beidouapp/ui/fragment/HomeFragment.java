@@ -813,14 +813,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     @Override
     public void onStart() {
         super.onStart();
-        myOrientationListener.start();
+//        myOrientationListener.start();
         Log.d("zw", "onStart: Fragment开始实现");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        myOrientationListener.stop();
+//        myOrientationListener.stop();
 
     }
 
@@ -1764,6 +1764,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     @Override
     public void onSensorChanged(SensorEvent event) {
         float degree = Math.round(event.values[0]);
+        mCurrentDir = degree;
         Log.d("zw", "onSensorChanged: 此时的角度为" + degree);
         RotateAnimation ra = new RotateAnimation(
                 currentDegree,
