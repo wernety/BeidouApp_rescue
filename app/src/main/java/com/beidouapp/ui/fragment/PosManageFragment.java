@@ -26,6 +26,7 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.mapapi.model.LatLng;
 import com.beidouapp.R;
 import com.beidouapp.model.messages.otherStarLocFromLiang;
 import com.beidouapp.model.utils.JSONUtils;
@@ -121,6 +122,16 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
                             Log.d("zw", "mapNeedChange: 第三次回调开始");
                             BackToMainListener.changeMap(selfPos);
 //                    Log.d("zw", "mapNeedChange: 第三次回调的参数是：" + selfPos.toString());
+                        }
+                    }
+                });
+                selfFragment.setOnFragmentLongClick(new selfFragment.OnFragmentLongClick() {
+                    @Override
+                    public void mapNeedDeleteMarker(starPos selfPos) {
+                        Log.d("zw", "mapNeedDeleteMarker: 删除marker的第二次回调成功");
+                        if (BackToMainListener != null){
+                            Log.d("zw", "mapNeedDeleteMarker: 第三次回调开始");
+                            BackToMainListener.deleteMapMarker(selfPos);
                         }
                     }
                 });
@@ -291,6 +302,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
     //回调接口，回调给MainActivity
     public interface BackToMainListener{
         void changeMap(starPos selfPos);
+        void deleteMapMarker(starPos selfPos);
     }
 
 

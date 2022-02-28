@@ -247,8 +247,7 @@ public class selfFragment extends Fragment {
      */
     private void deleteMapMarker(starPos selfPos) {
         if (onFragmentLongClick != null){
-            LatLng latLng = new LatLng(Double.parseDouble(selfPos.getLontitude()), Double.parseDouble(selfPos.getLatitude()));
-            onFragmentLongClick.mapNeedDeleteMarker(latLng);
+            onFragmentLongClick.mapNeedDeleteMarker(selfPos);
         }
     }
 
@@ -317,7 +316,7 @@ public class selfFragment extends Fragment {
     }
 
     public interface OnFragmentLongClick{
-        void mapNeedDeleteMarker(LatLng latLng);
+        void mapNeedDeleteMarker(starPos selfPos);
     }
 
 

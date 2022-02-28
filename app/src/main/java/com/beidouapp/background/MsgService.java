@@ -407,21 +407,69 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
     @Override
     public void onDisconnect() {
         NetStatus = NetworkManager.TYPE_NOT_CONNECT;
-        msgLink.setNetStatus(NetStatus);
-        msgLink.linkServer();
+        Log.d("zw", "onDisconnect: 此时的状态" + NetStatus);
+        //等2秒
+        int connectivityStatus = NetworkManager.getConnectivityStatus(this);
+        if (connectivityStatus == NetStatus){
+            msgLink.setNetStatus(NetStatus);
+            msgLink.linkServer();
+        }else{
+            switch (connectivityStatus){
+                case NetworkManager.TYPE_WIFI_MOBILE:{
+                    onWIFIMobileConnect();
+                    break;
+                }
+                case NetworkManager.TYPE_BLUETOOTH:{
+                    onBlueToothConnect();
+                    break;
+                } default:break;
+            }
+        }
     }
 
     @Override
     public void onWIFIMobileConnect() {
         NetStatus = NetworkManager.TYPE_WIFI_MOBILE;
-        msgLink.setNetStatus(NetStatus);
-        msgLink.linkServer();
+        Log.d("zw", "onWIFIMobileConnect: 此时的状态" + NetStatus);
+        //等两秒
+        int connectivityStatus = NetworkManager.getConnectivityStatus(this);
+        if (connectivityStatus == NetStatus){
+            msgLink.setNetStatus(NetStatus);
+            msgLink.linkServer();
+        }else{
+            switch (connectivityStatus){
+                case NetworkManager.TYPE_NOT_CONNECT:{
+                    onDisconnect();
+                    break;
+                }
+                case NetworkManager.TYPE_BLUETOOTH:{
+                    onBlueToothConnect();
+                    break;
+                } default:break;
+            }
+        }
     }
 
     @Override
     public void onBlueToothConnect() {
         NetStatus = NetworkManager.TYPE_BLUETOOTH;
-        msgLink.setNetStatus(NetStatus);
-        msgLink.linkServer();
+        Log.d("zw", "onBlueToothConnect: 此时的状态" + NetStatus);
+        //等两秒
+        int connectivityStatus = NetworkManager.getConnectivityStatus(this);
+        if (connectivityStatus == NetStatus){
+            msgLink.setNetStatus(NetStatus);
+            msgLink.linkServer();
+        }else{
+            switch (connectivityStatus){
+                case NetworkManager.TYPE_NOT_CONNECT:{
+                    onDisconnect();
+                    break;
+                }
+                case NetworkManager.TYPE_WIFI_MOBILE:{
+                    onWIFIMobileConnect();
+                    break;
+                } default:break;
+            }
+        }
     }
 }

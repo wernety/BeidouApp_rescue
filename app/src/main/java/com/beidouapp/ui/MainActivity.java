@@ -23,6 +23,7 @@ import android.view.Window;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.mapapi.model.LatLng;
 import com.beidouapp.R;
 import com.beidouapp.background.MsgService;
 import com.beidouapp.model.DataBase.DBHelper;
@@ -250,11 +251,24 @@ public class MainActivity extends AppCompatActivity {
             public void changeMap(starPos selfPos) {
                 Log.d("zw", "changeMap: 第三次回调成功");
                 bundle.putSerializable("selfPos", selfPos);
+                bundle.putInt("delete",0); //0不删除
                 switchFragment(homeFragment);
                 lastFragment = posManageFragment;
                 bottomNavigationView.setSelectedItemId(R.id.mainAct_bottom_home);
 //                bundle.putString();
             }
+
+            @Override
+            public void deleteMapMarker(starPos selfPos) {
+                Log.d("zw", "deleteMapMarker: 删除marker的第三次回调成功");
+                bundle.putSerializable("selfPos", selfPos);
+                bundle.putInt("delete", 1); //delete为1是删除这个点
+                switchFragment(homeFragment);
+                lastFragment = posManageFragment;
+                bottomNavigationView.setSelectedItemId(R.id.mainAct_bottom_home);
+            }
+
+
         });
     }
 

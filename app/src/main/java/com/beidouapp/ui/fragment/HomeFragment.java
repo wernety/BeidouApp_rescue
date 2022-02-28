@@ -215,6 +215,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private BaiduMap.OnPolylineClickListener listenerTrace;
     private int n = 0;
     private Handler handlerMyweather;
+    private int delete;
 
 
     public HomeFragment() {
@@ -826,12 +827,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         if(!hidden){
             Log.d("zw", "onResume: Fragment继续呈现");
             selfPos = (starPos) getArguments().getSerializable("selfPos");
+            delete = getArguments().getInt("delete");
             if(selfPos != null){
                 Log.d("zw", "onResume: 设置回传的位置");
                 show_selfbuild_loc(selfPos);
             }
             selfPos = null;
             getArguments().putSerializable("selfPos", selfPos);
+
+
         }
     }
 
