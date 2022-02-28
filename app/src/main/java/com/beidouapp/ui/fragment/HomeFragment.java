@@ -42,6 +42,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -133,7 +134,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private BaiduMap mMap;    //地图
     private boolean ifFirst = true;  //判断是否第一次
     private ImageButton btn1;   //
-    private ImageButton btn2;   //
     private ImageButton traceBtn;
     private ImageButton btn3;   //
     private ImageButton btn4;   //
@@ -289,11 +289,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         application = (DemoApplication) getActivity().getApplicationContext();
         mapView = view.findViewById(R.id.mMV);
         btn1 = view.findViewById(R.id.dingwei);
-        btn2 = view.findViewById(R.id.download);
         otherLocbtn = view.findViewById(R.id.people);
         traceBtn = view.findViewById(R.id.trace);
         btn1.setOnClickListener(this);
-        btn2.setOnClickListener(this);
         otherLocbtn.setOnClickListener(this);
         traceBtn.setOnClickListener(this);
         mMap = mapView.getMap();
@@ -924,10 +922,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 show_my_loc(String.valueOf(latitude), String.valueOf(lontitude), mCurrentDir);
                 testRequest();
 //                sendRequestForLoc(username);
-                break;
-            }
-            case R.id.download:{
-                downLoadMap();
                 break;
             }
             case R.id.people:{
