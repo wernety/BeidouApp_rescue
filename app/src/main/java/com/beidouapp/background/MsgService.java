@@ -261,6 +261,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         HeartbeatMsg heartbeatMsg = new HeartbeatMsg(sysProperty,appProperty,body);
 
         String json = JSONUtils.sendJSON(heartbeatMsg);
+        Log.d("zw", "sendHeart: 发送给福大的状态信息为：" + json);
         OkHttpUtils.getInstance(MsgService.this).postBD("http://119.3.130.87:50099/whbdApi/device/report/status", json, new OkHttpUtils.MyCallback() {
             @Override
             public void success(Response response) throws IOException {

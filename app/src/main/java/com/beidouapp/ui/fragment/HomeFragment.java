@@ -36,6 +36,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroupOverlay;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
@@ -295,6 +296,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         otherLocbtn.setOnClickListener(this);
         traceBtn.setOnClickListener(this);
         mMap = mapView.getMap();
+
         textView1 = view.findViewById(R.id.weatherTemperature);
         textView2 = view.findViewById(R.id.longitudeLatitude);
         textView3 = view.findViewById(R.id.altitude);
@@ -827,8 +829,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             selfPos = (starPos) getArguments().getSerializable("selfPos");
             delete = getArguments().getInt("delete");
             if(selfPos != null){
-                Log.d("zw", "onResume: 设置回传的位置");
-                show_selfbuild_loc(selfPos);
+                    Log.d("zw", "onResume: 显示回传的位置");
+                    show_selfbuild_loc(selfPos,delete);
             }
             selfPos = null;
             getArguments().putSerializable("selfPos", selfPos);
@@ -848,7 +850,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      * 显示从PosManagerFragment处返回的点
      * @param selfPos
      */
-    private void show_selfbuild_loc(starPos selfPos) {
+    private void show_selfbuild_loc(starPos selfPos, int delete) {
         double latitude = Double.parseDouble(selfPos.getLatitude());
         double lontitude = Double.parseDouble(selfPos.getLontitude());
 
@@ -894,13 +896,40 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         markerOptions.icon(bitmap);
         markerOptions.zIndex(17);   //层级
         markerOptions.extraInfo(bundle);
+        markerOptions.scaleX(0.1f);
+        markerOptions.scaleY(0.1f);
 
-        Marker marker = (Marker) mMap.addOverlay(markerOptions);
+
+
+        Marker markerFromPosManager = (Marker) mMap.addOverlay(markerOptions);
+        Log.d("zw", "show_selfbuild_loc: 此时的delete是" + delete);
+        if (delete == 1){
+            Log.d("zw", "show_selfbuild_loc: 执行删除");
+            markerFromPosManager.remove();
+            markerFromPosManager.remove();//第二次没有执行
+        }
 
 //在地图上添加Marker，并显示
 //        Overlay markerForResponseFromLocManager = mMap.addOverlay(option);
         Log.d("zw", "show_selfbuild_loc: 设置回传的位置成功");
     }
+
+    /**
+     * @return null
+     * @Title
+     * @parameter
+     * @Description 删除在PosManager列表中删除的点
+     * @author chx
+     * @data 2022/2/28/028  15:53
+     */
+    private void delete_selfbuild_loc(starPos selfPos) {
+        double latitude = Double.parseDouble(selfPos.getLatitude());
+        double lontitude = Double.parseDouble(selfPos.getLontitude());
+
+        List<com.baidu.platform.comapi.map.Overlay> overlays = mMap.getGLMapView().getOverlays();
+    }
+
+
 
     @Override
     public void onDestroy() {
@@ -974,7 +1003,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void run() {
                         Log.d("zw", "run: 开始进行网络请求");
-                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/getStatus1", new OkHttpUtils.MyCallback() {
+                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).
+                                get("http://120.27.249.235:8081/getStatus1",
+                                        new OkHttpUtils.MyCallback() {
                             @Override
                             public void success(Response response) throws IOException {
                                 bodyOtherLoc = response.body().string();
@@ -1050,11 +1081,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void run() {
                         Log.d("zw", "run: 开始进行状态请求");
-                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://139.196.122.222:8081/getStatus1", new OkHttpUtils.MyCallback() {
+                        OkHttpUtils.getInstance(getActivity().getApplicationContext()).
+                                get("http://120.27.249.235:8081/getStatus1",
+                                        new OkHttpUtils.MyCallback() {
                             @Override
                             public void success(Response response) throws IOException {
                                 bodyOtherLoc = response.body().string(); //状态信息
-//                                Log.d("zw", "success: post亮哥的服务器得到的数据" + bodyOtherLoc);
+                                Log.d("zw", "success: post亮哥的服务器得到的数据" + bodyOtherLoc);
                                 Message message = new Message();
                                 message.what = 1;
                                 handlerTrace.sendMessage(message);

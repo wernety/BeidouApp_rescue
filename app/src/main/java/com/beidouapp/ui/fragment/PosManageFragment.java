@@ -148,7 +148,7 @@ public class PosManageFragment extends Fragment implements View.OnClickListener 
                     threadForOtherLoc = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).post("http://120.27.249.235:8081/getPositionByStatus/1",
+                            OkHttpUtils.getInstance(getActivity().getApplicationContext()).get("http://120.27.249.235:8081/getPositionByStatus/1",
                                     new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {

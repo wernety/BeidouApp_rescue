@@ -93,9 +93,9 @@ public class other_loc extends AppCompatActivity implements View.OnClickListener
 //        Log.d("zw", "onCreate: 从亮哥那儿拿到的消息，显示在other_loc中：" + bodyOtherLoc);
         onlinestetusON = JSONUtils.receiveOnlinestetusONJson(bodyOtherLoc);
         try {
-            cntDeviceID = onlinestetusON.getTotalCount();
-            deviceIDs = onlinestetusON.getDeviceId();
-            onlineStatus = onlinestetusON.getStatus();
+            cntDeviceID = onlinestetusON.getData().getTotalCount();
+            deviceIDs = onlinestetusON.getData().getDeviceId();
+            onlineStatus = onlinestetusON.getData().getStatus();
         }catch (Exception e){
             cntDeviceID = 0;
             deviceIDs = new ArrayList<String>();

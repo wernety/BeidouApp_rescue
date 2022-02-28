@@ -5,49 +5,49 @@ import java.util.List;
 public class otherStarLocFromLiang {
 
 
-        private List<Data> data;
-        public void setData(List<Data> data) {
-            this.data = data;
-        }
-        public List<Data> getData() {
-            return data;
-        }
+    private int code;
+    private String msg;
+    private List<Data> data;
+    public void setCode(int code) {
+        this.code = code;
+    }
+    public int getCode() {
+        return code;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setData(List<Data> data) {
+        this.data = data;
+    }
+    public List<Data> getData() {
+        return data;
+    }
 
 
     public static class Data {
 
-        private String coordDesc;
-        private String lngDir;
-        private String releaseUserID;
-        private String latDir;
-        private String coordLng;
-        private int coordLegend;
-        private int coordStatus;
-        private String coordName;
         private int id;
+        private String releaseUserID;
+        private String coordLng;
         private String coordLat;
-        private String CoordTag;
-
-        public String getCoordTag() {
-            return CoordTag;
+        private String lngDir;
+        private String latDir;
+        private int coordLegend;
+        private String coordName;
+        private String coordDesc;
+        private int coordStatus;
+        private String coordTag;
+        public void setId(int id) {
+            this.id = id;
         }
-
-        public void setCoordTag(String coordTag) {
-            CoordTag = coordTag;
-        }
-
-        public void setCoordDesc(String coordDesc) {
-            this.coordDesc = coordDesc;
-        }
-        public String getCoordDesc() {
-            return coordDesc;
-        }
-
-        public void setLngDir(String lngDir) {
-            this.lngDir = lngDir;
-        }
-        public String getLngDir() {
-            return lngDir;
+        public int getId() {
+            return id;
         }
 
         public void setReleaseUserID(String releaseUserID) {
@@ -57,18 +57,32 @@ public class otherStarLocFromLiang {
             return releaseUserID;
         }
 
-        public void setLatDir(String latDir) {
-            this.latDir = latDir;
-        }
-        public String getLatDir() {
-            return latDir;
-        }
-
         public void setCoordLng(String coordLng) {
             this.coordLng = coordLng;
         }
         public String getCoordLng() {
             return coordLng;
+        }
+
+        public void setCoordLat(String coordLat) {
+            this.coordLat = coordLat;
+        }
+        public String getCoordLat() {
+            return coordLat;
+        }
+
+        public void setLngDir(String lngDir) {
+            this.lngDir = lngDir;
+        }
+        public String getLngDir() {
+            return lngDir;
+        }
+
+        public void setLatDir(String latDir) {
+            this.latDir = latDir;
+        }
+        public String getLatDir() {
+            return latDir;
         }
 
         public void setCoordLegend(int coordLegend) {
@@ -78,13 +92,6 @@ public class otherStarLocFromLiang {
             return coordLegend;
         }
 
-        public void setCoordStatus(int coordStatus) {
-            this.coordStatus = coordStatus;
-        }
-        public int getCoordStatus() {
-            return coordStatus;
-        }
-
         public void setCoordName(String coordName) {
             this.coordName = coordName;
         }
@@ -92,18 +99,25 @@ public class otherStarLocFromLiang {
             return coordName;
         }
 
-        public void setId(int id) {
-            this.id = id;
+        public void setCoordDesc(String coordDesc) {
+            this.coordDesc = coordDesc;
         }
-        public int getId() {
-            return id;
+        public String getCoordDesc() {
+            return coordDesc;
         }
 
-        public void setCoordLat(String coordLat) {
-            this.coordLat = coordLat;
+        public void setCoordStatus(int coordStatus) {
+            this.coordStatus = coordStatus;
         }
-        public String getCoordLat() {
-            return coordLat;
+        public int getCoordStatus() {
+            return coordStatus;
+        }
+
+        public void setCoordTag(String coordTag) {
+            this.coordTag = coordTag;
+        }
+        public String getCoordTag() {
+            return coordTag;
         }
 
     }
