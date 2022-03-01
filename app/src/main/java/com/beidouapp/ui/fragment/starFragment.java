@@ -37,6 +37,7 @@ public class starFragment extends Fragment {
     private OnFragmentClick onFragmentClick;
     private starposDB starPosdb;
     private starPos starPos;
+    private OnFragmentLongClick onFragmentLongClick;
 
     @Nullable
     @Override
@@ -110,6 +111,9 @@ public class starFragment extends Fragment {
      */
     private void deleteDB(starposDB starPosdb) {
         Log.d("zw", "deleteDB: 开始删除starPosDB数据库，用户是:" + application.getUserID());
+        if (onFragmentLongClick!=null){
+            onFragmentLongClick.mapNeedDeleteMarker(starPos);
+        }
         LitePal.deleteAll(starposDB.class, "latitude = ? and lontitude=? and selfID=?",
                 starPosdb.getLatitude(), starPosdb.getLontitude(), application.getUserID());
     }
@@ -127,5 +131,23 @@ public class starFragment extends Fragment {
 
     public interface OnFragmentClick{
         void mapNeedChange(starPos selfPos);
+    }
+
+
+    /**
+     * @param
+     * @return null
+     * @Title
+     * @parameter
+     * @Description  同selfFragment长按机制相同
+     * @author chx
+     * @data 2022/3/1/001  15:26
+     */
+    public void setOnFragmentLongClick(OnFragmentLongClick onFragmentLongClick){
+        this.onFragmentLongClick = onFragmentLongClick;
+    }
+
+    public interface OnFragmentLongClick{
+        void mapNeedDeleteMarker(starPos selfPos);
     }
 }

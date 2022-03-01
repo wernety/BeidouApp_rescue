@@ -110,6 +110,16 @@ public class PosManageFragment extends Fragment implements View.OnClickListener,
                         }
                     }
                 });
+                starFragment.setOnFragmentLongClick(new starFragment.OnFragmentLongClick() {
+                    @Override
+                    public void mapNeedDeleteMarker(starPos selfPos) {
+                        Log.d("zw", "mapNeedDeleteMarker: 删除marker的第二次回调成功");
+                        if (BackToMainListener != null){
+                            Log.d("zw", "mapNeedDeleteMarker: 第三次回调开始");
+                            BackToMainListener.deleteMapMarker(selfPos);
+                        }
+                    }
+                });
                 Log.d("zw", "onClick: 切换收藏位置点");
                 replaceFragement(starFragment);
                 break;
@@ -291,6 +301,16 @@ public class PosManageFragment extends Fragment implements View.OnClickListener,
                             Log.d("zw", "mapNeedChange: starPos第三次回调开始");
                             BackToMainListener.changeMap(starPos);
 //                    Log.d("zw", "mapNeedChange: 第三次回调的参数是：" + selfPos.toString());
+                        }
+                    }
+                });
+                starFragment.setOnFragmentLongClick(new starFragment.OnFragmentLongClick() {
+                    @Override
+                    public void mapNeedDeleteMarker(starPos selfPos) {
+                        Log.d("zw", "mapNeedDeleteMarker:star 删除marker的第二次回调成功");
+                        if (BackToMainListener != null){
+                            Log.d("zw", "mapNeedDeleteMarker:star 第三次回调开始");
+                            BackToMainListener.deleteMapMarker(selfPos);
                         }
                     }
                 });

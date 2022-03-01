@@ -80,6 +80,7 @@ import com.baidu.mapapi.map.offline.MKOLUpdateElement;
 import com.baidu.mapapi.map.offline.MKOfflineMap;
 import com.baidu.mapapi.map.offline.MKOfflineMapListener;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.model.LatLngBounds;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.Pos;
@@ -841,8 +842,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
             selfPos = (starPos) getArguments().getSerializable("selfPos");
             delete = getArguments().getInt("delete");
             if(selfPos != null){
+                if (delete == 0){
                     Log.d("zw", "onResume: 显示回传的位置");
                     show_selfbuild_loc(selfPos,delete);
+                }else {
+                    Log.d("zw", "onHiddenChanged: 删除在PosManager中删除的marker");
+                    delete_selfbuild_loc(selfPos);
+                }
             }
             selfPos = null;
             getArguments().putSerializable("selfPos", selfPos);
@@ -898,15 +904,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
             }
         }
 
-//        OverlayOptions option = new MarkerOptions()
-//                .position(point)
-//                .icon(bitmap)
-//                .extraInfo(bundle);
-
         markerOptions = new MarkerOptions();
-//
         markerOptions.position(point);
-//        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.icon_mark);
         markerOptions.icon(bitmap);
         markerOptions.zIndex(17);   //层级
         markerOptions.extraInfo(bundle);
@@ -914,17 +913,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         markerOptions.scaleY(0.1f);
 
 
-
-        Marker markerFromPosManager = (Marker) mMap.addOverlay(markerOptions);
-        Log.d("zw", "show_selfbuild_loc: 此时的delete是" + delete);
-        if (delete == 1){
-            Log.d("zw", "show_selfbuild_loc: 执行删除");
-            markerFromPosManager.remove();
-            markerFromPosManager.remove();//第二次没有执行
+        LatLngBounds build = new LatLngBounds.Builder().include(point).build();
+        Log.d("z", "delete_selfbuild_loc: 此时的build是" + build);
+        List<Marker> markersInBounds = mMap.getMarkersInBounds(build);
+        Log.d("zw", "delete_selfbuild_loc: 此时的marker有" + markersInBounds);
+        if (markersInBounds!=null){
+            Log.d("zw", "show_selfbuild_loc: 重复添加marker了，所以在这里不添加");
+        }else{
+            Marker markerFromPosManager = (Marker) mMap.addOverlay(markerOptions);
         }
-
-//在地图上添加Marker，并显示
-//        Overlay markerForResponseFromLocManager = mMap.addOverlay(option);
         Log.d("zw", "show_selfbuild_loc: 设置回传的位置成功");
     }
 
@@ -937,10 +934,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
      * @data 2022/2/28/028  15:53
      */
     private void delete_selfbuild_loc(starPos selfPos) {
-        double latitude = Double.parseDouble(selfPos.getLatitude());
+        double latitude = Double.parseDouble(selfPos.getLatitude());   //原坐标点
         double lontitude = Double.parseDouble(selfPos.getLontitude());
-
-        List<com.baidu.platform.comapi.map.Overlay> overlays = mMap.getGLMapView().getOverlays();
+        LatLng latLng = new LatLng(latitude, lontitude);
+        LatLngBounds build = new LatLngBounds.Builder().include(latLng).build();
+        Log.d("z", "delete_selfbuild_loc: 此时的build是" + build);
+        List<Marker> markersInBounds = mMap.getMarkersInBounds(build);
+        Log.d("zw", "delete_selfbuild_loc: 此时的marker有" + markersInBounds);
+        if (markersInBounds!=null){
+            markersInBounds.get(0).remove();
+        }
     }
 
 
