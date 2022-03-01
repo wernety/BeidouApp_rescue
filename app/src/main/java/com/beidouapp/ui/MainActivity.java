@@ -1,5 +1,7 @@
 package com.beidouapp.ui;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,6 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,6 +25,8 @@ import android.os.Message;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -99,12 +107,10 @@ public class MainActivity extends AppCompatActivity {
     private Intent intentservice;
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.activity_main);
@@ -282,12 +288,46 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-    }
+        }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // to stop the listener and save battery
+//        mSensorManager.unregisterListener(this);
     }
+
+//    @Override
+//    public void onSensorChanged(SensorEvent event) {
+//
+//        // get the angle around the z-axis rotated
+//        float degree = Math.round(event.values[0]);
+//        Log.d("活动中的传感器：", "onSensorChanged: "+Float.toString(degree) + " degrees");
+//
+////        // create a rotation animation (reverse turn degree degrees)
+////        RotateAnimation ra = new RotateAnimation(
+////                currentDegree,
+////                -degree,
+////                Animation.RELATIVE_TO_SELF, 0.5f,
+////                Animation.RELATIVE_TO_SELF,
+////                0.5f);
+////
+////        // how long the animation will take place
+////        ra.setDuration(210);
+////
+////        // set the animation after the end of the reservation status
+////        ra.setFillAfter(true);
+////
+////        // Start the animation
+////        image.startAnimation(ra);
+////        currentDegree = -degree;
+//
+//    }
+//
+//    @Override
+//    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+//        // not in use
+//    }
 
     @Override
     protected void onDestroy() {
@@ -306,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 
     private void generateToken(long timestampTmp, Context context) {
         String appId = "AppId5358eeb9b2ee399d308b6b98e98fa5c6";

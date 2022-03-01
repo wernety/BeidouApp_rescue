@@ -2,13 +2,16 @@ package com.beidouapp.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Process;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -16,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,13 +55,16 @@ import okhttp3.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText userNameEditText, userPasswordEditText;
+    private CheckBox rememberCheck;
     private Button loginButton;
     private Button swichButton;
-    private boolean mode = true; //true为隐藏密码
+    private boolean mode = true;
+    private boolean ifRemember = true; //是否记住密码
     private String token;
     private String username;
     private String password;
     private DemoApplication application;
+    private SharedPreferences sp;
 
 
     @Override
@@ -77,6 +84,14 @@ public class LoginActivity extends AppCompatActivity {
         userPasswordEditText = (EditText) findViewById(R.id.edt_password);
         loginButton = (Button) findViewById(R.id.btn_login);
         swichButton = (Button) findViewById(R.id.btn_swich_psw);
+        rememberCheck = (CheckBox) findViewById(R.id.remember);
+        // 实例化SharedPreferences
+        sp = getSharedPreferences("user", MODE_PRIVATE);
+        //获取文件中的值
+        username = sp.getString("name", ""); //第二个参数为不能正常获取时的值
+        password = sp.getString("pwd", "");
+        userNameEditText.setText(username);
+        userPasswordEditText.setText(password);
     }
 
     private void initListener(){
@@ -95,22 +110,31 @@ public class LoginActivity extends AppCompatActivity {
         swichButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (v.getId() == R.id.btn_swich_psw) {//从隐藏变显示
                     if (mode) {
                         userPasswordEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                         //为了点击之后输入框光标不变
                         userPasswordEditText.setSelection(userPasswordEditText.getText().length());
-                        swichButton.setBackgroundResource(R.drawable.no_eye);
-                        mode = !mode;
+                        swichButton.setBackgroundResource(R.drawable.eye);
                     } else {
                         userPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                         //为了点击之后输入框光标不变
                         userPasswordEditText.setSelection(userPasswordEditText.getText().length());
-                        swichButton.setBackgroundResource(R.drawable.eye);
-                        mode = !mode;
+                        swichButton.setBackgroundResource(R.drawable.no_eye);
                     }
+                    mode = !mode;
                 }
+            }
+        });
+        rememberCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (rememberCheck.isChecked()) {
+                    ifRemember = true;
+                    Toast.makeText(LoginActivity.this, "记住密码", Toast.LENGTH_LONG).show();}
+                else {
+                    ifRemember = false;
+                    Toast.makeText(LoginActivity.this, "不记住", Toast.LENGTH_LONG).show();}
             }
         });
     }
@@ -195,6 +219,7 @@ public class LoginActivity extends AppCompatActivity {
             User4Login user4Login = new User4Login(username, password);
             String json = JSONUtils.sendJSON(user4Login);
             Log.d("json", json);
+
             OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/login", json,
                     new OkHttpUtils.MyCallback() {
                         @Override
@@ -203,6 +228,19 @@ public class LoginActivity extends AppCompatActivity {
                             int code = object.getInteger("code");
                             if (code == 200) {
                                 token = object.getString("token");
+                                // 获取sp的编辑器
+                                SharedPreferences.Editor edit = sp.edit();
+                                if(ifRemember){
+                                    edit.putString("name", username);
+                                    edit.putString("pwd", password);
+                                    // 把edit进行提交
+                                    edit.commit();
+                                }
+                                else {
+                                    // 清除保存的信息
+                                    edit.clear();
+                                    edit.commit();
+                                }
                                 Message message = new Message();
                                 message.what = 1;
                                 handler.sendMessage(message);
@@ -249,19 +287,21 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {                         //若无读写权限，结束程序
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this,"谢谢！",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "谢谢！", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, "未授权！", Toast.LENGTH_SHORT).show();
-                    android.os.Process.killProcess(android.os.Process.myPid());
+                    Process.killProcess(Process.myPid());
                     System.exit(0);
                 }
                 break;
-            default:break;
+            default:
+                break;
         }
-    }
+    }                                                                                                                                                               
 
     /**
      * @param

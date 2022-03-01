@@ -313,7 +313,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         textView3 = view.findViewById(R.id.altitude);
         textView4 = view.findViewById(R.id.velocity);
         textView5 = view.findViewById(R.id.direction);
-        compass = view.findViewById(R.id.compass);
+        compass = view.findViewById(R.id.imageViewCompass);
     }
 
     private void iniMap() {
