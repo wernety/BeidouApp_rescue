@@ -303,6 +303,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         traceBtn.setOnClickListener(this);
         mMap = mapView.getMap();
         mSensorManager = (SensorManager) getActivity().getSystemService(SENSOR_SERVICE);
+        List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        Log.d("zw", "iniAll: 传感器有" + deviceSensors);
 
         textView1 = view.findViewById(R.id.weatherTemperature);
         textView2 = view.findViewById(R.id.longitudeLatitude);
