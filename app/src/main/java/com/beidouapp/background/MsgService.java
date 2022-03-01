@@ -51,7 +51,7 @@ import okhttp3.WebSocketListener;
  */
 
 public class MsgService extends Service implements NetworkChangeReceiver.NetStateChangeObserver {
-    private NetworkManager networkManager;
+    private NetworkManager  networkManager;
     private int NetStatus;
     public Link msgLink;
     private String uid;
@@ -192,12 +192,21 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                     intent.putExtra("message", text);
                     sendBroadcast(intent);
 
-                    Bundle bundle = new Bundle();
-                    bundle.putString("message", text);
-                    Message message = new Message();
-                    message.setData(bundle);
-                    message.what = 1;
-                    write2DBHandler.sendMessage(message);
+                    Message4Receive message4Receive = JSONUtils.receiveJSON(text);
+                    if (message4Receive.getType().equals("MSG")) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("message", text);
+                        Message message = new Message();
+                        message.setData(bundle);
+                        message.what = 1;
+                        write2DBHandler.sendMessage(message);
+                    }
+                    else if (message4Receive.getType().equals("ERR")) {
+                        if (message4Receive.getMsg().equals("用户重复登陆")){
+
+                        }
+                    }
+
                 }
 
                 @Override
@@ -205,6 +214,8 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                     super.onClosing(webSocket, code, reason);
                     Log.d("WebSocket", "onClosing");
                     if (netStatus == NetworkManager.TYPE_WIFI_MOBILE) {
+                        webSocket.close(code,reason);
+                        webSocket = null;
                         NetLinking();
                     }
                 }
@@ -212,10 +223,6 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 @Override
                 public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
                     super.onFailure(webSocket, t, response);
-                    Log.d("WebSocket", "onFailure");
-                    if (netStatus == NetworkManager.TYPE_WIFI_MOBILE) {
-                        NetLinking();
-                    }
                 }
             });
 
@@ -344,7 +351,6 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                     case 1:{
                         String text = message.getData().getString("message");
                         Message4Receive message4Receive = JSONUtils.receiveJSON(text);
-                        Log.d("WebSocket", "onMessage" + message4Receive.toString());
                         if (message4Receive.getType().equals("MSG")) {
                             if (message4Receive.getReceiveType().equals("group")) {
                                 Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
