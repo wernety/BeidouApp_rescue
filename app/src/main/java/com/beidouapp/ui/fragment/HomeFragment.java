@@ -1237,16 +1237,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                             case 1:{
                                 BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.red);
                                 marker.setIcon(bitmapDescriptor);
+                                marker.setScale((float) 0.1);
                                 break;
                             }
                             case 2:{
                                 BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.deepblue);
                                 marker.setIcon(bitmapDescriptor);
+                                marker.setScale((float) 0.1);
                                 break;
                             }
                             case 3:{
                                 BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.yellow);
                                 marker.setIcon(bitmapDescriptor);
+                                marker.setScale((float) 0.1);
                             } default:break;
                         }
 
