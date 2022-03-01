@@ -1,18 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat android:layout_height="match_parent"
+<!--<androidx.appcompat.widget.LinearLayoutCompat android:layout_height="match_parent"-->
+<!--    android:layout_width="match_parent"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    android:orientation="vertical"-->
+<!--    app:divider="@color/black"-->
+<!--    app:showDividers="middle"-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android">-->
+
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:id="@+id/rv_selfloc"-->
+<!--        android:divider="@color/black"-->
+<!--        android:dividerHeight="@dimen/cardview_compat_inset_shadow"/>-->
+
+
+<!--</androidx.appcompat.widget.LinearLayoutCompat>-->
+
+
+<com.scwang.smart.refresh.layout.SmartRefreshLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/refreshLayoutForSelfLoc"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+<com.scwang.smart.refresh.header.ClassicsHeader
     android:layout_width="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    app:divider="@color/black"
-    app:showDividers="middle"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/rv_selfloc"
-        android:divider="@color/black"
-        android:dividerHeight="@dimen/cardview_compat_inset_shadow"/>
+    android:layout_height="wrap_content"/>
+<androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/rv_selfloc"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:overScrollMode="never"
+    android:background="#fff" />
+<com.scwang.smart.refresh.footer.ClassicsFooter
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
 
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+</com.scwang.smart.refresh.layout.SmartRefreshLayout>

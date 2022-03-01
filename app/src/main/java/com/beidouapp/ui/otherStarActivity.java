@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.starposDB;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
+import com.scwang.smart.refresh.layout.listener.OnLoadMoreListener;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
@@ -41,9 +42,13 @@ public class otherStarActivity extends AppCompatActivity {
     private RefreshLayout refreshLayout;
     private RecyclerView recyclerView;
     private List<starLocFormOtherDB> starLocFormOtherDBS;
+    private List<starLocFormOtherDB> starLocFormOtherDBSFather;
     private otherStarLocAdapter otherStarLocAdapter;
     private DemoApplication application;
     private Intent intent;
+    private int i;
+    private int numOfstarLocFormOtherDBSFather;
+    private int order;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,6 +59,7 @@ public class otherStarActivity extends AppCompatActivity {
     }
 
     private void ini() {
+        i = 1;
         application = (DemoApplication) getApplicationContext();
         refreshLayout = (RefreshLayout)findViewById(R.id.refreshLayout);
         recyclerView = findViewById(R.id.recyclerView);
@@ -62,15 +68,11 @@ public class otherStarActivity extends AppCompatActivity {
         recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
                 DividerItemDecoration.VERTICAL));
         refreshLayout.setEnableRefresh(true);
-        refreshLayout.setEnableLoadMore(false);
-        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                Log.d("zw", "onRefresh: 刷新");
-                //refresh时，首先post，然后写库，最后重新加载
-            }
-        });
-        starLocFormOtherDBS = LitePal.findAll(starLocFormOtherDB.class);
+        refreshLayout.setEnableLoadMore(true);
+        starLocFormOtherDBSFather = LitePal.findAll(starLocFormOtherDB.class);
+        starLocFormOtherDBS = starLocFormOtherDBSFather.subList(1,i*5);
+        numOfstarLocFormOtherDBSFather = starLocFormOtherDBSFather.size();
+        order = numOfstarLocFormOtherDBSFather/5;
         Log.d("zw", "ini: 此时starLocFormOtherDB中的数据为" + starLocFormOtherDBS.get(0).getLatitude());
         otherStarLocAdapter = new otherStarLocAdapter(starLocFormOtherDBS);
         recyclerView.setAdapter(otherStarLocAdapter);
@@ -129,6 +131,40 @@ public class otherStarActivity extends AppCompatActivity {
                 }
             }
         });
+        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+                Log.d("zw", "onRefresh: 刷新");
+                recyclerView.setAdapter(otherStarLocAdapter);
+                refreshLayout.finishRefresh();
+                //refresh时，首先post，然后写库，最后重新加载
+            }
+        });
 
+        refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
+                //刷新一次，获得后面5个
+                if(i<order){
+                    Log.d("zw", "onLoadMore: 此时正在加载更多" + i + "  " + numOfstarLocFormOtherDBSFather);
+                    i++;
+                    Log.d("zw", "onLoadMore: 此时正在加载更多，接下来" + i);
+                    starLocFormOtherDBS = starLocFormOtherDBSFather.subList(1,i*5);
+//                    otherStarLocAdapter = new otherStarLocAdapter(starLocFormOtherDBS);
+//                    recyclerView.setAdapter(otherStarLocAdapter);
+                    otherStarLocAdapter.addMore(starLocFormOtherDBS);
+                    refreshLayout.finishLoadMore();
+                }else if(i == order){
+                    i++;
+                    starLocFormOtherDBS = starLocFormOtherDBSFather.subList(1,numOfstarLocFormOtherDBSFather);
+//                    otherStarLocAdapter = new otherStarLocAdapter(starLocFormOtherDBS);
+//                    recyclerView.setAdapter(otherStarLocAdapter);
+                    otherStarLocAdapter.addMore(starLocFormOtherDBS);
+                    refreshLayout.finishLoadMore();
+                }else {
+                    refreshLayout.finishLoadMore();
+                }
+            }
+        });
     }
 }

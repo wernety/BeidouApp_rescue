@@ -32,6 +32,8 @@ import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.selfPosJson;
 import com.beidouapp.ui.DemoApplication;
+import com.scwang.smart.refresh.layout.api.RefreshLayout;
+import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 
 import org.litepal.LitePal;
 
@@ -57,6 +59,7 @@ public class selfFragment extends Fragment {
     private DemoApplication application;
     private starposDB starposDB;
     private OnFragmentLongClick onFragmentLongClick;
+    private RefreshLayout rlForSlefLoc;
 
 
     @Nullable
@@ -81,11 +84,20 @@ public class selfFragment extends Fragment {
      */
     private void ini(View view) {
         application = (DemoApplication) getActivity().getApplicationContext();
+        rlForSlefLoc = view.findViewById(R.id.refreshLayoutForSelfLoc);
         selfRv = view.findViewById(R.id.rv_selfloc);
         selfRv.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext().getApplicationContext(),
                 RecyclerView.VERTICAL, false));
         selfRv.addItemDecoration(new DividerItemDecoration(getActivity().getApplicationContext(),
                 DividerItemDecoration.VERTICAL));
+        rlForSlefLoc.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+
+                refreshLayout.finishRefresh(5);
+                refreshLayout.closeHeaderOrFooter();
+            }
+        });
     }
 
     /**

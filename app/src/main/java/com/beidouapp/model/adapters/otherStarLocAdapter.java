@@ -22,11 +22,12 @@ import java.util.List;
  */
 public class otherStarLocAdapter extends RecyclerView.Adapter<otherStarLocAdapter.otherStarViewHoder>{
 
-    List<starLocFormOtherDB> mlist = LitePal.findAll(starLocFormOtherDB.class);
+    List<starLocFormOtherDB> mlist;
     private setOnItemClickListener setOnItemClickListener;
 
     public otherStarLocAdapter(List<starLocFormOtherDB> starLocFormOtherDBS){
-        Log.d("zw", "otherStarLocAdapter: 此时的otherStarLocAdapter中的数据为 " + mlist.get(0).getLatitude());
+        mlist = starLocFormOtherDBS;
+//        Log.d("zw", "otherStarLocAdapter: 此时的otherStarLocAdapter中的数据为 " + mlist.get(0).getLatitude());
     }
 
     @NonNull
@@ -74,6 +75,11 @@ public class otherStarLocAdapter extends RecyclerView.Adapter<otherStarLocAdapte
     @Override
     public int getItemCount() {
         return mlist.size();
+    }
+
+    public void addMore(List<starLocFormOtherDB> starLocFormOtherDBS){
+        mlist = starLocFormOtherDBS;
+        notifyDataSetChanged();
     }
 
     static class otherStarViewHoder extends RecyclerView.ViewHolder{
