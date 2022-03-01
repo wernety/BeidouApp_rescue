@@ -223,6 +223,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     private int delete;
     private SensorManager mSensorManager;
     private float currentDegree;
+    private float mlastDir;
+    private ImageView compass;
 
 
     public HomeFragment() {
@@ -311,6 +313,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         textView3 = view.findViewById(R.id.altitude);
         textView4 = view.findViewById(R.id.velocity);
         textView5 = view.findViewById(R.id.direction);
+        compass = view.findViewById(R.id.compass);
     }
 
     private void iniMap() {
@@ -1769,6 +1772,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     @Override
     public void onSensorChanged(SensorEvent event) {
         float degree = Math.round(event.values[0]);
+        mlastDir = mCurrentDir;
         mCurrentDir = degree;
         Log.d("zw", "onSensorChanged: 此时的角度为" + degree);
         RotateAnimation ra = new RotateAnimation(
@@ -1780,8 +1784,60 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
 
         // how long the animation will take place
         ra.setDuration(210);
+        ra.setFillAfter(true);
+
+        if (Math.abs(mCurrentDir - mlastDir) > 2)
+        {
+            setTextView(degree);
+            compass.startAnimation(ra);
+        }
 
         currentDegree = -degree;
+    }
+
+    private void setTextView(float x) {
+                switch ((int) (x / 45)) {
+                    case 0: {
+                        textView5.setText(new StringBuilder().append("方向：").append("北偏东").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "北偏东" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 1: {
+                        textView5.setText(new StringBuilder().append("方向：").append("东偏北").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "东偏北" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 2: {
+                        textView5.setText(new StringBuilder().append("方向：").append("东偏南").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "东偏南" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 3: {
+                        textView5.setText(new StringBuilder().append("方向：").append("南偏东").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "南偏东" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 4: {
+                        textView5.setText(new StringBuilder().append("方向：").append("南偏西").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "南偏西" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 5: {
+                        textView5.setText(new StringBuilder().append("方向：").append("西偏南").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "西偏南" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 6: {
+                        textView5.setText(new StringBuilder().append("方向：").append("西偏北").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "西偏北" + (int) (x % 45) + "°");
+                        break;
+                    }
+                    case 7: {
+                        textView5.setText(new StringBuilder().append("方向：").append("北偏西").append((int) (x % 45)).append("°").toString());
+                        Log.d("directionIs", (int) (x / 45)+ "北偏西" + (int) (x % 45) + "°");
+                        break;
+                    }
+                }
     }
 
     @Override
