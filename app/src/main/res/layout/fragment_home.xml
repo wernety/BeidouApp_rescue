@@ -40,6 +40,7 @@
             android:orientation="vertical">
 
             <ImageView
+                android:id="@+id/compass"
                 android:layout_width="90dp"
                 android:layout_height="90dp"
                 android:src="@drawable/fangxiang">
