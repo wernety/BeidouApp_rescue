@@ -105,6 +105,7 @@
                 android:id="@+id/remember"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:checked="true"
                 android:text="记住密码">
             </CheckBox>
         </LinearLayout>
