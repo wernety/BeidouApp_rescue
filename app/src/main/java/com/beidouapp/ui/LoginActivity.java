@@ -178,7 +178,7 @@ public class LoginActivity extends AppCompatActivity {
                             userPasswordEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                         }
                         passwordHideButton.setVisibility(View.VISIBLE); //设置隐藏密码的小眼睛按钮可见
-                        sendCodeButton.setVisibility(View.GONE); //设置发送验证码按钮可见
+                        sendCodeButton.setVisibility(View.GONE); //设置发送验证码按钮不可见
                     }
                     else {
                         userNameText.setText("手机号");
@@ -475,6 +475,7 @@ public class LoginActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     private Handler smsLoginHandler = new Handler(){
         @Override
