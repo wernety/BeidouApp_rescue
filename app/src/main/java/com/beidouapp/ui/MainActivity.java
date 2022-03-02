@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
         initFriendGroupOrg();
 
 
+
         id2name.write2DB(writableDatabase,loginId,
                 application.getIndexID(),
                 loginId,

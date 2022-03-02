@@ -49,11 +49,14 @@ public class otherStarActivity extends AppCompatActivity {
     private int i;
     private int numOfstarLocFormOtherDBSFather;
     private int order;
+    private String searchKey;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otherstar);
+        searchKey = getIntent().getStringExtra("searchKey");
+        Log.d("zw", "onCreate: 搜寻关键字为" + searchKey);
         ini();
 
     }
@@ -69,11 +72,18 @@ public class otherStarActivity extends AppCompatActivity {
                 DividerItemDecoration.VERTICAL));
         refreshLayout.setEnableRefresh(true);
         refreshLayout.setEnableLoadMore(true);
+        if (searchKey == null || searchKey.isEmpty()){
         starLocFormOtherDBSFather = LitePal.findAll(starLocFormOtherDB.class);
-        starLocFormOtherDBS = starLocFormOtherDBSFather.subList(1,i*5);
+        }else{
+            starLocFormOtherDBSFather = LitePal.where("tag=?", searchKey).find(starLocFormOtherDB.class);
+        }
         numOfstarLocFormOtherDBSFather = starLocFormOtherDBSFather.size();
+        if (numOfstarLocFormOtherDBSFather < 5){
+            starLocFormOtherDBS = starLocFormOtherDBSFather.subList(0,numOfstarLocFormOtherDBSFather);
+        }else {
+            starLocFormOtherDBS = starLocFormOtherDBSFather.subList(0,i*5);
+        }
         order = numOfstarLocFormOtherDBSFather/5;
-        Log.d("zw", "ini: 此时starLocFormOtherDB中的数据为" + starLocFormOtherDBS.get(0).getLatitude());
         otherStarLocAdapter = new otherStarLocAdapter(starLocFormOtherDBS);
         recyclerView.setAdapter(otherStarLocAdapter);
         otherStarLocAdapter.setOnItemClickListener(new otherStarLocAdapter.setOnItemClickListener() {
@@ -149,14 +159,14 @@ public class otherStarActivity extends AppCompatActivity {
                     Log.d("zw", "onLoadMore: 此时正在加载更多" + i + "  " + numOfstarLocFormOtherDBSFather);
                     i++;
                     Log.d("zw", "onLoadMore: 此时正在加载更多，接下来" + i);
-                    starLocFormOtherDBS = starLocFormOtherDBSFather.subList(1,i*5);
+                    starLocFormOtherDBS = starLocFormOtherDBSFather.subList(0,i*5);
 //                    otherStarLocAdapter = new otherStarLocAdapter(starLocFormOtherDBS);
 //                    recyclerView.setAdapter(otherStarLocAdapter);
                     otherStarLocAdapter.addMore(starLocFormOtherDBS);
                     refreshLayout.finishLoadMore();
                 }else if(i == order){
                     i++;
-                    starLocFormOtherDBS = starLocFormOtherDBSFather.subList(1,numOfstarLocFormOtherDBSFather);
+                    starLocFormOtherDBS = starLocFormOtherDBSFather.subList(0,numOfstarLocFormOtherDBSFather);
 //                    otherStarLocAdapter = new otherStarLocAdapter(starLocFormOtherDBS);
 //                    recyclerView.setAdapter(otherStarLocAdapter);
                     otherStarLocAdapter.addMore(starLocFormOtherDBS);

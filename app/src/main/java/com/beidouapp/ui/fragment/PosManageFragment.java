@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.icu.util.BuddhistCalendar;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -152,7 +153,6 @@ public class PosManageFragment extends Fragment implements View.OnClickListener,
                 break;
             }
             case R.id.add_starLoc:{
-                String s = searchLoc.getText().toString();
 //                Intent intent = new Intent(getActivity(), otherStarActivity.class);
 //                startActivityForResult(intent, 3);
 //                if (!s.isEmpty()){
@@ -245,7 +245,9 @@ public class PosManageFragment extends Fragment implements View.OnClickListener,
                 switch (msg.what){
                     case 1:{
                         //开启activity
+                        String s = searchLoc.getText().toString();
                         Intent intent = new Intent(getActivity(), otherStarActivity.class);
+                        intent.putExtra("searchKey", s);
                         startActivityForResult(intent, 3);
                         break;
                     } default:break;

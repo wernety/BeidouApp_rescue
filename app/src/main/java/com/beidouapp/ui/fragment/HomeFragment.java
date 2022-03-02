@@ -1209,7 +1209,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
                 View view = inflater.inflate(R.layout.text_item, null);
 
-                TextView textView = (TextView) view.findViewById(R.id.tv_loc);
+                TextView tv_mapLongClicklatitude = (TextView) view.findViewById(R.id.tv_mapLongClicklatitude);
+                TextView tv_mapLongClicklongtitude = (TextView) view.findViewById(R.id.tv_mapLongClicklongtitude);
                 Button btnCancel = view.findViewById(R.id.btn_cancel);
                 Button btnCommit = view.findViewById(R.id.btn_search);
                 EditText et_text = view.findViewById(R.id.et_text);
@@ -1344,10 +1345,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                     }
                 });
 
-                DecimalFormat df = new DecimalFormat("#0.0000000");
+                DecimalFormat df = new DecimalFormat("#0.0000");
 
 
-                textView.setText("纬度：" + df.format(latLng.latitude) +  "经度：" + df.format(latLng.longitude));
+                tv_mapLongClicklongtitude.setText(df.format(latLng.latitude));
+                tv_mapLongClicklatitude.setText(df.format(latLng.longitude));
                 InfoWindow infoWindow = new InfoWindow(view, latLng, -47);
                 mMap.showInfoWindow(infoWindow);
                 Log.d("zw", "onMapLongClick: 长按成功");
