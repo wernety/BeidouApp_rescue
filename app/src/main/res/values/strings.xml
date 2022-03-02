@@ -65,6 +65,10 @@
     <string name="binding">绑定</string>
     <string name="bind_email">绑定邮箱</string>
     <string name="Regional_Download">区域下载</string>
+    <string name="Register_ID">账号:</string>
+    <string name="Register_Check">注册验证码</string>
+    <string name="Register_Pass">注册密码</string>
+    <string name="Check_get">获取验证码</string>
 
 
 

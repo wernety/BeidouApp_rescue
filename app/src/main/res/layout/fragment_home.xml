@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-
     <!--    <Button-->
     <!--        android:layout_width="match_parent"-->
     <!--        android:layout_height="50dp"-->
@@ -19,36 +18,34 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
+
         <com.baidu.mapapi.map.MapView
+            android:id="@+id/mMV"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/mMV"/>
+            android:layout_height="733dp" />
+
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/imageViewCompass"
-                android:gravity="center|center_horizontal"
-                android:src="@drawable/img_compass"
-                android:layout_width="95dp"
-                android:layout_height="95dp"
-                android:layout_marginTop="35dp"/>
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="5dp"
                 android:layout_margin="2dp"
-                android:background="@drawable/bodertext">
+                android:background="@drawable/bodertext"
+                android:orientation="vertical"
+                android:padding="5dp">
+
                 <TextClock
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:format12Hour="HH:mm:ss"
                     android:format24Hour="HH:mm:ss"
                     android:hint="显示时间"
-                    android:textSize="30sp"/>
+                    android:textSize="30sp" />
+
                 <TextView
                     android:id="@+id/weatherTemperature"
                     android:layout_width="wrap_content"
@@ -58,6 +55,7 @@
                     android:hint="天气查询中…"
                     android:textColor="@color/info_text_color"
                     android:textSize="@dimen/info_text_size" />
+
                 <TextView
                     android:id="@+id/longitudeLatitude"
                     android:layout_width="wrap_content"
@@ -67,6 +65,7 @@
                     android:hint="E118.31°  N38.11°"
                     android:textColor="@color/info_text_color"
                     android:textSize="@dimen/info_text_size" />
+
                 <TextView
                     android:id="@+id/altitude"
                     android:layout_width="wrap_content"
@@ -76,6 +75,7 @@
                     android:hint="海拔：11米"
                     android:textColor="@color/info_text_color"
                     android:textSize="@dimen/info_text_size" />
+
                 <TextView
                     android:id="@+id/velocity"
                     android:layout_width="wrap_content"
@@ -85,6 +85,7 @@
                     android:hint="速度：10m/s"
                     android:textColor="@color/info_text_color"
                     android:textSize="@dimen/info_text_size" />
+
                 <TextView
                     android:id="@+id/direction"
                     android:layout_width="wrap_content"
@@ -95,7 +96,23 @@
                     android:textColor="@color/info_text_color"
                     android:textSize="@dimen/info_text_size" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"/>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imageViewCompass"
+                android:alpha="50"
+                android:layout_width="95dp"
+                android:layout_height="95dp"
+                android:layout_marginTop="35dp"
+                android:gravity="left"
+                android:src="@drawable/img_compass" />
+
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

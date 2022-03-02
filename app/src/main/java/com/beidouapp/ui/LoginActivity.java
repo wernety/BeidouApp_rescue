@@ -65,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
     private String password;
     private DemoApplication application;
     private SharedPreferences sp;
+    private Button registerButton;
 
 
     @Override
@@ -84,6 +85,7 @@ public class LoginActivity extends AppCompatActivity {
         userPasswordEditText = (EditText) findViewById(R.id.edt_password);
         loginButton = (Button) findViewById(R.id.btn_login);
         swichButton = (Button) findViewById(R.id.btn_swich_psw);
+        registerButton = (Button) findViewById(R.id.button2);
         rememberCheck = (CheckBox) findViewById(R.id.remember);
         // 实例化SharedPreferences
         sp = getSharedPreferences("user", MODE_PRIVATE);
@@ -135,6 +137,14 @@ public class LoginActivity extends AppCompatActivity {
                 else {
                     ifRemember = false;
                     Toast.makeText(LoginActivity.this, "不记住", Toast.LENGTH_LONG).show();}
+            }
+        });
+
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
             }
         });
     }

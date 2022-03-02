@@ -7,6 +7,8 @@ import static com.beidouapp.model.utils.JSONUtils.receivePosFromBDJson;
 import static com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY;
 
 import android.Manifest;
+import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -29,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -226,6 +229,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     private float currentDegree;
     private float mlastDir;
     private ImageView compass;
+    private Typeface font;
 
 
     public HomeFragment() {
@@ -297,6 +301,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
      */
     private void iniAll(@NonNull View view) {
         application = (DemoApplication) getActivity().getApplicationContext();
+        font = ResourcesCompat.getFont(getActivity().getApplicationContext(), R.font.huangyou);
         mapView = view.findViewById(R.id.mMV);
         btn1 = view.findViewById(R.id.dingwei);
         otherLocbtn = view.findViewById(R.id.people);
@@ -307,13 +312,18 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         mMap = mapView.getMap();
         mSensorManager = (SensorManager) getActivity().getSystemService(SENSOR_SERVICE);
         List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-        Log.d("zw", "iniAll: 传感器有" + deviceSensors);
 
         textView1 = view.findViewById(R.id.weatherTemperature);
         textView2 = view.findViewById(R.id.longitudeLatitude);
         textView3 = view.findViewById(R.id.altitude);
         textView4 = view.findViewById(R.id.velocity);
         textView5 = view.findViewById(R.id.direction);
+        textView1.setTypeface(font);
+        textView2.setTypeface(font);
+        textView3.setTypeface(font);
+        textView4.setTypeface(font);
+        textView5.setTypeface(font);
+
         compass = view.findViewById(R.id.imageViewCompass);
     }
 
@@ -372,57 +382,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         locationClient.setLocOption(option);
         locationClient.registerLocationListener(myLocationListener);
         locationClient.start();
-//        myOrientationListener = new MyOrientationListener(getActivity().getApplicationContext());
-//        myOrientationListener.setOnOrientationListener(new MyOrientationListener.OnOrientationListener() {
-//            @Override
-//            public void onOrientationChanged(float x) {
-//                mCurrentDir = x;
-//                int yushu = (int) (x % 45);
-//                int chushu = (int) (x / 45);
-//                switch ((int) (x / 45)) {
-//                    case 0: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("北偏东").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "北偏东" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                    case 1: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("东偏北").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "东偏北" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                    case 2: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("东偏南").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "东偏南" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                    case 3: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("南偏东").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "南偏东" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                    case 4: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("南偏西").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "南偏西" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                    case 5: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("西偏南").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "西偏南" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                    case 6: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("西偏北").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "西偏北" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                    case 7: {
-//                        textView5.setText(new StringBuilder().append("方向：").append("北偏西").append((int) (x % 45)).append("°").toString());
-//                        Log.d("directionIs", (int) (x / 45)+ "北偏西" + (int) (x % 45) + "°");
-//                        break;
-//                    }
-//                }
-//            }
-//        });
     }
 
 
@@ -1788,7 +1747,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                 0.5f);
 
         // how long the animation will take place
-        ra.setDuration(210);
+        ra.setDuration(15);
         ra.setFillAfter(true);
 
         if (Math.abs(mCurrentDir - mlastDir) > 2)
