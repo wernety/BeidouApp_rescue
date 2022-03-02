@@ -21,7 +21,9 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,9 +42,7 @@ import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 聊天活动
@@ -66,10 +66,12 @@ public class ChatActivity extends AppCompatActivity {
     private EditText input;
     private Button btn_send;
     private ImageButton btn_back;
+    private ImageView btn_more;
     private DemoApplication application;
     private SQLiteDatabase writableDatabase;
     private List<recentMan> manRecords;
     private recentMan manRecord;
+    private RelativeLayout drawMenu;
 
 
 
@@ -150,8 +152,10 @@ public class ChatActivity extends AppCompatActivity {
         btn_send = (Button) findViewById(R.id.btn_send);
         input = (EditText) findViewById(R.id.et_content);
         btn_back = (ImageButton) findViewById(R.id.chat_return);
+        btn_more = (ImageView) findViewById(R.id.btn_multimedia);
         title = (TextView) findViewById(R.id.tv_groupOrContactName);
         title.setText(toNickname);
+        drawMenu = (RelativeLayout) findViewById(R.id.layout_draw_out);
     }
 
 
@@ -178,8 +182,7 @@ public class ChatActivity extends AppCompatActivity {
                     Toast.makeText(ChatActivity.this, "输入不能为空", Toast.LENGTH_LONG).show();
                 }
 
-                if (msgService.msgLink.webSocket != null) {
-//                if (true) {
+                if (msgService.msgLink.webSocketClient != null && msgService.msgLink.webSocketClient.isOpen()) {
 
                     if (toType.equals("group")) {
                         Message4Send message4Send = new Message4Send(toID,"group", "text", content);
@@ -282,6 +285,21 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        btn_more.setOnClickListener(new View.OnClickListener() {
+            boolean flag = false;
+            @Override
+            public void onClick(View view) {
+                if (flag){
+                    drawMenu.setVisibility(View.GONE);
+                    flag = !flag;
+                } else {
+                    drawMenu.setVisibility(View.VISIBLE);
+                    flag = !flag;
+                }
 
             }
         });

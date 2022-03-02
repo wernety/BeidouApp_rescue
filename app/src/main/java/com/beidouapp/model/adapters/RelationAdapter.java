@@ -28,7 +28,7 @@ public class RelationAdapter extends BaseTreeAdapter <RelationAdapter.RelationVi
     @Override
     public void onBindHolder(@NonNull RelationViewHolder holder, int position, Relation bean) {
         holder.tvName.setText(bean.getLabel());
-        if (bean.getChildren() != null && bean.getChildren().size() > 0){
+        if (bean.getChildren() != null){
             holder.ivNext.setVisibility(View.VISIBLE);
 //            holder.ivCheck.setVisibility(View.INVISIBLE);
         }else {

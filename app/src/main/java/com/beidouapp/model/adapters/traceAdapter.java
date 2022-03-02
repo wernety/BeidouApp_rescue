@@ -31,7 +31,7 @@ public class traceAdapter extends BaseTreeAdapter<traceAdapter.TraceViewHolder, 
     @Override
     public void onBindHolder(@NonNull traceAdapter.TraceViewHolder holder, int position, Relation bean) {
         holder.tvName_trace.setText(bean.getLabel());
-        if (bean.getChildren() != null && bean.getChildren().size() > 0){
+        if (bean.getChildren() != null){
             holder.ivNext_trace.setVisibility(View.VISIBLE);
             holder.ivCheck_trace.setVisibility(View.INVISIBLE);
         }else {

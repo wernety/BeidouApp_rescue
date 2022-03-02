@@ -1,137 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@null"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    app:divider="@color/black"
-    app:dividerPadding="3dp"
-    app:showDividers="beginning|middle|end"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <ImageView
+    tools:context=".ui.registerActivity">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:src="@drawable/register"
-        android:scaleType="centerCrop"/>
+        android:layout_height="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/edit_background"
+        android:orientation="horizontal">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="17"
-        android:layout_gravity="start"
-        android:orientation="vertical">
-
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <ImageView
+            android:id="@+id/iv_more_accout"
+            android:layout_width="20dp"
+            android:layout_height="25dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/setting" />
+        <TextView
+            android:id="@+id/text_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:orientation="horizontal"
-            android:layout_gravity="start">
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:text="@string/user_name"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:text="@string/Register_ID"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="4dp"
-                android:gravity="center"/>
+        <EditText
+            android:id="@+id/edt_username"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:drawablePadding="8dp"
+            android:background="@null"
+            android:hint="@string/uname_hint"
+            android:inputType="text" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/edit_background"
+        android:orientation="horizontal">
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="7"
-                android:layout_gravity="end"
-                android:gravity="center"
-                android:hint="请输入手机号"/>
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="25dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/lock" />
+        <TextView
+            android:id="@+id/text_smsCode"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="17"
-            android:orientation="vertical">
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:text="验证码"/>
 
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:orientation="horizontal"
-                android:layout_gravity="start">
+        <EditText
+            android:id="@+id/edt_smsCode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:drawablePadding="8dp"
+            android:background="@null"
+            android:hint="请输入验证码"
+            android:singleLine="true" />
+        <Button
+            android:id="@+id/btn_send_code"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="发送"
+            android:layout_gravity="right|center_vertical"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/edit_background"
+        android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="3"
-                    android:text="@string/Register_Check"
-                    android:layout_marginLeft="3dp"
-                    android:layout_marginRight="4dp"
-                    android:gravity="center"/>
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="25dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/lock" />
+        <TextView
+            android:id="@+id/text_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:text="设置密码"/>
 
-                <EditText
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="7"
-                    android:gravity="center"
-                    android:hint="请输入验证码"/>
+        <EditText
+            android:id="@+id/edt_password"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:drawablePadding="8dp"
+            android:background="@null"
+            android:hint="@string/pwd_hint"
+            android:inputType="textPassword"
+            android:singleLine="true" />
+        <Button
+            android:id="@+id/btn_switch_psw"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_margin="10dp"
+            android:padding="5dp"
+            android:background="@drawable/no_eye" />
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:text="@string/Check_get"
-                    android:id="@+id/btn_getCheck"/>
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="17"
-                android:orientation="vertical">
-
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:orientation="horizontal"
-                    android:layout_gravity="start">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="3"
-                        android:text="@string/Register_Pass"
-                        android:layout_marginLeft="3dp"
-                        android:layout_marginRight="4dp"
-                        android:gravity="center"/>
-
-                    <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="7"
-                        android:gravity="center"
-                        android:hint="请输入密码"/>
-
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
-
+    </LinearLayout>
     <Button
+        android:id="@+id/btn_register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="4"
-        android:layout_marginRight="6dp"
-        android:layout_marginLeft="6dp"
-        android:layout_marginBottom="12dp"
-        android:text="@string/register"/>
-
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
+        android:layout_gravity="center"
+        android:background="@color/blue"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="120dp"
+        android:text="注册" />
+    <Button
+        android:id="@+id/btn_to_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="去登录" />
+</LinearLayout>

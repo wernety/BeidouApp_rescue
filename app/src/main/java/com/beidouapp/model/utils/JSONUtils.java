@@ -134,6 +134,11 @@ public class JSONUtils {
                 rel.setChildren(list);
             }
             rel.setTransformed(true);
+        } else if (Long.parseLong(rel.getId()) < 10000000000L) {
+            if (rel.getChildren() == null) {
+                List <Relation> children = new ArrayList<>();
+                rel.setChildren(children);
+            }
         }
         if (rel.getChildren() != null && rel.getChildren().size() > 0) {
             int size_c = rel.getChildren().size();
