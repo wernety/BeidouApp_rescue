@@ -13,7 +13,7 @@ public class ActivityPermission extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_activitypermission);
+        setContentView(R.layout.activity_permission);
 
         Toolbar toolbar = findViewById(R.id.permission1);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {

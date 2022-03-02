@@ -25,4 +25,49 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="Confirm_creation">确认创建</string>
+    <string name="Select_members">选择成员</string>
+    <string name="Add_friends">添加好友</string>
+    <string name="Confirm_add">确认添加</string>
+    <string name="nickname">昵称</string>
+    <string name="user_name">用户名:</string>
+    <string name="passward">密码:</string>
+    <string name="remember_passward">记住密码</string>
+    <string name="Verification_code_login">验证码登录</string>
+    <string name="register">注册</string>
+    <string name="send_message">发消息</string>
+    <string name="Collect_coordinate_points">收藏坐标点</string>
+    <string name="Self_local">自建坐标点</string>
+    <string name="friends">好友</string>
+    <string name="Group_chat">群聊</string>
+    <string name="organization">组织</string>
+    <string name="Message_push">消息推送</string>
+    <string name="longitude">经度</string>
+    <string name="offline">离线</string>
+    <string name="latitude">纬度</string>
+    <string name="name">名称</string>
+    <string name="delete">删除</string>
+    <string name="sign_out">退出</string>
+    <string name="Confirm_modify">确认修改</string>
+    <string name="Cancle_modify">取消修改</string>
+    <string name="determine">确定</string>
+    <string name="submit">提交</string>
+    <string name="cancle">取消</string>
+    <string name="send">发送</string>
+    <string name="sex">性别</string>
+    <string name="woman">女</string>
+    <string name="man">男</string>
+    <string name="birthday">生日:</string>
+    <string name="save">保存</string>
+    <string name="log_passward">登录密码</string>
+    <string name="modify">修改</string>
+    <string name="bind_phone">绑定手机</string>
+    <string name="binding">绑定</string>
+    <string name="bind_email">绑定邮箱</string>
+    <string name="Regional_Download">区域下载</string>
+
+
+
+
+
 </resources>

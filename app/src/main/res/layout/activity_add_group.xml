@@ -28,7 +28,7 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:padding="10dp"
-            android:text="选择成员"
+            android:text="@string/Select_members"
             android:textColor="#000000" />
 
 
@@ -111,7 +111,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:background="@color/blue"
-            android:text="确认创建"
+            android:text="@string/Confirm_creation"
             android:textColor="@color/white"
             android:textSize="16dp" />
 

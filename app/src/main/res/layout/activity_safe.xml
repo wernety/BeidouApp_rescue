@@ -17,13 +17,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="安全设置"
+            android:text="@string/security_setting"
             android:textColor="@android:color/white"
             android:textSize="18sp" />
     </androidx.appcompat.widget.Toolbar>
 
     <TextView
-        android:text="登录密码"
+        android:text="@string/log_passward"
         android:layout_gravity="left"
         android:layout_marginLeft="20dp"
         android:layout_width="match_parent"
@@ -34,7 +34,7 @@
         android:layout_width="fill_parent">
         <Button
             android:id="@+id/btn_mima"
-            android:text="修改"
+            android:text="@string/modify"
             android:background="@null"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
     </RelativeLayout>
 
     <TextView
-        android:text="绑定手机"
+        android:text="@string/bind_phone"
         android:layout_gravity="left"
         android:layout_marginLeft="20dp"
         android:layout_width="match_parent"
@@ -74,7 +74,7 @@
 
         <Button
             android:id="@+id/btn_shouji"
-            android:text="绑定"
+            android:text="@string/binding"
             android:background="@null"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
             />
     </RelativeLayout>
     <TextView
-        android:text="绑定邮箱"
+        android:text="@string/bind_email"
         android:layout_gravity="left"
         android:layout_marginLeft="20dp"
         android:layout_width="match_parent"
@@ -113,7 +113,7 @@
 
         <Button
             android:id="@+id/btn_youxiang"
-            android:text="绑定"
+            android:text="@string/binding"
             android:background="@null"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

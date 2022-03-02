@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             android:background="@color/white"
             android:textSize="15sp"
-            android:text="提交"
+            android:text="@string/submit"
             android:layout_weight="1"
             />
         <Button
@@ -80,7 +80,7 @@
             android:background="@color/white"
             android:textSize="15sp"
             android:layout_weight="1"
-            android:text="取消"
+            android:text="@string/cancle"
             />
     </LinearLayout>
 

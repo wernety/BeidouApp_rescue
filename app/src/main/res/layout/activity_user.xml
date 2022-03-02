@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="用户资料"
+            android:text="@string/Account_information"
             android:textColor="@android:color/white"
             android:textSize="18sp" />
     </androidx.appcompat.widget.Toolbar>
@@ -30,6 +30,7 @@
         android:orientation="vertical">
         <de.hdodenhof.circleimageview.CircleImageView
             android:src="@drawable/catdog"
+            android:id="@+id/mImgHead"
             app:civ_border_width="2dp"
             app:civ_border_color="#FF000000"
             android:layout_width="100dp"
@@ -37,27 +38,34 @@
             android:layout_marginTop="40dp"/>
     </LinearLayout>
 
+    <View android:layout_height="2dp"
+        android:layout_width="match_parent"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:background="@color/black"
+        />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="用户名"
+        android:text="@string/user_name"
         android:lines="1"
         android:textSize="18dp"
         android:gravity="left"
         android:textColor="@color/black">
     </TextView>
-
     <EditText
         android:hint="员工f"
-        android:textColorHint="@color/white"
-        android:drawablePadding="10dp"
+        android:textColorHint="@color/black"
+        android:id="@+id/mEtName"
         android:paddingLeft="10dp"
         android:layout_width="match_parent"
         android:layout_height="50dp"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="性别"
+        android:text="@string/sex"
         android:textSize="18dp"/>
     <RadioGroup
         android:layout_width="wrap_content"
@@ -67,52 +75,36 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/radio_2"
-            android:text="女" />
+            android:id="@+id/girl"
+            android:text="@string/woman" />
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/radio_1"
+            android:id="@+id/boy"
             android:checked="true"
-            android:text="男"/>
+            android:text="@string/man"/>
     </RadioGroup>
+
+    <View android:layout_height="2dp"
+        android:layout_width="match_parent"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:background="@color/black"
+        />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="生日"
+        android:id="@+id/mTvBirthday"
+        android:text="@string/birthday"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:textSize="18dp"/>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
-        android:orientation="horizontal">
-        <Spinner
-            android:id="@+id/add_year_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"></Spinner>
 
-        <TextView
-            android:text="年"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Spinner
-            android:id="@+id/add_month_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"></Spinner>
-        <TextView
-            android:text="月"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Spinner
-            android:id="@+id/add_day_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"></Spinner>
-        <TextView
-            android:text="日"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+    <Button android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/mBtnSave"
+        android:layout_margin="10dp"
+        android:text="@string/save"/>
 
 </LinearLayout>

@@ -20,14 +20,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="收藏坐标点" />
+            android:text="@string/Collect_coordinate_points" />
 
         <Button
             android:id="@+id/btn_self"
             android:layout_width="107dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="自建坐标点" />
+            android:text="@string/Self_local" />
 
     </LinearLayout>
     <LinearLayout

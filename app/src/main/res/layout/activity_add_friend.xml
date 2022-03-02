@@ -28,7 +28,7 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:padding="10dp"
-            android:text="添加好友"
+            android:text="@string/Add_friends"
             android:textColor="#000000" />
 
 
@@ -84,7 +84,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:background="@color/blue"
-            android:text="确认添加"
+            android:text="@string/Confirm_add"
             android:textColor="@color/white"
             android:textSize="16dp" />
 

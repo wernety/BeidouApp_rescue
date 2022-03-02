@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/ivOnline"
-            android:text="离线"
+            android:text="@string/offline"
             android:textSize="15dp"
             android:layout_weight="1"
             android:textColor="@color/red"
@@ -43,7 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@mipmap/enter"
-            android:tint="#000000"
             android:id="@+id/ivNext"
             android:rotation="0"
             android:layout_marginRight="15dp"
@@ -55,8 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginRight="15dp"
-            android:rotation="0"
-            android:tint="#000000" />
+            android:rotation="0" />
         <!--            android:src="@mipmap/enter"-->
     </LinearLayout>
 </LinearLayout>

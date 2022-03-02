@@ -45,7 +45,7 @@
             android:layout_height="20dp"
             android:textSize="16sp"
             android:textColor="@color/black"
-            android:text="好友"/>
+            android:text="@string/friends"/>
 
         <ListView
             android:id="@+id/friendList"
@@ -65,7 +65,7 @@
             android:textSize="16sp"
             android:paddingTop="10dp"
             android:textColor="@color/black"
-            android:text="群聊"/>
+            android:text="@string/Group_chat"/>
 
         <ListView
             android:id="@+id/groupList"
@@ -85,7 +85,7 @@
             android:paddingTop="10dp"
             android:textSize="16sp"
             android:textColor="@color/black"
-            android:text="组织"/>
+            android:text="@string/organization"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"

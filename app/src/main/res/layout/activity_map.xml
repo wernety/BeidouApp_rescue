@@ -17,12 +17,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="离线地图"
+            android:text="@string/offline_map"
             android:textColor="@android:color/white"
             android:textSize="18sp" />
         <Button
             android:id="@+id/btn_down"
-            android:text="区域下载"
+            android:text="@string/Regional_Download"
             android:textColor="@color/color_un_focused"
             android:background="@null"
             android:layout_gravity="right"

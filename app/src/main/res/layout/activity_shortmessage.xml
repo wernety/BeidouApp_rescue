@@ -18,12 +18,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="短报文队列"
+            android:text="@string/Short_message_sequence"
             android:textColor="@android:color/black"
             android:textSize="18sp" />
         <Button
             android:id="@+id/btn_del"
-            android:text="删除"
+            android:text="@string/delete"
             android:textColor="@color/red"
             android:background="@null"
             android:layout_gravity="right"

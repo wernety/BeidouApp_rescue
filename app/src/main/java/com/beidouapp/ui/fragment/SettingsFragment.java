@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.beidouapp.R;
+import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.LoginActivity;
 import com.beidouapp.ui.Setting.ActivityBluetooth;
 import com.beidouapp.ui.Setting.ActivityMap;
@@ -23,6 +24,7 @@ import com.beidouapp.ui.Setting.ActivityPermission;
 public class SettingsFragment extends Fragment {
 
     private View root;
+    private DemoApplication application;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class SettingsFragment extends Fragment {
         if(root==null) {
             root = inflater.inflate(R.layout.fragment_settings, container, false);
         }
+        application = (DemoApplication) getActivity().getApplicationContext();
         Button user = root.findViewById(R.id.user);
         user.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,9 +112,11 @@ public class SettingsFragment extends Fragment {
         exit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                application.setFlag(false);
                 Intent i = new Intent(getActivity(), LoginActivity.class);
                 //启动
                 startActivity(i);
+                getActivity().finish();
             }
         });
         return root;

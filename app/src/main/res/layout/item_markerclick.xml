@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:text="经度"/>
+                android:text="@string/longitude"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -59,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:text="纬度"/>
+                android:text="@string/latitude"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="15sp"
-                android:text="名称"/>
+                android:text="@string/name"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -117,7 +117,7 @@
             android:layout_height="wrap_content"
             android:background="@color/white"
             android:textSize="15sp"
-            android:text="删除"
+            android:text="@string/delete"
             android:layout_weight="1"
             />
         <Button
@@ -127,7 +127,7 @@
             android:background="@color/white"
             android:textSize="15sp"
             android:layout_weight="1"
-            android:text="退出"
+            android:text="@string/sign_out"
             />
     </LinearLayout>
 

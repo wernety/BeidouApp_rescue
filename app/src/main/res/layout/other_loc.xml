@@ -32,6 +32,6 @@
         android:layout_height="50dp"
         android:layout_gravity="bottom|center_horizontal"
         android:gravity="center_horizontal|bottom"
-        android:text="确定" />
+        android:text="@string/determine" />
 
 </LinearLayout>
