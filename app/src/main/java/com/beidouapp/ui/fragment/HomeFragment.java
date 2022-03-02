@@ -1788,7 +1788,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                 0.5f);
 
         // how long the animation will take place
-        ra.setDuration(210);
+        ra.setDuration(10);
         ra.setFillAfter(true);
 
         if (Math.abs(mCurrentDir - mlastDir) > 2)
