@@ -5,7 +5,7 @@ plugins {
 android {
     signingConfigs {
         debug {
-            storeFile file('F:\\HorizontalProject\\AndroidProject\\BeidouApp\\beidou.jks')
+            storeFile file('D:\\Project\\BeiDou\\BeidouApp_rescue-gitee\\beidou.jks')
             storePassword '000000'
             keyAlias 'key0'
             keyPassword '000000'
@@ -54,6 +54,7 @@ dependencies {
     //查看最新版本请前往github，仅支持androidx
     implementation 'com.github.loperSeven:DateTimePicker:0.1.0'
 //    3.14.2
+    implementation 'org.java-websocket:Java-WebSocket:1.5.2'
     implementation 'com.squareup.okio:okio:1.17.4'
     implementation 'com.alibaba:fastjson:1.2.79'
     implementation 'com.google.code.gson:gson:2.8.4'

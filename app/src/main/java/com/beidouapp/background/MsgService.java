@@ -12,12 +12,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
 import com.beidouapp.model.DataBase.recentMan;
+import com.beidouapp.model.FilePacket;
 import com.beidouapp.model.messages.HeartbeatMsg;
 import com.beidouapp.model.messages.HeartbeatMsg.*;
 import com.beidouapp.model.messages.Message4Receive;
+import com.beidouapp.model.utils.Bytes2Hex;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.NetworkChangeReceiver;
 import com.beidouapp.model.utils.NetworkManager;
@@ -26,20 +26,29 @@ import com.beidouapp.model.utils.state_request;
 import com.beidouapp.ui.DemoApplication;
 import com.beidouapp.ui.fragment.MyLocationListener;
 
+import org.java_websocket.handshake.ServerHandshake;
 import org.litepal.LitePal;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.ByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import org.java_websocket.client.WebSocketClient;
+
+import javax.xml.datatype.DatatypeFactory;
+
 import okhttp3.Response;
-import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
 
 
 /**
@@ -100,6 +109,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         Log.d("zw", "onStartCommand:全局的curToken " + curToken);
         NetStatus = NetworkManager.getConnectivityStatus(MsgService.this);
         msgLink = new Link("ws://120.27.242.92:8080/chatWS/" + uid, NetStatus);
+        //http://10.123.254.170:8080/
         msgLink.linkServer();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -120,15 +130,54 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      */
     public boolean sendMessage(String message){
         if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE) {
-            return msgLink.webSocket.send(message);
+            try {
+                msgLink.webSocketClient.send(message);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
         }
         if (NetStatus == NetworkManager.TYPE_BLUETOOTH) {
-            return msgLink.webSocket.send(message);
+            try {
+                msgLink.webSocketClient.send(message);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
         }
         if (NetStatus == NetworkManager.TYPE_NOT_CONNECT) {
-            return msgLink.webSocket.send(message);
+            try {
+                msgLink.webSocketClient.send(message);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
         }
         return false;
+    }
+
+
+    /**
+     * 发送图片
+     * @param filePath
+     * @return
+     */
+    public boolean sendMessage(Path filePath) {
+        String fileName = filePath.getFileName().toString();
+        FilePacket p = FilePacket.constructNewFilePacket(fileName);
+        msgLink.setFilePath(filePath);
+        msgLink.webSocketClient.send(p.getBuffer().array());
+        return false;
+    }
+
+    public boolean sendTest() {
+        try {
+            String str = "zzjyy";
+            msgLink.webSocketClient.send(ByteBuffer.wrap(str.getBytes()));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 
@@ -137,10 +186,16 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      * 连接网络
      */
     public class Link {
-        private String url = "";
+        public WebSocketClient webSocketClient;
+        private String url;
         private int netStatus;
-        private OkHttpClient client;
-        public WebSocket webSocket;
+        private Path filePath;
+        private Runnable fileUploadRunnable;
+        private Thread fileUploadThread;
+
+        public void setFilePath(Path filePath) {
+            this.filePath = filePath;
+        }
 
         public Link(String url, int netStatus){
             this.url = url;
@@ -151,42 +206,53 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
             this.netStatus = netStatus;
         }
 
-        public void linkServer(){
-            switch (netStatus){
-                case NetworkManager.TYPE_NOT_CONNECT:{BeidouLinking();break;}
-                case NetworkManager.TYPE_WIFI_MOBILE:{NetLinking();break;}
-                case NetworkManager.TYPE_BLUETOOTH:{BluetoothLinking();break;}
-                default:break;
-            }
-        }
-
         /**
          * WIFI\4G下连接
+         * 使用WebSocket
          */
         private void NetLinking(){
-            client = new OkHttpClient.Builder()
-                    .writeTimeout(60, TimeUnit.SECONDS)
-                    .readTimeout(60, TimeUnit.SECONDS)
-                    .connectTimeout(60, TimeUnit.SECONDS)
-                    .retryOnConnectionFailure(true)
-                    .build();
-            if (webSocket != null){
-                webSocket.cancel();
-            }
 
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            webSocket = client.newWebSocket(request, new WebSocketListener() {
+            URI uri = URI.create(url);
+            Log.d("WebSocket", uri.getHost());
+            webSocketClient = new WebSocketClient(uri) {
                 @Override
-                public void onOpen(WebSocket webSocket, Response response) {
-                    super.onOpen(webSocket, response);
+                public void onOpen(ServerHandshake handshakes) {
                     Log.d("WebSocket", "onOpen");
                 }
 
                 @Override
-                public void onMessage(WebSocket webSocket, String text) {
-                    super.onMessage(webSocket, text);
+                public void onMessage(ByteBuffer bytes) {
+                    super.onMessage(bytes);
+                    FilePacket p = FilePacket.parseByteBuffer(bytes);
+                    int code;
+                    switch (p.getType()) {
+                        case FilePacket.P_ACK_NEW_FILE:{
+                            code = (int) p.getBuffer().get();
+                            if (code == FilePacket.SUCCESS_CODE) {
+                                Log.d("WebSocket", "开始发送文件");
+                            }
+                            fileUploadRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    msgLink.startSendFileData();
+                                }
+                            };
+                            fileUploadThread = new Thread(fileUploadRunnable);
+                            fileUploadThread.start();
+                            break;
+                        }
+                        case FilePacket.P_ACK_FILE_END:{
+                            code = (int) p.getBuffer().get();
+                            if (code == FilePacket.SUCCESS_CODE) {
+                                Log.d("WebSocket", "文件发送完成");
+                            }
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onMessage(String text) {
                     Log.d("WebSocket", "onMessage" + text);
                     Intent intent = new Intent("com.beidouapp.callback.content");
                     intent.putExtra("message", text);
@@ -206,30 +272,73 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
 
                         }
                     }
-
                 }
 
                 @Override
-                public void onClosing(WebSocket webSocket, int code, String reason) {
-                    super.onClosing(webSocket, code, reason);
-                    Log.d("WebSocket", "onClosing");
-                    if (netStatus == NetworkManager.TYPE_WIFI_MOBILE) {
-                        webSocket.close(code,reason);
-                        webSocket = null;
-                        NetLinking();
+                public void onClose(int code, String reason, boolean remote) {
+                    Log.d("WebSocket", "onClose");
+                    if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE){
+                        linkServer();
                     }
                 }
-
                 @Override
-                public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
-                    super.onFailure(webSocket, t, response);
+                public void onError(Exception ex) {
+                    ex.printStackTrace();
                 }
-            });
-
-
+            };
+            try {
+                webSocketClient.connectBlocking();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
         private void BeidouLinking(){}
         private void BluetoothLinking(){}
+
+
+        public void linkServer(){
+            switch (netStatus){
+                case NetworkManager.TYPE_NOT_CONNECT:{BeidouLinking();break;}
+                case NetworkManager.TYPE_WIFI_MOBILE:{NetLinking();break;}
+                case NetworkManager.TYPE_BLUETOOTH:{BluetoothLinking();break;}
+                default:break;
+            }
+        }
+
+        private void startSendFileData(){
+            try {
+                ByteChannel fileChannel = Files.newByteChannel(filePath, EnumSet.of(StandardOpenOption.READ));
+                ByteBuffer buffer = ByteBuffer.allocate(1 + 4096);
+                buffer.order(ByteOrder.BIG_ENDIAN);
+
+                MessageDigest md = MessageDigest.getInstance("MD5");
+
+                int bytesRead = -1;
+
+                buffer.clear();//make buffer ready for write
+                buffer.put((byte)FilePacket.P_FILE_DATA);
+
+                while((bytesRead = fileChannel.read(buffer)) != -1){
+                    buffer.flip();  //make buffer ready for read
+                    buffer.mark();
+                    buffer.get(); //skip a byte
+                    md.update(buffer);
+                    buffer.reset();
+                    webSocketClient.send(buffer);
+                    buffer.clear(); //make buffer ready for write
+                    buffer.put((byte)FilePacket.P_FILE_DATA);
+                }
+
+                byte[] digest = md.digest();
+                String digestInHex = Bytes2Hex.bytes2hex(digest);
+                System.out.println("send file finished, digest: " + digestInHex);
+                FilePacket p = FilePacket.constructFileEndPacket(digestInHex);
+                webSocketClient.send(p.getBuffer());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -419,7 +528,9 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         int connectivityStatus = NetworkManager.getConnectivityStatus(this);
         if (connectivityStatus == NetStatus){
             msgLink.setNetStatus(NetStatus);
-            msgLink.linkServer();
+            if (msgLink.webSocketClient.isClosed()){
+                msgLink.linkServer();
+            }
         }else{
             switch (connectivityStatus){
                 case NetworkManager.TYPE_WIFI_MOBILE:{
@@ -442,7 +553,9 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         int connectivityStatus = NetworkManager.getConnectivityStatus(this);
         if (connectivityStatus == NetStatus){
             msgLink.setNetStatus(NetStatus);
-            msgLink.linkServer();
+            if (msgLink.webSocketClient.isClosed()){
+                msgLink.linkServer();
+            }
         }else{
             switch (connectivityStatus){
                 case NetworkManager.TYPE_NOT_CONNECT:{
@@ -465,7 +578,9 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         int connectivityStatus = NetworkManager.getConnectivityStatus(this);
         if (connectivityStatus == NetStatus){
             msgLink.setNetStatus(NetStatus);
-            msgLink.linkServer();
+            if (msgLink.webSocketClient.isClosed()){
+                msgLink.linkServer();
+            }
         }else{
             switch (connectivityStatus){
                 case NetworkManager.TYPE_NOT_CONNECT:{
