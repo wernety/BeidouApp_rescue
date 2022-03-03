@@ -46,8 +46,6 @@ import java.util.TimerTask;
 
 import org.java_websocket.client.WebSocketClient;
 
-import javax.xml.datatype.DatatypeFactory;
-
 import okhttp3.Response;
 
 
@@ -119,6 +117,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         super.onDestroy();
         NetworkChangeReceiver.unRegisterObserver(this);
         NetworkChangeReceiver.unRegisterReceiver(this);
+        msgLink.disLinkServer();
     }
 
 
@@ -226,7 +225,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                     FilePacket p = FilePacket.parseByteBuffer(bytes);
                     int code;
                     switch (p.getType()) {
-                        case FilePacket.P_ACK_NEW_FILE:{
+                        case FilePacket.UP_ACK_NEW_FILE:{
                             code = (int) p.getBuffer().get();
                             if (code == FilePacket.SUCCESS_CODE) {
                                 Log.d("WebSocket", "开始发送文件");
@@ -241,8 +240,9 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                             fileUploadThread.start();
                             break;
                         }
-                        case FilePacket.P_ACK_FILE_END:{
+                        case FilePacket.UP_ACK_FILE_END:{
                             code = (int) p.getBuffer().get();
+                            System.out.println(code);
                             if (code == FilePacket.SUCCESS_CODE) {
                                 Log.d("WebSocket", "文件发送完成");
                             }
@@ -277,13 +277,16 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
                     Log.d("WebSocket", "onClose");
-                    if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE){
-                        linkServer();
-                    }
+//                    if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE){
+//                        linkServer();
+//                    }
                 }
                 @Override
                 public void onError(Exception ex) {
                     ex.printStackTrace();
+                    if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE){
+                        linkServer();
+                    }
                 }
             };
             try {
@@ -293,6 +296,12 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
             }
         }
 
+        private void NetDisLinking() {
+            if (webSocketClient != null) {
+                webSocketClient.close();
+                webSocketClient = null;
+            }
+        }
         private void BeidouLinking(){}
         private void BluetoothLinking(){}
 
@@ -306,6 +315,10 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
             }
         }
 
+        public void disLinkServer() {
+            NetDisLinking();
+        }
+
         private void startSendFileData(){
             try {
                 ByteChannel fileChannel = Files.newByteChannel(filePath, EnumSet.of(StandardOpenOption.READ));
@@ -317,7 +330,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 int bytesRead = -1;
 
                 buffer.clear();//make buffer ready for write
-                buffer.put((byte)FilePacket.P_FILE_DATA);
+                buffer.put((byte)FilePacket.UP_FILE_DATA);
 
                 while((bytesRead = fileChannel.read(buffer)) != -1){
                     buffer.flip();  //make buffer ready for read
@@ -327,11 +340,11 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                     buffer.reset();
                     webSocketClient.send(buffer);
                     buffer.clear(); //make buffer ready for write
-                    buffer.put((byte)FilePacket.P_FILE_DATA);
+                    buffer.put((byte)FilePacket.UP_FILE_DATA);
                 }
 
                 byte[] digest = md.digest();
-                String digestInHex = Bytes2Hex.bytes2hex(digest);
+                String digestInHex = Bytes2Hex.bytes2hex(digest).toUpperCase();
                 System.out.println("send file finished, digest: " + digestInHex);
                 FilePacket p = FilePacket.constructFileEndPacket(digestInHex);
                 webSocketClient.send(p.getBuffer());
