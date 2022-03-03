@@ -249,6 +249,163 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+
+    private void checkPermissions(){
+        List<String> permissionList = new ArrayList<>();
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+            //启动程序后询问读写权限
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+            //启动程序后询问读写权限
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},1);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+            //启动程序后询问读写权限
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+        }
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.System.canWrite(LoginActivity.this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                        Uri.parse("package:" + getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivityForResult(intent, 200);
+            } else {
+                // 如果有权限做些什么
+            }
+
+        }
+
+    }
+
+    private Handler getInfoHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if (msg.what == 1) {
+                try {
+                    OkHttpUtils.getInstance(LoginActivity.this).get("http://139.196.122.222:8080/getInfo",
+                            token, new OkHttpUtils.MyCallback() {
+                                @Override
+                                public void success(Response response) throws IOException {
+                                    JSONObject object = JSON.parseObject(response.body().string());
+                                    int code = object.getInteger("code");
+                                    if (code == 200) {
+                                        User user = JSON.parseObject(object.getString("user"), User.class);
+                                        application.setIndexID(user.getUserId());
+                                        application.setNickName(user.getNickName());
+                                        application.setUserID(user.getUserName());
+                                        application.setUserPass(password);
+                                        application.setToken(token);
+                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    } else if (code == 500) {
+                                    } else
+                                        Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
+                                }
+
+                                @Override
+                                public void failed(IOException e) {
+
+                                }
+                            });
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
+    });
+
+
+
+    /**
+     * 账号密码方式登录
+     * @param username
+     * @param password
+     */
+    public void loginByPsw(String username, String password){
+        try {
+            User4Login user4Login = new User4Login(username, password);
+            String json = JSONUtils.sendJSON(user4Login);
+            Log.d("json", json);
+
+            OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/login", json,
+                    new OkHttpUtils.MyCallback() {
+                        @Override
+                        public void success(Response response) throws IOException {
+                            JSONObject object = JSON.parseObject(response.body().string());
+                            int code = object.getInteger("code");
+                            if (code == 200) {
+                                token = object.getString("token");
+                                // 获取sp的编辑器
+                                SharedPreferences.Editor edit = sp.edit();
+                                if (ifPassword) { //如果采用账号密码登录，且选择了记住密码，将账号密码存到sp
+                                    if(ifRemember){
+                                        edit.putString("name", username);
+                                        edit.putString("pwd", password);
+                                        // 把edit进行提交
+                                        edit.commit();
+                                    }
+                                    else {
+                                        // 清除保存的信息
+                                        edit.clear();
+                                        edit.commit();
+                                    }
+                                }
+                                Message message = new Message();
+                                message.what = 1;
+                                getInfoHandler.sendMessage(message);
+                            } else if (code == 500) {
+                                LoginActivity.this.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(LoginActivity.this, "用户名或者密码错误", Toast.LENGTH_LONG).show();
+                                        userNameEditText.setText("");
+                                        userPasswordEditText.setText("");
+                                    }
+                                });
+                            } else
+                                Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
+                        }
+                        @Override
+                        public void failed(IOException e) {
+                            Log.d("zw", "failed: 没有网络状态，此时使用本地数据库加载数据");
+                            List<orgAndUidAndKey> records = LitePal.where("uid = ?", username).find(orgAndUidAndKey.class);
+                            //查询数据库，如果有此人，则跳转页面
+                            if(records.isEmpty()){
+
+                            }else{
+                                Log.d("zw", "failed: 开始检测");
+                                orgAndUidAndKey record = records.get(0);
+                                Log.d("zw", "failed: 数据库中的密码是" + record.getPass());
+                                Log.d("zw", "failed: 检测结果应该是" + password);
+                                if(record.getPass().equals(password)){
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    intent.putExtra("uid", username);
+                                    intent.putExtra("upw", password);
+
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }
+                            Log.d("login", e.getMessage());
+                        }
+                    });
+        } catch (Exception e) {
+            Log.d("zw", "loginByPsw: 遇到问题直接退出了");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 短信验证码登录
+     * @param username
+     * @param smsCode
+     */
     private void loginBySMS(String username, String smsCode) {
         JSONObject SMSLogin = new JSONObject();
         SMSLogin.put("mobile",username);
@@ -279,7 +436,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             Message message = new Message();
                             message.what = 1;
-                            smsLoginHandler.sendMessage(message);
+                            getInfoHandler.sendMessage(message);
                         } else
                             Log.d("验证码登录", "success: 请求错误");
                     }
@@ -328,193 +485,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     };
 
-    private void checkPermissions(){
-        List<String> permissionList = new ArrayList<>();
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
-            //启动程序后询问读写权限
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
-            //启动程序后询问读写权限
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},1);
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-            //启动程序后询问读写权限
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
-        }
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.System.canWrite(LoginActivity.this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
-                        Uri.parse("package:" + getPackageName()));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivityForResult(intent, 200);
-            } else {
-                // 如果有权限做些什么
-            }
-
-        }
-
-    }
-
-    /**
-     * 账号密码方式登录
-     * @param username
-     * @param password
-     */
-    public void loginByPsw(String username, String password){
-        try {
-            Handler handler = new Handler() {
-                //           @Override
-                @SuppressLint("HandlerLeak")
-                public void handleMessage(Message message) {
-                    if (message.what == 1) {
-                        try {
-                            OkHttpUtils.getInstance(LoginActivity.this).get("http://139.196.122.222:8080/getInfo",
-                                    token, new OkHttpUtils.MyCallback() {
-                                        @Override
-                                        public void success(Response response) throws IOException {
-                                            JSONObject object = JSON.parseObject(response.body().string());
-                                            int code = object.getInteger("code");
-                                            if (code == 200) {
-                                                User user = JSON.parseObject(object.getString("user"), User.class);
-                                                application.setIndexID(user.getUserId());
-                                                application.setNickName(user.getNickName());
-                                                application.setUserID(user.getUserName());
-                                                application.setUserPass(password);
-                                                application.setToken(token);
-                                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                                startActivity(intent);
-                                                finish();
-                                            } else if (code == 500) {
-                                            } else
-                                                Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
-                                        }
-
-                                        @Override
-                                        public void failed(IOException e) {
-
-                                        }
-                                    });
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            };
-            User4Login user4Login = new User4Login(username, password);
-            String json = JSONUtils.sendJSON(user4Login);
-            Log.d("json", json);
-
-            OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/login", json,
-                    new OkHttpUtils.MyCallback() {
-                        @Override
-                        public void success(Response response) throws IOException {
-                            JSONObject object = JSON.parseObject(response.body().string());
-                            int code = object.getInteger("code");
-                            if (code == 200) {
-                                token = object.getString("token");
-                                // 获取sp的编辑器
-                                SharedPreferences.Editor edit = sp.edit();
-                                if (ifPassword) { //如果采用账号密码登录，且选择了记住密码，将账号密码存到sp
-                                    if(ifRemember){
-                                        edit.putString("name", username);
-                                        edit.putString("pwd", password);
-                                        // 把edit进行提交
-                                        edit.commit();
-                                    }
-                                    else {
-                                        // 清除保存的信息
-                                        edit.clear();
-                                        edit.commit();
-                                    }
-                                }
-                                Message message = new Message();
-                                message.what = 1;
-                                handler.sendMessage(message);
-                            } else if (code == 500) {
-                                LoginActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(LoginActivity.this, "用户名或者密码错误", Toast.LENGTH_LONG).show();
-                                        userNameEditText.setText("");
-                                        userPasswordEditText.setText("");
-                                    }
-                                });
-                            } else
-                                Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
-                        }
-                        @Override
-                        public void failed(IOException e) {
-                            Log.d("zw", "failed: 没有网络状态，此时使用本地数据库加载数据");
-                            List<orgAndUidAndKey> records = LitePal.where("uid = ?", username).find(orgAndUidAndKey.class);
-                            //查询数据库，如果有此人，则跳转页面
-                            if(records.isEmpty()){
-
-                            }else{
-                                Log.d("zw", "failed: 开始检测");
-                                orgAndUidAndKey record = records.get(0);
-                                Log.d("zw", "failed: 数据库中的密码是" + record.getPass());
-                                Log.d("zw", "failed: 检测结果应该是" + password);
-                                if(record.getPass().equals(password)){
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    intent.putExtra("uid", username);
-                                    intent.putExtra("upw", password);
-
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            }
-                            Log.d("login", e.getMessage());
-                        }
-                    });
-        } catch (Exception e) {
-            Log.d("zw", "loginByPsw: 遇到问题直接退出了");
-            e.printStackTrace();
-        }
-    }
-
-
-    private Handler smsLoginHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == 1) {
-                try {
-                    OkHttpUtils.getInstance(LoginActivity.this).get("http://139.196.122.222:8080/getInfo",
-                            token, new OkHttpUtils.MyCallback() {
-                                @Override
-                                public void success(Response response) throws IOException {
-                                    JSONObject object = JSON.parseObject(response.body().string());
-                                    int code = object.getInteger("code");
-                                    if (code == 200) {
-                                        User user = JSON.parseObject(object.getString("user"), User.class);
-                                        application.setIndexID(user.getUserId());
-                                        application.setNickName(user.getNickName());
-                                        application.setUserID(user.getUserName());
-                                        application.setUserPass(password);
-                                        application.setToken(token);
-                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    } else if (code == 500) {
-                                    } else
-                                        Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
-                                }
-
-                                @Override
-                                public void failed(IOException e) {
-
-                                }
-                            });
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {                         //若无读写权限，结束程序
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
