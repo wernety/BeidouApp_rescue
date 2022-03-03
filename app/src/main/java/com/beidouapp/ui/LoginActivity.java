@@ -308,12 +308,13 @@ public class LoginActivity extends AppCompatActivity {
 
                                 @Override
                                 public void failed(IOException e) {
-
+                                    e.printStackTrace();
                                 }
                             });
-
+                    return true;
                 } catch (Exception e) {
                     e.printStackTrace();
+                    return false;
                 }
             }
             return false;
