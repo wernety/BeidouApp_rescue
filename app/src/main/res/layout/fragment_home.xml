@@ -4,18 +4,6 @@
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--    <Button-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="50dp"-->
-    <!--        android:id="@+id/btn1"-->
-    <!--        android:text="定位更新"/>-->
-
-    <!--    <Button-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="50dp"-->
-    <!--        android:id="@+id/btn2"-->
-    <!--        android:text="下载武汉地图"/>-->
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -114,66 +102,72 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_width="68dp"
+            android:layout_height="292dp"
             android:layout_gravity="right"
-            android:layout_marginTop="30dp">
+            android:layout_marginTop="30dp"
+            android:background="@drawable/background_new"
+            android:alpha="0.5"
+            android:orientation="vertical"
+
+            >
+
 
             <ImageButton
                 android:id="@+id/location"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:scaleType="fitCenter"
                 android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
-                android:background="@drawable/bodericon"
                 android:adjustViewBounds="true"
+                android:background="@drawable/bodericon"
+                android:scaleType="fitCenter"
                 android:src="@drawable/location_show" />
 
             <ImageButton
                 android:id="@+id/people"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:scaleType="fitCenter"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/bodericon"
+                android:scaleType="fitCenter"
                 android:src="@drawable/people_show" />
 
             <ImageButton
                 android:id="@+id/trace"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:scaleType="fitCenter"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/bodericon"
+                android:scaleType="fitCenter"
                 android:src="@drawable/track_show" />
 
             <ImageButton
                 android:id="@+id/updateMylocate"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:scaleType="fitCenter"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/bodericon"
+                android:scaleType="fitCenter"
                 android:src="@drawable/location_report" />
 
             <ImageButton
                 android:id="@+id/dingwei"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:scaleType="fitCenter"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/bodericon"
+                android:scaleType="fitCenter"
                 android:src="@drawable/location_refresh" />
         </LinearLayout>
     </FrameLayout>
