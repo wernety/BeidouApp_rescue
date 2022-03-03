@@ -232,7 +232,7 @@ public class LoginActivity extends AppCompatActivity {
                                     }
                                     @Override
                                     public void failed(IOException e) {
-                                        Log.d("登录", "fail: 请求失败");;
+                                        Log.d("登录", "fail: 请求失败");
                                     }
                                 });
                     }
@@ -319,7 +319,6 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
     });
-
 
 
     /**
