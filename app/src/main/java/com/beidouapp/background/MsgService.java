@@ -1,6 +1,5 @@
 package com.beidouapp.background;
 
-import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -12,11 +11,13 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
 import com.beidouapp.model.DataBase.recentMan;
 import com.beidouapp.model.FilePacket;
 import com.beidouapp.model.messages.HeartbeatMsg;
 import com.beidouapp.model.messages.HeartbeatMsg.*;
 import com.beidouapp.model.messages.Message4Receive;
+import com.beidouapp.model.messages.Message4Send;
 import com.beidouapp.model.utils.Bytes2Hex;
 import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.NetworkChangeReceiver;
@@ -127,7 +128,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      * 根据网络状态
      * @param message
      */
-    public boolean sendMessage(String message){
+    public boolean sendFile(String message){
         if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE) {
             try {
                 msgLink.webSocketClient.send(message);
@@ -157,29 +158,30 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
 
 
     /**
-     * 发送图片
+     * 发送文件
      * @param filePath
      * @return
      */
-    public boolean sendMessage(Path filePath) {
+    public boolean sendFile(Message4Send message4Send, Path filePath) {
         String fileName = filePath.getFileName().toString();
-        FilePacket p = FilePacket.constructNewFilePacket(fileName);
+        String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+        FilePacket p = FilePacket.constructUpNewFilePacket(suffix);
         msgLink.setFilePath(filePath);
+        msgLink.setUpFileMessage(message4Send);
         msgLink.webSocketClient.send(p.getBuffer().array());
+
         return false;
     }
 
-    public boolean sendTest() {
-        try {
-            String str = "zzjyy";
-            msgLink.webSocketClient.send(ByteBuffer.wrap(str.getBytes()));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    /**
+     * 请求文件
+     * @return
+     */
+    public boolean requestFile (String path) {
+        FilePacket p = FilePacket.constructDownNewFilePacket(path);
+        msgLink.webSocketClient.send(p.getBuffer().array());
+        return false;
     }
-
-
 
     /**
      * 连接网络
@@ -189,11 +191,22 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         private String url;
         private int netStatus;
         private Path filePath;
+        private Message4Send upFileMessage;
         private Runnable fileUploadRunnable;
+        private Runnable fileDownloadRunnable;
         private Thread fileUploadThread;
+        private Thread fileDownloadThread;
 
         public void setFilePath(Path filePath) {
             this.filePath = filePath;
+        }
+
+        public Message4Send getUpFileMessage() {
+            return upFileMessage;
+        }
+
+        public void setUpFileMessage(Message4Send upFileMessage) {
+            this.upFileMessage = upFileMessage;
         }
 
         public Link(String url, int netStatus){
@@ -245,9 +258,17 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                             System.out.println(code);
                             if (code == FilePacket.SUCCESS_CODE) {
                                 Log.d("WebSocket", "文件发送完成");
+                                String str = FilePacket.getUpFileServerPath(p.getBuffer());
+                                Log.d("WebSocket", "返回路径:" + str);
+                                msgLink.upFileMessage.setSendText(str);
+                                String json = JSON.toJSONString(msgLink.upFileMessage, true);
+                                sendFile(json);
                             }
+                            break;
                         }
+                        case FilePacket.DOWN_ACK_FILE_REQUEST:{
 
+                        }
                     }
                 }
 
@@ -346,7 +367,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 byte[] digest = md.digest();
                 String digestInHex = Bytes2Hex.bytes2hex(digest).toUpperCase();
                 System.out.println("send file finished, digest: " + digestInHex);
-                FilePacket p = FilePacket.constructFileEndPacket(digestInHex);
+                FilePacket p = FilePacket.constructUpFileEndPacket(digestInHex);
                 webSocketClient.send(p.getBuffer());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -466,9 +487,9 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
 
 
     private void initHandler() {
-        write2DBHandler = new Handler(){
-            @SuppressLint("HandlerLeak")
-            public void handleMessage(Message message) {
+        write2DBHandler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message message) {
                 switch (message.what){
                     case 1:{
                         String text = message.getData().getString("message");
@@ -526,8 +547,9 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                         break;
                     } default:{break;}
                 }
+                return false;
             }
-        };
+        });
 
     }
 

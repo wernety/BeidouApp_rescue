@@ -13,10 +13,8 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -50,8 +48,6 @@ import com.beidouapp.model.utils.id2name;
 
 import org.litepal.LitePal;
 
-import java.io.File;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -168,8 +164,8 @@ public class ChatActivity extends AppCompatActivity {
                String imgPath = handleImageOnKitKat(data);
                Log.d("IMG","PATH:" + imgPath);
                Path path = Paths.get(imgPath);
-               Log.d("IMG","PATH:" + path.toString());
-               msgService.sendMessage(path);
+               Message4Send message = new Message4Send(loginId, toType, "img", null);
+               msgService.sendFile(message, path);
                break;
             }
             case CODE_CAMERA_REQUEST:{
@@ -236,7 +232,7 @@ public class ChatActivity extends AppCompatActivity {
                         Message4Send message4Send = new Message4Send(toID,"group", "text", content);
                         Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send,true);
-                        msgService.sendMessage(json);
+                        msgService.sendFile(json);
                         ChatMessage chatMessage = new ChatMessage();
                         chatMessage.setContent(content);
                         chatMessage.setIsMeSend(1);
@@ -268,7 +264,7 @@ public class ChatActivity extends AppCompatActivity {
                         Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send, true);
 
-                        boolean isSent = msgService.sendMessage(json);
+                        boolean isSent = msgService.sendFile(json);
 
                         ChatMessage chatMessage = new ChatMessage();
                         chatMessage.setContent(content);
@@ -428,29 +424,56 @@ public class ChatActivity extends AppCompatActivity {
             String message = intent.getStringExtra("message");
             Log.d("WebSocket", "onReceive" + message);
             Message4Receive message4Receive = JSONUtils.receiveJSON(message);
+            String receiveType = message4Receive.getReceiveType();
+            String msgType = message4Receive.getData().getMsgType();
             if (message4Receive.getType().equals("MSG")) {
-                if (message4Receive.getReceiveType().equals("group")) {
 
-                    ChatMessage chatMessage = new ChatMessage();
+                ChatMessage chatMessage = new ChatMessage();
+
+                if (msgType.equals("text")) {
                     chatMessage.setContent(message4Receive.getData().getSendText());
-                    chatMessage.setIsMeSend(0);
-                    chatMessage.setTime(System.currentTimeMillis()+"");
-                    chatMessage.setName(id2name.transform(writableDatabase,loginId,message4Receive.getData().getSendUserId()));
-                    chatMessageList.add(chatMessage);
-                    initChatMsgListView();
+                } else if (msgType.equals("img")) {
+                    if (msgService.requestFile(message4Receive.getData().getSendText())) {
 
-                } else if (message4Receive.getData().getSendUserId().equals(toID)) {
-
-                    ChatMessage chatMessage = new ChatMessage();
-                    chatMessage.setContent(message4Receive.getData().getSendText());
-                    chatMessage.setIsMeSend(0);
-                    long timeMillis1 = System.currentTimeMillis();
-                    chatMessage.setTime(String.valueOf(timeMillis1)+"");
-                    chatMessage.setName(toNickname);
-                    chatMessageList.add(chatMessage);
-                    initChatMsgListView();
-
+                    }
                 }
+
+                chatMessage.setIsMeSend(0);
+                chatMessage.setTime(System.currentTimeMillis()+"");
+
+                if (receiveType.equals("group")) {
+                    chatMessage.setName(id2name.transform(writableDatabase,loginId,message4Receive.getData().getSendUserId()));
+                } else if (message4Receive.getData().getSendUserId().equals(toID)){
+                    chatMessage.setName(toNickname);
+                }
+
+                chatMessageList.add(chatMessage);
+                initChatMsgListView();
+
+
+//                if (receiveType.equals("group")) {
+//
+//                    ChatMessage chatMessage = new ChatMessage();
+//                    chatMessage.setContent(message4Receive.getData().getSendText());
+//                    chatMessage.setIsMeSend(0);
+//                    chatMessage.setTime(System.currentTimeMillis()+"");
+//                    chatMessage.setName(id2name.transform(writableDatabase,loginId,message4Receive.getData().getSendUserId()));
+//                    chatMessageList.add(chatMessage);
+//                    initChatMsgListView();
+//
+//                } else if (message4Receive.getData().getSendUserId().equals(toID)) {
+//
+//                    ChatMessage chatMessage = new ChatMessage();
+//                    chatMessage.setContent(message4Receive.getData().getSendText());
+//                    chatMessage.setContent(message4Receive.getData().getSendText());
+//                    chatMessage.setIsMeSend(0);
+//                    long timeMillis1 = System.currentTimeMillis();
+//                    chatMessage.setTime(String.valueOf(timeMillis1)+"");
+//                    chatMessage.setName(toNickname);
+//                    chatMessageList.add(chatMessage);
+//                    initChatMsgListView();
+//
+//                }
             }
         }
     }
