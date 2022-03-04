@@ -110,10 +110,9 @@ public class add_group extends AppCompatActivity {
                 int size_relation = relationList.size();
                 HashMap<String, String> dataMap = new HashMap<>();
 
-                Handler handler = new Handler() {
-                    //           @Override
-                    @SuppressLint("HandlerLeak")
-                    public void handleMessage(Message message) {
+                Handler handler = new Handler(new Handler.Callback() {
+                    @Override
+                    public boolean handleMessage(Message message) {
                         if (message.what == 1) {
                             try {
                                 OkHttpUtils.getInstance(add_group.this).put("http://139.196.122.222:8080/beisan/selfgroup/addSelfGroupUserList",
@@ -125,22 +124,22 @@ public class add_group extends AppCompatActivity {
                                                 if (code == 200) {
                                                     finish();
                                                 }
-
                                             }
 
                                             @Override
                                             public void failed(IOException e) {
-
+                                                e.printStackTrace();
                                             }
                                         });
-
+                                return true;
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                return false;
                             }
                         }
+                        return false;
                     }
-                };
-
+                });
                 new Thread(new Runnable() {
                     @Override
                     public void run() {

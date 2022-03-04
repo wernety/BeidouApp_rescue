@@ -286,6 +286,11 @@ public class MainActivity extends AppCompatActivity {
         startService(intentservice);
     }
 
+    private void StopMsgService() {
+        unbindService(serviceConnection);
+        stopService(intentservice);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -333,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(serviceConnection);
+        StopMsgService();
     }
 
     /**
