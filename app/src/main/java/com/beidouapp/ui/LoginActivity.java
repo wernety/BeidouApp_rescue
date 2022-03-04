@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.beidouapp.Config;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.User;
@@ -218,7 +219,8 @@ public class LoginActivity extends AppCompatActivity {
                     countHandler.postDelayed(myRunable,1000);
                     JSONObject needSMSCode = new JSONObject();
                     needSMSCode.put("mobile",username);
-                    OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/sms/code",needSMSCode.toString(),
+                    String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/sms/code";
+                    OkHttpUtils.getInstance(LoginActivity.this).post(url,needSMSCode.toString(),
                             new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
@@ -282,7 +284,8 @@ public class LoginActivity extends AppCompatActivity {
         public boolean handleMessage(Message msg) {
             if (msg.what == 1) {
                 try {
-                    OkHttpUtils.getInstance(LoginActivity.this).get("http://139.196.122.222:8080/getInfo",
+                    String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/getInfo";
+                    OkHttpUtils.getInstance(LoginActivity.this).get(url,
                             token, new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
@@ -330,8 +333,8 @@ public class LoginActivity extends AppCompatActivity {
             User4Login user4Login = new User4Login(username, password);
             String json = JSONUtils.sendJSON(user4Login);
             Log.d("json", json);
-
-            OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/login", json,
+            String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/login";
+            OkHttpUtils.getInstance(LoginActivity.this).post(url, json,
                     new OkHttpUtils.MyCallback() {
                         @Override
                         public void success(Response response) throws IOException {
@@ -408,7 +411,8 @@ public class LoginActivity extends AppCompatActivity {
         SMSLogin.put("mobile",username);
         SMSLogin.put("smsCode",smsCode);
         SMSLogin.put("uuid",uuid);
-        OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/sms/login", SMSLogin.toString(),
+        String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/sms/login";
+        OkHttpUtils.getInstance(LoginActivity.this).post(url, SMSLogin.toString(),
                 new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {

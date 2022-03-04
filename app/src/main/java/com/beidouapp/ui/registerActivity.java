@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.beidouapp.Config;
 import com.beidouapp.R;
 import com.beidouapp.model.utils.OkHttpUtils;
 
@@ -89,7 +90,8 @@ public class registerActivity extends AppCompatActivity {
                     JSONObject needSMSCode = new JSONObject();
                     Toast.makeText(registerActivity.this, "成功发送至"+username, Toast.LENGTH_LONG).show();
                     needSMSCode.put("mobile",username);
-                    OkHttpUtils.getInstance(registerActivity.this).post("http://139.196.122.222:8080/sms/code",needSMSCode.toString(),
+                    String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/sms/code";
+                    OkHttpUtils.getInstance(registerActivity.this).post(url,needSMSCode.toString(),
                             new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
@@ -149,7 +151,8 @@ public class registerActivity extends AppCompatActivity {
         SMSRegister.put("smsCode",smsCode);
         SMSRegister.put("password",password);
         SMSRegister.put("uuid",uuid);
-        OkHttpUtils.getInstance(registerActivity.this).post("http://139.196.122.222:8080/register", SMSRegister.toString(),
+        String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/register";
+        OkHttpUtils.getInstance(registerActivity.this).post(url, SMSRegister.toString(),
                 new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {
