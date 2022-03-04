@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="15dp"
-            android:text="经度"/>
+            android:text="经度:"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -32,11 +32,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="15dp"
-            android:text="纬度"/>
+            android:text="纬度:"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="15dp"
+            android:background="@drawable/et_background"
             android:id="@+id/tv_mapLongClicklongtitude"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -44,30 +45,56 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/et_background"
         android:id="@+id/et_text"
         android:layout_weight="1"
         android:hint="输入标记点名称"
         android:maxLines="1"/>
-    <Spinner
+
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:id="@+id/locChoose_Spinner"
-        android:entries="@array/locInfo"
-        android:spinnerMode="dropdown"/>
+        android:orientation="horizontal">
+
+
+        <Spinner
+            android:id="@+id/locChoose_Spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/spinner_background"
+            android:entries="@array/locInfo"
+            android:spinnerMode="dropdown" />
+
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="30dp"
+            android:layout_height="match_parent" />
+
+
+        <Spinner
+            android:id="@+id/legendChoose_Spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/spinner_background"
+            android:entries="@array/locLegend"
+            android:spinnerMode="dropdown"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="25dp"/>
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/black"/>
 
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:id="@+id/legendChoose_Spinner"
-        android:entries="@array/locLegend"
-        android:spinnerMode="dropdown"/>
+
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"

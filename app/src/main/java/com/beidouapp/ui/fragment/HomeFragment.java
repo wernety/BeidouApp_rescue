@@ -317,12 +317,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         textView2 = view.findViewById(R.id.longitudeLatitude);
         textView3 = view.findViewById(R.id.altitude);
         textView4 = view.findViewById(R.id.velocity);
-        textView5 = view.findViewById(R.id.direction);
+//        textView5 = view.findViewById(R.id.direction);
         textView1.setTypeface(font);
         textView2.setTypeface(font);
         textView3.setTypeface(font);
         textView4.setTypeface(font);
-        textView5.setTypeface(font);
+//        textView5.setTypeface(font);
 
         compass = view.findViewById(R.id.imageViewCompass);
     }
@@ -1166,10 +1166,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                 Marker marker = (Marker) mMap.addOverlay(markerOptions);
 
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
-                View view = inflater.inflate(R.layout.text_item, null);
+                View view = inflater.inflate(R.layout.pos_infoandcommit, null);
 
                 TextView tv_mapLongClicklatitude = (TextView) view.findViewById(R.id.tv_mapLongClicklatitude);
                 TextView tv_mapLongClicklongtitude = (TextView) view.findViewById(R.id.tv_mapLongClicklongtitude);
+                tv_mapLongClicklatitude.setTypeface(font);
+                tv_mapLongClicklongtitude.setTypeface(font);
                 Button btnCancel = view.findViewById(R.id.btn_cancel);
                 Button btnCommit = view.findViewById(R.id.btn_search);
                 EditText et_text = view.findViewById(R.id.et_text);
@@ -1747,12 +1749,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                 0.5f);
 
         // how long the animation will take place
-        ra.setDuration(15);
+        ra.setDuration(45);
         ra.setFillAfter(true);
 
         if (Math.abs(mCurrentDir - mlastDir) > 2)
         {
-            setTextView(degree);
+//            setTextView(degree);
             compass.startAnimation(ra);
         }
 
