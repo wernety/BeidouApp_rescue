@@ -137,6 +137,10 @@ public class selfPosAdapter extends RecyclerView.Adapter<selfPosAdapter.selfView
         notifyDataSetChanged();
     }
 
+    public void changeInfo(String info, int pos){
+        mlist.get(pos).setLocInfo(info);
+    }
+
     public class selfViewHolder extends RecyclerView.ViewHolder{
         TextView tv2_selfpos;
         TextView tv2_postag;

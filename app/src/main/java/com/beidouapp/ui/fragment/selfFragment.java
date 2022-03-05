@@ -68,6 +68,8 @@ public class selfFragment extends Fragment {
     private Handler handlerUpload;
     private Handler handlerCancelUpLoad;
     private Handler handlerDelete;
+    private Handler handlerWatchLocInfo;
+    private AlertDialog alertDialog;
 
 
     @Nullable
@@ -140,6 +142,20 @@ public class selfFragment extends Fragment {
                         selfPosAdapter.deleteData(msg.arg1);
                         break;
                     }
+                }
+                return false;
+            }
+        });
+        handlerWatchLocInfo = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                switch (msg.what){
+                    case 1:{
+                        Log.d("zw", "handleMessage: " + msg.getData().getString("Info"));
+                        selfPosAdapter.changeInfo( msg.getData().getString("Info"), msg.arg1);
+                        alertDialog.dismiss();
+                        break;
+                    } default:break;
                 }
                 return false;
             }
@@ -217,7 +233,7 @@ public class selfFragment extends Fragment {
                                 break;
                             }
                             case R.id.watchLocInfo:{
-                                showInfo(selfPos);
+                                showInfo(selfPos, pos);
                                 break;
                             }
                             case R.id.cancleUpLoad:
@@ -329,9 +345,6 @@ public class selfFragment extends Fragment {
                                 message3.what = 1;
                                 message3.arg1 = pos;
                                 handlerDelete.sendMessage(message3);
-
-
-
                             }
 
                             @Override
@@ -439,7 +452,7 @@ public class selfFragment extends Fragment {
     /**
      * 显示位置点详细信息
      */
-    private void showInfo(starPos selfPos) {
+    private void showInfo(starPos selfPos, int pos) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         LayoutInflater inflater = LayoutInflater.from(context);
         View v = inflater.inflate(R.layout.locinfo, null);
@@ -451,16 +464,36 @@ public class selfFragment extends Fragment {
         if (!selfPosRecords.isEmpty()){
             selfPosRecord = selfPosRecords.get(0);
             content.setText(selfPos.getLocInfo());
-            AlertDialog alertDialog = builder.create();
+            alertDialog = builder.create();
             alertDialog.show();
             alertDialog.getWindow().setContentView(v);
             alertDialog.getWindow().setGravity(Gravity.CENTER);
             update.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    selfPosRecord.setLocInfo(content.getText().toString());
-                    selfPosRecord.save();
-                    alertDialog.dismiss();
+                    selfPosJson selfPosJson = new selfPosJson(selfPosRecord.getUid(), selfPosRecord.getLontitude(),
+                            selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), content.getText().toString(), selfPosRecord.getLocInfo(),0, selfPosRecord.getTag());
+                    String json = JSONUtils.sendJson(selfPosJson);
+                    OkHttpUtils.getInstance(getActivity().getApplicationContext()).put("http://120.27.249.235:8081/updatePosition", json, new OkHttpUtils.MyCallback() {
+                        @Override
+                        public void success(Response response) throws IOException {
+                            Log.d("zw", "success: 修改成功");
+                            Message message4 = new Message();
+                            Bundle bundle4 = new Bundle();
+                            bundle4.putString("Info", content.getText().toString());
+                            message4.what = 1;
+                            message4.arg1 = pos;
+                            message4.setData(bundle4);
+                            handlerWatchLocInfo.sendMessage(message4);
+                            selfPosRecord.setLocInfo(content.getText().toString());
+                            selfPosRecord.save();
+                        }
+
+                        @Override
+                        public void failed(IOException e) {
+
+                        }
+                    });
                 }
             });
             cancel.setOnClickListener(new View.OnClickListener() {
