@@ -484,12 +484,6 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 webSocketClient.send(p.getBuffer());
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    fileChannel.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
 
