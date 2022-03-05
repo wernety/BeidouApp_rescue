@@ -120,6 +120,7 @@ import org.litepal.LitePal;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -226,8 +227,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     private Handler handlerMyweather;
     private int delete;
     private SensorManager mSensorManager;
-    private float currentDegree;
-    private float mlastDir;
+    private Sensor mAccelerometer;
+    private Sensor mMagneticField;
+    //sensor data
+    private float[] r = new float[9];   //rotation matrix
+    private float[] values = new float[3];   //orientation values
+    private float[] accelerometerValues = new float[3];  //data of acclerometer sensor
+    private float[] magneticFieldValues = new float[3]; //data of magnetic field sensor
+    private float newDegree; //最新的方向角
+    private float lastDegree;//上一次的方向角
+    private int times = 0;
+    private int totalTimes = 21;  //取totalTimes次的采样结果的中位数来作为方向的结果，这里最好设置totalTimes为奇数
+    private List<Float> degreeList =  new ArrayList<Float>(totalTimes); //存储totalTimes次采样结果
+
     private ImageView compass;
     private Typeface font;
 
@@ -311,18 +323,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         traceBtn.setOnClickListener(this);
         mMap = mapView.getMap();
         mSensorManager = (SensorManager) getActivity().getSystemService(SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mMagneticField = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
 
         textView1 = view.findViewById(R.id.weatherTemperature);
         textView2 = view.findViewById(R.id.longitudeLatitude);
         textView3 = view.findViewById(R.id.altitude);
         textView4 = view.findViewById(R.id.velocity);
-//        textView5 = view.findViewById(R.id.direction);
+        textView5 = view.findViewById(R.id.direction);
         textView1.setTypeface(font);
         textView2.setTypeface(font);
         textView3.setTypeface(font);
         textView4.setTypeface(font);
-//        textView5.setTypeface(font);
+        textView5.setTypeface(font);
 
         compass = view.findViewById(R.id.imageViewCompass);
     }
@@ -786,7 +800,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     public void onStop() {
         super.onStop();
 //        myOrientationListener.stop();
-
+        mSensorManager.unregisterListener(this);
     }
 
     /**
@@ -820,8 +834,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     public void onResume() {
         super.onResume();
         mapView.onResume();
-        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-                SensorManager.SENSOR_DELAY_GAME);
+        //register listener
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mMagneticField, SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
@@ -918,8 +933,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     public void onPause() {
         super.onPause();
         mapView.onPause();
-        mSensorManager.unregisterListener(this);
     }
+
+
 
     @Override
     public void onClick(View v) {
@@ -1166,12 +1182,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                 Marker marker = (Marker) mMap.addOverlay(markerOptions);
 
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
-                View view = inflater.inflate(R.layout.pos_infoandcommit, null);
+                View view = inflater.inflate(R.layout.text_item, null);
 
                 TextView tv_mapLongClicklatitude = (TextView) view.findViewById(R.id.tv_mapLongClicklatitude);
                 TextView tv_mapLongClicklongtitude = (TextView) view.findViewById(R.id.tv_mapLongClicklongtitude);
-                tv_mapLongClicklatitude.setTypeface(font);
-                tv_mapLongClicklongtitude.setTypeface(font);
                 Button btnCancel = view.findViewById(R.id.btn_cancel);
                 Button btnCommit = view.findViewById(R.id.btn_search);
                 EditText et_text = view.findViewById(R.id.et_text);
@@ -1736,71 +1750,98 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-        float degree = Math.round(event.values[0]);
-        mlastDir = mCurrentDir;
-        mCurrentDir = degree;
-        Log.d("zw", "onSensorChanged: 此时的角度为" + degree);
-        RotateAnimation ra = new RotateAnimation(
-                currentDegree,
-                -degree,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF,
-                0.5f);
-
-        // how long the animation will take place
-        ra.setDuration(45);
-        ra.setFillAfter(true);
-
-        if (Math.abs(mCurrentDir - mlastDir) > 2)
-        {
-//            setTextView(degree);
-            compass.startAnimation(ra);
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        if (times < totalTimes ) {
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                accelerometerValues = sensorEvent.values;
+            }
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                magneticFieldValues = sensorEvent.values;
+            }
+            SensorManager.getRotationMatrix(r, null, accelerometerValues, magneticFieldValues);
+            SensorManager.getOrientation(r, values);
+            values[0] = (float) Math.toDegrees(values[0]); //values[0]：方位角，围绕 -z 轴的旋转角度。
+            // 该值表示设备的 y 轴和磁北极之间的角度。 朝北时这个角度为0，朝南时这个角度为π。
+              // 同样，面向东时，该角度为 π/2，面向西方时，该角度为 -π/2。 值的范围是 -π 到 π。
+            if(values[0] <0){
+                values[0] = (360 - Math.abs(values[0])) + 180;
+            }
+//            Log.d("旋转矩阵", "onSensorChanged: " + times);
+            degreeList.add(values[0]) ;
+            if(times == (totalTimes-1)) {
+                Collections.sort(degreeList);
+               newDegree = degreeList.get((totalTimes-1)/2);
+//               Log.d("旋转矩阵", "onSensorChanged: " + newDegree);
+                if (Math.abs(lastDegree-newDegree)>=1)
+                {
+                    RotateAnimation ra = new RotateAnimation(
+                            lastDegree,
+                            newDegree,
+                            Animation.RELATIVE_TO_SELF, 0.5f,
+                            Animation.RELATIVE_TO_SELF, 0.5f);
+                    ra.setDuration(100);
+                    ra.setFillAfter(true);
+                    compass.startAnimation(ra);
+                }
+                lastDegree = newDegree;
+                setTextView(Math.round(newDegree));
+            }
+            times++;
+        }else { //重置
+            times = 0;
+            degreeList = new ArrayList<Float>(totalTimes); //重置totalTimes次采样结果
+            lastDegree = newDegree;
         }
 
-        currentDegree = -degree;
+
+
+
+//        float saveDegree = newDegree;
+//        newDegree = values[0];
+
+//        if (Math.abs(Math.round(newDegree) - Math.round(saveDegree)) >= 2)
+//        {
+//            if (values[0]<0){
+//                setTextView(Math.round(values[0] + 360));
+//            }else {
+//                setTextView(Math.round(values[0]));
+//            }
+//            compass.startAnimation(ra);
+//        }
     }
 
     private void setTextView(float x) {
                 switch ((int) (x / 45)) {
                     case 0: {
                         textView5.setText(new StringBuilder().append("方向：").append("北偏东").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "北偏东" + (int) (x % 45) + "°");
                         break;
                     }
                     case 1: {
-                        textView5.setText(new StringBuilder().append("方向：").append("东偏北").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "东偏北" + (int) (x % 45) + "°");
+                        textView5.setText(new StringBuilder().append("方向：").append("东偏北").append((int) (45- x % 45)).append("°").toString());
                         break;
                     }
                     case 2: {
                         textView5.setText(new StringBuilder().append("方向：").append("东偏南").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "东偏南" + (int) (x % 45) + "°");
                         break;
                     }
                     case 3: {
-                        textView5.setText(new StringBuilder().append("方向：").append("南偏东").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "南偏东" + (int) (x % 45) + "°");
+                        textView5.setText(new StringBuilder().append("方向：").append("南偏东").append((int) (45- x % 45)).append("°").toString());
                         break;
                     }
                     case 4: {
                         textView5.setText(new StringBuilder().append("方向：").append("南偏西").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "南偏西" + (int) (x % 45) + "°");
                         break;
                     }
                     case 5: {
-                        textView5.setText(new StringBuilder().append("方向：").append("西偏南").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "西偏南" + (int) (x % 45) + "°");
+                        textView5.setText(new StringBuilder().append("方向：").append("西偏南").append((int) (45- x % 45)).append("°").toString());
                         break;
                     }
                     case 6: {
                         textView5.setText(new StringBuilder().append("方向：").append("西偏北").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "西偏北" + (int) (x % 45) + "°");
                         break;
                     }
                     case 7: {
-                        textView5.setText(new StringBuilder().append("方向：").append("北偏西").append((int) (x % 45)).append("°").toString());
-                        Log.d("directionIs", (int) (x / 45)+ "北偏西" + (int) (x % 45) + "°");
+                        textView5.setText(new StringBuilder().append("方向：").append("北偏西").append((int) (45- x % 45)).append("°").toString());
                         break;
                     }
                 }

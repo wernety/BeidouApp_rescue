@@ -1,7 +1,9 @@
 package com.beidouapp.ui;
 
+import static com.beidouapp.model.utils.checkUtils.isMobileNO;
+import static com.beidouapp.model.utils.checkUtils.isNetworkConnected;
+
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -29,6 +31,7 @@ import androidx.core.content.ContextCompat;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.beidouapp.Config;
 import com.beidouapp.R;
 import com.beidouapp.model.DataBase.orgAndUidAndKey;
 import com.beidouapp.model.User;
@@ -51,6 +54,7 @@ import okhttp3.Response;
  */
 
 public class LoginActivity extends AppCompatActivity {
+    private static final String TAG = "登录";
     private TextView userNameText ,passwordText;
     private EditText userNameEditText, userPasswordEditText;
     private CheckBox rememberCheck;
@@ -62,7 +66,9 @@ public class LoginActivity extends AppCompatActivity {
     private boolean ifHide = true; // 是否显示密码
     private boolean ifPassword = true; // 是否密码登录
     private boolean ifRemember = true; //是否记住密码
-    Handler counthandler = new Handler(); //验证码发送等待倒计时
+    private boolean ifNetwork; //当前是否联网
+    private final String networkTip = "当前没有网络"; //网络状态提示
+    Handler countHandler = new Handler(); //验证码发送等待倒计时
     int wait = 60; //等待60秒
     private String token;
     private String username;
@@ -82,7 +88,11 @@ public class LoginActivity extends AppCompatActivity {
         application.setFlag(false);
         checkPermissions();
         initUI();                                                                                   //初始化UI
-        initListener();                                                                             //初始化监听器
+        initListener();//初始化监听器
+        ifNetwork = isNetworkConnected(LoginActivity.this);
+        if(!ifNetwork){
+            Toast.makeText(LoginActivity.this, networkTip, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void initUI() {
@@ -106,146 +116,135 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initListener(){
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                username = userNameEditText.getText().toString();
-                if(ifPassword){
-                    password = userPasswordEditText.getText().toString();
-                    if (TextUtils.isEmpty(username)||TextUtils.isEmpty(password)){
-                        Toast.makeText(LoginActivity.this, "大哥，用户或者密码少填了一个", Toast.LENGTH_LONG).show();
-                    }else {
-                        loginByPsw(username, password);
-                    }
+        loginButton.setOnClickListener(v -> {
+            username = userNameEditText.getText().toString();
+            if(ifPassword){
+                password = userPasswordEditText.getText().toString();
+                if (TextUtils.isEmpty(username)||TextUtils.isEmpty(password)){
+                    Toast.makeText(LoginActivity.this, "大哥，用户或者密码少填了一个", Toast.LENGTH_LONG).show();
+                }else if(!ifNetwork) {
+                    Toast.makeText(LoginActivity.this, networkTip, Toast.LENGTH_LONG).show();
+                }else
+                {
+                    loginByPsw(username, password);
+                }
+            }
+            else {
+                smsCode = userPasswordEditText.getText().toString();
+                if (TextUtils.isEmpty(smsCode)){
+                    Toast.makeText(LoginActivity.this, "验证码不能为空", Toast.LENGTH_LONG).show();
+                }else if(!ifNetwork){
+                    Toast.makeText(LoginActivity.this, networkTip, Toast.LENGTH_LONG).show();
                 }
                 else {
-                    smsCode = userPasswordEditText.getText().toString();
-                    if (TextUtils.isEmpty(smsCode)){
-                        Toast.makeText(LoginActivity.this, "验证码不能为空", Toast.LENGTH_LONG).show();
-                    }else {
-                        loginBySMS(username, smsCode);
-                    }
+                    loginBySMS(username, smsCode);
                 }
             }
         });
-        passwordHideButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (v.getId() == R.id.btn_switch_psw) {
-                    ifHide = !ifHide; //从隐藏变显示
+        passwordHideButton.setOnClickListener(v -> {
+            if (v.getId() == R.id.btn_switch_psw) {
+                ifHide = !ifHide; //从隐藏变显示
+                if (ifHide) {
+                    userPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    //为了点击之后输入框光标不变
+                    userPasswordEditText.setSelection(userPasswordEditText.getText().length());
+                    passwordHideButton.setBackgroundResource(R.drawable.no_eye);
+                } else {
+                    userPasswordEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                    //为了点击之后输入框光标不变
+                    userPasswordEditText.setSelection(userPasswordEditText.getText().length());
+                    passwordHideButton.setBackgroundResource(R.drawable.eye);
+                }
+            }
+        });
+        rememberCheck.setOnClickListener(v -> {
+            if (rememberCheck.isChecked()) {
+                ifRemember = true;
+                Toast.makeText(LoginActivity.this, "记住密码", Toast.LENGTH_LONG).show();}
+            else {
+                ifRemember = false;
+                Toast.makeText(LoginActivity.this, "不记住", Toast.LENGTH_LONG).show();}
+        });
+        switchLoginButton.setOnClickListener(v -> {
+            if (v.getId() == R.id.btn_login_switch) {//从密码登录到验证码登录
+                ifPassword = !ifPassword; //切换
+                if (ifPassword) {
+                    userNameText.setText("手机号");
+                    passwordText.setText("密码");
+                    switchLoginButton.setText("验证码登录");
+                    userNameEditText.setHint("请输入用户名");
+                    userPasswordEditText.setHint("请输入密码");
+                    userPasswordEditText.setText("");
+//                        检查当前的小眼睛状态决定密码是否显示
                     if (ifHide) {
                         userPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                        //为了点击之后输入框光标不变
-                        userPasswordEditText.setSelection(userPasswordEditText.getText().length());
-                        passwordHideButton.setBackgroundResource(R.drawable.no_eye);
-                    } else {
+                    }
+                    else {
                         userPasswordEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                        //为了点击之后输入框光标不变
-                        userPasswordEditText.setSelection(userPasswordEditText.getText().length());
-                        passwordHideButton.setBackgroundResource(R.drawable.eye);
                     }
+                    passwordHideButton.setVisibility(View.VISIBLE); //设置隐藏密码的小眼睛按钮可见
+                    sendCodeButton.setVisibility(View.GONE); //设置发送验证码按钮不可见
                 }
-            }
-        });
-        rememberCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (rememberCheck.isChecked()) {
-                    ifRemember = true;
-                    Toast.makeText(LoginActivity.this, "记住密码", Toast.LENGTH_LONG).show();}
                 else {
-                    ifRemember = false;
-                    Toast.makeText(LoginActivity.this, "不记住", Toast.LENGTH_LONG).show();}
-            }
-        });
-        switchLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (v.getId() == R.id.btn_login_switch) {//从密码登录到验证码登录
-                    ifPassword = !ifPassword; //切换
-                    if (ifPassword) {
-                        userNameText.setText("手机号");
-                        passwordText.setText("密码");
-                        switchLoginButton.setText("验证码登录");
-                        userNameEditText.setHint("请输入用户名");
-                        userPasswordEditText.setHint("请输入密码");
-                        userPasswordEditText.setText("");
-//                        检查当前的小眼睛状态决定密码是否显示
-                        if (ifHide) {
-                            userPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                        }
-                        else {
-                            userPasswordEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                        }
-                        passwordHideButton.setVisibility(View.VISIBLE); //设置隐藏密码的小眼睛按钮可见
-                        sendCodeButton.setVisibility(View.GONE); //设置发送验证码按钮不可见
-                    }
-                    else {
-                        userNameText.setText("手机号");
-                        passwordText.setText("验证码");
-                        switchLoginButton.setText("账号密码登录");
-                        userNameEditText.setHint("请输入手机号");
-                        userNameEditText.setInputType(InputType.TYPE_CLASS_PHONE);
-                        userPasswordEditText.setHint("请输入验证码");
-                        userPasswordEditText.setText("");
-                        userPasswordEditText.setInputType(InputType.TYPE_CLASS_NUMBER); //设置输入模式为数字
-                        passwordHideButton.setVisibility(View.GONE); //设置隐藏密码的小眼睛按钮不可见
-                        sendCodeButton.setVisibility(View.VISIBLE);
-                    }
+                    userNameText.setText("手机号");
+                    passwordText.setText("验证码");
+                    switchLoginButton.setText("账号密码登录");
+                    userNameEditText.setHint("请输入手机号");
+                    userNameEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+                    userPasswordEditText.setHint("请输入验证码");
+                    userPasswordEditText.setText("");
+                    userPasswordEditText.setInputType(InputType.TYPE_CLASS_NUMBER); //设置输入模式为数字
+                    passwordHideButton.setVisibility(View.GONE); //设置隐藏密码的小眼睛按钮不可见
+                    sendCodeButton.setVisibility(View.VISIBLE);
                 }
             }
         });
 
-        sendCodeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (v.getId() ==R.id.btn_send_code){
-                    username = userNameEditText.getText().toString();
-                    boolean isPhoneNum = isMobileNO(userNameEditText.getText().toString());
-                    if (TextUtils.isEmpty(username)){
-                        Toast.makeText(LoginActivity.this, "手机号不能为空", Toast.LENGTH_LONG).show();
-                        return;
-                    }else if (!isPhoneNum){
-                        userNameEditText.setText("");
-                        Toast.makeText(LoginActivity.this, "请输入正确的手机号码", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    else {
-                        //如果手机号输入正确
-                        //先设置按钮不可用，然后执行倒计时，给后端提示发送验证码
-                        v.setEnabled(false);
-                        counthandler.postDelayed(myRunable,1000);
-                        JSONObject needSMSCode = new JSONObject();
-                        needSMSCode.put("mobile",username);
-                        OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/sms/code",needSMSCode.toString(),
-                                new OkHttpUtils.MyCallback() {
-                                    @Override
-                                    public void success(Response response) throws IOException {
-                                        JSONObject object = JSON.parseObject(response.body().string());
-                                        Log.d("登录", "success: "+ object);;
-                                        int code = object.getInteger("code");
-                                        if (code == 200) {
-                                            uuid = object.getString("uuid");
-                                            Log.d("登录", "success: 验证码发送成功");;
-                                        } else
-                                            Log.d("登录", "success: 请求错误");;
-                                    }
-                                    @Override
-                                    public void failed(IOException e) {
-                                        Log.d("登录", "fail: 请求失败");
-                                    }
-                                });
-                    }
+        sendCodeButton.setOnClickListener(v -> {
+            if (v.getId() ==R.id.btn_send_code){
+                username = userNameEditText.getText().toString();
+                boolean isPhoneNum = isMobileNO(userNameEditText.getText().toString());
+                if (TextUtils.isEmpty(username)){
+                    Toast.makeText(LoginActivity.this, "手机号不能为空", Toast.LENGTH_LONG).show();
+                }else if (!isPhoneNum){
+                    userNameEditText.setText("");
+                    Toast.makeText(LoginActivity.this, "请输入正确的手机号码", Toast.LENGTH_LONG).show();
+                }else if(!ifNetwork){
+                    Toast.makeText(LoginActivity.this, networkTip, Toast.LENGTH_LONG).show();
+                }
+                else {
+                    //如果手机号输入正确且当前有网络状态
+                    //先设置按钮不可用，然后执行倒计时，给后端提示发送验证码
+                    v.setEnabled(false);
+                    countHandler.postDelayed(myRunable,1000);
+                    JSONObject needSMSCode = new JSONObject();
+                    needSMSCode.put("mobile",username);
+                    String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/sms/code";
+                    OkHttpUtils.getInstance(LoginActivity.this).post(url,needSMSCode.toString(),
+                            new OkHttpUtils.MyCallback() {
+                                @Override
+                                public void success(Response response) throws IOException {
+                                    JSONObject object = JSON.parseObject(response.body().string());
+                                    Log.d("登录", "success: "+ object);
+                                    int code = object.getInteger("code");
+                                    if (code == 200) {
+                                        uuid = object.getString("uuid");
+                                        Log.d(TAG, "success: 验证码发送成功");
+                                    } else
+                                        Log.d(TAG, "success: 请求错误");
+                                }
+                                @Override
+                                public void failed(IOException e) {
+                                    Log.d(TAG, "fail: 请求失败");
+                                }
+                            });
                 }
             }
         });
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent  toRegister = new Intent(LoginActivity.this, registerActivity.class);
-                startActivity(toRegister);
-            }
+        registerButton.setOnClickListener(v -> {
+            Intent  toRegister = new Intent(LoginActivity.this, registerActivity.class);
+            startActivity(toRegister);
         });
     }
 
@@ -285,12 +284,14 @@ public class LoginActivity extends AppCompatActivity {
         public boolean handleMessage(Message msg) {
             if (msg.what == 1) {
                 try {
-                    OkHttpUtils.getInstance(LoginActivity.this).get("http://139.196.122.222:8080/getInfo",
+                    String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/getInfo";
+                    OkHttpUtils.getInstance(LoginActivity.this).get(url,
                             token, new OkHttpUtils.MyCallback() {
                                 @Override
                                 public void success(Response response) throws IOException {
                                     JSONObject object = JSON.parseObject(response.body().string());
                                     int code = object.getInteger("code");
+                                    String msg = object.getString("msg");
                                     if (code == 200) {
                                         User user = JSON.parseObject(object.getString("user"), User.class);
                                         application.setIndexID(user.getUserId());
@@ -302,8 +303,8 @@ public class LoginActivity extends AppCompatActivity {
                                         startActivity(intent);
                                         finish();
                                     } else if (code == 500) {
-                                    } else
-                                        Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
+                                        LoginActivity.this.runOnUiThread(() -> Toast.makeText(LoginActivity.this,msg,Toast.LENGTH_LONG).show());
+                                    }
                                 }
 
                                 @Override
@@ -332,13 +333,14 @@ public class LoginActivity extends AppCompatActivity {
             User4Login user4Login = new User4Login(username, password);
             String json = JSONUtils.sendJSON(user4Login);
             Log.d("json", json);
-
-            OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/login", json,
+            String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/login";
+            OkHttpUtils.getInstance(LoginActivity.this).post(url, json,
                     new OkHttpUtils.MyCallback() {
                         @Override
                         public void success(Response response) throws IOException {
                             JSONObject object = JSON.parseObject(response.body().string());
                             int code = object.getInteger("code");
+                            String msg = object.getString("msg");
                             if (code == 200) {
                                 token = object.getString("token");
                                 // 获取sp的编辑器
@@ -348,7 +350,7 @@ public class LoginActivity extends AppCompatActivity {
                                         edit.putString("name", username);
                                         edit.putString("pwd", password);
                                         // 把edit进行提交
-                                        edit.commit();
+                                        edit.apply();
                                     }
                                     else {
                                         // 清除保存的信息
@@ -363,16 +365,14 @@ public class LoginActivity extends AppCompatActivity {
                                 LoginActivity.this.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(LoginActivity.this, "用户名或者密码错误", Toast.LENGTH_LONG).show();
-                                        userNameEditText.setText("");
-                                        userPasswordEditText.setText("");
+                                        Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_LONG).show();
                                     }
                                 });
-                            } else
-                                Toast.makeText(LoginActivity.this, "请求错误", Toast.LENGTH_LONG).show();
+                            }
                         }
                         @Override
                         public void failed(IOException e) {
+                            Toast.makeText(LoginActivity.this, "网络未连接", Toast.LENGTH_LONG).show();
                             Log.d("zw", "failed: 没有网络状态，此时使用本地数据库加载数据");
                             List<orgAndUidAndKey> records = LitePal.where("uid = ?", username).find(orgAndUidAndKey.class);
                             //查询数据库，如果有此人，则跳转页面
@@ -411,12 +411,14 @@ public class LoginActivity extends AppCompatActivity {
         SMSLogin.put("mobile",username);
         SMSLogin.put("smsCode",smsCode);
         SMSLogin.put("uuid",uuid);
-        OkHttpUtils.getInstance(LoginActivity.this).post("http://139.196.122.222:8080/sms/login", SMSLogin.toString(),
+        String url = "http://" + Config.BeiDou_SERVER_HOST + ":" + Config.BeiDou_SERVER_PORT + "/sms/login";
+        OkHttpUtils.getInstance(LoginActivity.this).post(url, SMSLogin.toString(),
                 new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {
                         JSONObject object = JSON.parseObject(response.body().string());
                         int code = object.getInteger("code");
+                        String msg = object.getString("msg");
                         if (code == 200) {
                             Log.d("验证码登录", "success:成功");
                             token = object.getString("token");
@@ -432,13 +434,14 @@ public class LoginActivity extends AppCompatActivity {
                                     // 清除保存的信息
                                     edit.clear();
                                 }
-                                edit.commit();
+                                edit.apply();
                             }
                             Message message = new Message();
                             message.what = 1;
                             getInfoHandler.sendMessage(message);
-                        } else
-                            Log.d("验证码登录", "success: 请求错误");
+                        } else if(code==500) {
+                            LoginActivity.this.runOnUiThread(() -> Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_LONG).show());
+                        }
                     }
                     @Override
                     public void failed(IOException e) {
@@ -472,7 +475,7 @@ public class LoginActivity extends AppCompatActivity {
         public void run() {
             if(wait >=0) {
                 sendCodeButton.setText(String.valueOf(wait));
-                counthandler.postDelayed(this, 1000);
+                countHandler.postDelayed(this, 1000);
                 //从当前时间开始延迟delayMillis时间后执行Runnable
                 wait--;
             }
@@ -480,7 +483,7 @@ public class LoginActivity extends AppCompatActivity {
                 wait = 60;
                 sendCodeButton.setText("重新发送");
                 sendCodeButton.setEnabled(true);
-                counthandler.removeCallbacks(this);
+                countHandler.removeCallbacks(this);
             }
         }
     };
@@ -526,21 +529,4 @@ public class LoginActivity extends AppCompatActivity {
         }
         super.onResume();
     }
-
-    /**
-     * 验证手机格式
-     */
-    public static boolean isMobileNO(String mobiles) {
-        /*
-         * 移动：134、135、136、137、138、139、150、151、157(TD)、158、159、187、188
-         * 联通：130、131、132、152、155、156、185、186 电信：133、153、180、189、（1349卫通）
-         * 总结起来就是第一位必定为1，第二位必定为3或5或8，其他位置的可以为0-9
-         */
-        String telRegex = "[1][3456789]\\d{9}";// "[1]"代表第1位为数字1，"[358]"代表第二位可以为3、5、8中的一个，"\\d{9}"代表后面是可以是0～9的数字，有9位。
-        if (TextUtils.isEmpty(mobiles))
-            return false;
-        else
-            return mobiles.matches(telRegex);
-    }
-
 }

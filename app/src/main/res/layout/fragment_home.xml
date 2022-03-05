@@ -53,7 +53,18 @@
                     android:hint="E118.31°  N38.11°"
                     android:textColor="@color/white"
                     android:textSize="@dimen/info_text_size" />
-
+                <TextView
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp"
+                    android:id="@+id/direction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:autoLink="phone"
+                    android:gravity="left"
+                    android:hint="方向：南偏东10°"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/info_text_size" />
                 <TextView
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="5dp"

@@ -351,7 +351,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 int bytesRead = -1;
 
                 buffer.clear();//make buffer ready for write
-                buffer.put((byte)FilePacket.UP_FILE_DATA);
+                buffer.put((byte)FilePacket.UP_ACK_FILE_END);
 
                 while((bytesRead = fileChannel.read(buffer)) != -1){
                     buffer.flip();  //make buffer ready for read
@@ -361,7 +361,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                     buffer.reset();
                     webSocketClient.send(buffer);
                     buffer.clear(); //make buffer ready for write
-                    buffer.put((byte)FilePacket.UP_FILE_DATA);
+                    buffer.put((byte)FilePacket.UP_ACK_FILE_END);
                 }
 
                 byte[] digest = md.digest();
