@@ -66,6 +66,8 @@ public class selfFragment extends Fragment {
     private OnFragmentLongClick onFragmentLongClick;
     private RefreshLayout rlForSlefLoc;
     private Handler handlerUpload;
+    private Handler handlerCancelUpLoad;
+    private Handler handlerDelete;
 
 
     @Nullable
@@ -113,6 +115,31 @@ public class selfFragment extends Fragment {
                         selfPosAdapter.uploadSuccess(msg.arg1);
                         break;
                     } default:break;
+                }
+                return false;
+            }
+        });
+        handlerCancelUpLoad = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                switch (msg.what){
+                    case 1:{
+                        Log.d("zw", "handleMessage: 此时的msg参数1是" + msg.arg1);
+                        selfPosAdapter.cancelUpload(msg.arg1);
+                        break;
+                    } default:break;
+                }
+                return false;
+            }
+        });
+        handlerDelete = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                switch (msg.what){
+                    case 1:{
+                        selfPosAdapter.deleteData(msg.arg1);
+                        break;
+                    }
                 }
                 return false;
             }
@@ -296,18 +323,15 @@ public class selfFragment extends Fragment {
                             public void success(Response response) throws IOException {
                                 //将数据库发送状态修改成已发送
                                 Log.d("zw", "success: 网络也删除成功");
-                                JSONObject object = JSON.parseObject(response.body().string());
-                                Integer code = object.getInteger("code");
-                                switch (code){
-                                    case 200:{
-                                        LitePal.deleteAll(Pos.class, "latitude = ? and lontitude=? and uid=?", selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID());
-                                        selfPosAdapter.deleteData(pos);
-                                        break;
-                                    } default:{
-                                        LitePal.deleteAll(Pos.class, "latitude = ? and lontitude=? and uid=?", selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID());
-                                        selfPosAdapter.deleteData(pos);
-                                    }
-                                }
+                                Log.d("zw", "success: 删除自建点返回的信息是：" + response.body().string());
+                                LitePal.deleteAll(Pos.class, "latitude = ? and lontitude=? and uid=?", selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID());
+                                Message message3 = new Message();
+                                message3.what = 1;
+                                message3.arg1 = pos;
+                                handlerDelete.sendMessage(message3);
+
+
+
                             }
 
                             @Override
@@ -350,7 +374,7 @@ public class selfFragment extends Fragment {
                 OkHttpUtils.getInstance(getActivity().getApplicationContext()).put("http://120.27.249.235:8081/reclaimPosition", json, new OkHttpUtils.MyCallback() {
                     @Override
                     public void success(Response response) throws IOException {
-                        selfPosRecord.setStatus("1");
+                        selfPosRecord.setStatus("0");
                         selfPosRecord.save();
                         if (starPosRecords.isEmpty()){
                             starposDB = new starposDB();
@@ -377,7 +401,10 @@ public class selfFragment extends Fragment {
                             starposDB.setLocInfo(selfPosRecord.getLocInfo());
                             starposDB.save();
                         }
-                        selfPosAdapter.cancelUpload(pos);
+                        Message message2 = new Message();
+                        message2.what = 1;
+                        message2.arg1 = pos;
+                        handlerCancelUpLoad.sendMessage(message2);
                     }
 
                     @Override

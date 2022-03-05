@@ -1182,7 +1182,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                 Marker marker = (Marker) mMap.addOverlay(markerOptions);
 
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
-                View view = inflater.inflate(R.layout.text_item, null);
+                View view = inflater.inflate(R.layout.pos_infoandcommit, null);
 
                 TextView tv_mapLongClicklatitude = (TextView) view.findViewById(R.id.tv_mapLongClicklatitude);
                 TextView tv_mapLongClicklongtitude = (TextView) view.findViewById(R.id.tv_mapLongClicklongtitude);
