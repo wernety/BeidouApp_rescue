@@ -30,18 +30,25 @@ import com.beidouapp.ui.fragment.MyLocationListener;
 import org.java_websocket.handshake.ServerHandshake;
 import org.litepal.LitePal;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.ByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -107,7 +114,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         initHandler();
         Log.d("zw", "onStartCommand:全局的curToken " + curToken);
         NetStatus = NetworkManager.getConnectivityStatus(MsgService.this);
-        msgLink = new Link("ws://120.27.242.92:8080/chatWS/" + uid, NetStatus);
+        msgLink = new Link("ws://120.27.242.92:8080/chatWS/", uid, NetStatus);
         //http://10.123.254.170:8080/
         msgLink.linkServer();
         return super.onStartCommand(intent, flags, startId);
@@ -128,7 +135,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      * 根据网络状态
      * @param message
      */
-    public boolean sendFile(String message){
+    public boolean sendMessage(String message){
         if (NetStatus == NetworkManager.TYPE_WIFI_MOBILE) {
             try {
                 msgLink.webSocketClient.send(message);
@@ -162,11 +169,11 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      * @param filePath
      * @return
      */
-    public boolean sendFile(Message4Send message4Send, Path filePath) {
+    public boolean sendMessage(Message4Send message4Send, Path filePath) {
         String fileName = filePath.getFileName().toString();
         String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
         FilePacket p = FilePacket.constructUpNewFilePacket(suffix);
-        msgLink.setFilePath(filePath);
+        msgLink.setUpFilePath(filePath);
         msgLink.setUpFileMessage(message4Send);
         msgLink.webSocketClient.send(p.getBuffer().array());
 
@@ -178,27 +185,46 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      * @return
      */
     public boolean requestFile (String path) {
+        Path serverPath = Paths.get(path);
         FilePacket p = FilePacket.constructDownNewFilePacket(path);
-        msgLink.webSocketClient.send(p.getBuffer().array());
+        msgLink.setDownFilePath(Paths.get(FilePacket.createFilePath(MsgService.this),
+                serverPath.getFileName().toString()));
+        System.out.println(msgLink.downFilePath.toString());
+        try {
+            msgLink.fileChannel = Files.newByteChannel(msgLink.downFilePath,
+                    EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            msgLink.webSocketClient.send(p.getBuffer().array());
+            msgLink.md = MessageDigest.getInstance("MD5");
+        } catch (IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
     /**
-     * 连接网络
+     * 连接聊天服务
      */
     public class Link {
         public WebSocketClient webSocketClient;
         private String url;
         private int netStatus;
-        private Path filePath;
+        private Path upFilePath;
+        private Path downFilePath;
+        private List<Path> downFilePathList = new ArrayList<>();
         private Message4Send upFileMessage;
-        private Runnable fileUploadRunnable;
-        private Runnable fileDownloadRunnable;
-        private Thread fileUploadThread;
-        private Thread fileDownloadThread;
+        private ByteChannel fileChannel;
+        private MessageDigest md;
+        private Queue<String> downFilePathQueue = new LinkedList<>();
 
-        public void setFilePath(Path filePath) {
-            this.filePath = filePath;
+
+
+        public void setUpFilePath(Path upFilePath) {
+            this.upFilePath = upFilePath;
+        }
+
+        public void setDownFilePath(Path downFilePath) {
+            this.downFilePath = downFilePath;
         }
 
         public Message4Send getUpFileMessage() {
@@ -209,9 +235,12 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
             this.upFileMessage = upFileMessage;
         }
 
-        public Link(String url, int netStatus){
-            this.url = url;
+        public Link(String url, String id,int netStatus){
+            this.url = url + id;
             this.netStatus = netStatus;
+
+//            filePacketQueue.offer() //ru
+//            filePacketQueue.poll() //chu
         }
 
         public void setNetStatus(int netStatus){
@@ -243,14 +272,13 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                             if (code == FilePacket.SUCCESS_CODE) {
                                 Log.d("WebSocket", "开始发送文件");
                             }
-                            fileUploadRunnable = new Runnable() {
+
+                            new Thread(new Runnable() {
                                 @Override
                                 public void run() {
                                     msgLink.startSendFileData();
                                 }
-                            };
-                            fileUploadThread = new Thread(fileUploadRunnable);
-                            fileUploadThread.start();
+                            }).start();
                             break;
                         }
                         case FilePacket.UP_ACK_FILE_END:{
@@ -262,13 +290,70 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                                 Log.d("WebSocket", "返回路径:" + str);
                                 msgLink.upFileMessage.setSendText(str);
                                 String json = JSON.toJSONString(msgLink.upFileMessage, true);
-                                sendFile(json);
+                                sendMessage(json);
                             }
                             break;
                         }
-                        case FilePacket.DOWN_ACK_FILE_REQUEST:{
-
+                        case FilePacket.DOWN_ACK_NEW_FILE:{
+                            code = (int) p.getBuffer().get();
+                            if (code == FilePacket.SUCCESS_CODE) {
+                                Log.d("file", "开始接收文件");
+                                FilePacket p4s = FilePacket.constructDownFileRequestPacket(code);
+                                webSocketClient.send(p4s.getBuffer());
+                            } else if (code == FilePacket.ERROR_CODE) {
+                                FilePacket p4s = FilePacket.constructDownFileRequestPacket(code);
+                                webSocketClient.send(p4s.getBuffer());
+                            }
+                            break;
                         }
+                        case FilePacket.DOWN_FILE_DATA:{
+                            try {
+                                Log.d("file", "接收到文件包");
+                                p.getBuffer().mark();
+                                md.update(p.getBuffer());
+                                p.getBuffer().reset();
+                                fileChannel.write(p.getBuffer());
+                            } catch (IOException e){
+                                try {
+                                    fileChannel.close();
+                                } catch (IOException ignore) {
+                                }
+                            }
+                            break;
+                        }
+                        case FilePacket.DOWN_FILE_END:{
+
+                                byte[] digest = md.digest();
+                                String localDigest = Bytes2Hex.bytes2hex(digest).toUpperCase();
+                                System.out.println("local, digest : " + localDigest);
+                            try {
+                                int digestBytesLen = p.getBuffer().getInt();
+                                byte[] digestBytes = new byte[digestBytesLen];
+                                p.getBuffer().get(digestBytes);
+                                String remoteDigest = new String(digestBytes, StandardCharsets.UTF_8);
+                                System.out.println("receive file end, digest : " + remoteDigest);
+                                FilePacket ackP;
+                                if(localDigest.equals(remoteDigest)){
+                                    System.out.println("file digests are same, send success ack code");
+                                    ackP = FilePacket.constructDownAckFileEndPacket(FilePacket.SUCCESS_CODE);
+                                } else {
+                                    System.out.println("file digests are not same, send error ack code");
+                                    ackP = FilePacket.constructDownAckFileEndPacket(FilePacket.ERROR_CODE);
+                                }
+                                webSocketClient.send(ackP.getBuffer());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            downFilePathQueue.poll();
+
+                            if (!downFilePathQueue.isEmpty()) {
+                                requestFile(downFilePathQueue.peek());
+                            }
+
+                            break;
+                        }
+
                     }
                 }
 
@@ -276,13 +361,40 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 public void onMessage(String text) {
                     Log.d("WebSocket", "onMessage" + text);
                     Intent intent = new Intent("com.beidouapp.callback.content");
-                    intent.putExtra("message", text);
-                    sendBroadcast(intent);
+//                    intent.putExtra("message", text);
+//                    sendBroadcast(intent);
+
+                    Bundle bundle = new Bundle();
 
                     Message4Receive message4Receive = JSONUtils.receiveJSON(text);
+
+                    String receiveType = message4Receive.getReceiveType();                          //group或single
+                    bundle.putString("receiveType", receiveType);
+
                     if (message4Receive.getType().equals("MSG")) {
-                        Bundle bundle = new Bundle();
-                        bundle.putString("message", text);
+
+                        String msgType = message4Receive.getData().getMsgType();                    //text或img
+                        bundle.putString("msgType", msgType);
+
+                        bundle.putString("sendText", message4Receive.getData().getSendText());      //发送内容：文字信息或图片地址
+                        bundle.putString("sendUserId", message4Receive.getData().getSendUserId());  //发送者id
+                        bundle.putString("sendTime", message4Receive.getData().getSendTime());      //发送时间
+
+                        if (msgType.equals("text")) {
+                            if (receiveType.equals("group")) {
+                                bundle.putString("groupId", message4Receive.getData().getGroupId());
+                            }
+                            intent.putExtra("messageBundle", bundle);
+                            sendBroadcast(intent);
+                        } else if (msgType.equals("img")) {
+                            String path = bundle.getString("sendText");
+
+                            if (downFilePathQueue.isEmpty()) {
+                                requestFile(path);
+                            }
+                            downFilePathQueue.offer(path);
+                        }
+
                         Message message = new Message();
                         message.setData(bundle);
                         message.what = 1;
@@ -341,8 +453,9 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         }
 
         private void startSendFileData(){
+
             try {
-                ByteChannel fileChannel = Files.newByteChannel(filePath, EnumSet.of(StandardOpenOption.READ));
+                ByteChannel fileChannel = Files.newByteChannel(upFilePath, EnumSet.of(StandardOpenOption.READ));
                 ByteBuffer buffer = ByteBuffer.allocate(1 + 4096);
                 buffer.order(ByteOrder.BIG_ENDIAN);
 
@@ -371,8 +484,18 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                 webSocketClient.send(p.getBuffer());
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    fileChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
+
+    }
+
+    private void startReceiveFileData() {
 
     }
 
@@ -492,56 +615,53 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
             public boolean handleMessage(Message message) {
                 switch (message.what){
                     case 1:{
-                        String text = message.getData().getString("message");
-                        Message4Receive message4Receive = JSONUtils.receiveJSON(text);
-                        if (message4Receive.getType().equals("MSG")) {
-                            if (message4Receive.getReceiveType().equals("group")) {
-                                Log.d("zw", "onReceive: 暂时不处理群聊消息入库，后面再处理");
-                                String toID = message4Receive.getData().getGroupId();
+                        Bundle bundle = message.getData();
+
+                        if (Objects.equals(bundle.getString("receiveType"), "group")) {
+                            String toID = bundle.getString("groupId");
+                            manRecords = LitePal.where("toID=? and selfID=?", toID, uid).find(recentMan.class);
+                            if(manRecords.isEmpty()){
+                                manRecord = new recentMan();
+                                manRecord.setToID(toID);
+                                manRecord.setSelfId(uid);
+                                manRecord.setType("1");
+                                manRecord.save();//最近群聊群名入库
+                            }else {
+                                manRecord = manRecords.get(0);
+                            }
+                            ContentValues values = new ContentValues();
+                            values.put("groupID", toID);
+                            values.put("selfID", uid);
+                            values.put("flag", bundle.getString("sendUserId"));//别人发的,flag设置为账号（手机号）
+                            values.put("contentChat", bundle.getString("sendText"));
+                            values.put("message_type", "text");
+                            values.put("time", bundle.getString("sendTime"));
+                            writableDatabase.insert("chat_group", null, values);//最近获得的群聊消息入库
+                            Log.d("websocket", "群聊消息入库成功");
+                        }else{
+                            if(!Objects.requireNonNull(bundle.getString("sendUserId")).isEmpty()){
+                                String toID = bundle.getString("sendUserId");
                                 manRecords = LitePal.where("toID=? and selfID=?", toID, uid).find(recentMan.class);
                                 if(manRecords.isEmpty()){
                                     manRecord = new recentMan();
                                     manRecord.setToID(toID);
                                     manRecord.setSelfId(uid);
-                                    manRecord.setType("1");
-                                    manRecord.save();//最近群聊群名入库
+                                    manRecord.setType("0");
+                                    manRecord.save();//最近单聊用户入库
                                 }else {
                                     manRecord = manRecords.get(0);
                                 }
                                 ContentValues values = new ContentValues();
-                                values.put("groupID", toID);
+                                values.put("toID", toID);
                                 values.put("selfID", uid);
-                                values.put("flag", message4Receive.getData().getSendUserId());//别人发的,flag设置为账号（手机号）
-                                values.put("contentChat", message4Receive.getData().getSendText());
+                                values.put("flag", 0);//别人发的是0
+                                values.put("contentChat", bundle.getString("sendText"));
                                 values.put("message_type", "text");
-                                values.put("time", message4Receive.getData().getSendTime());
-                                writableDatabase.insert("chat_group", null, values);//最近获得的群聊消息入库
-                                Log.d("websocket", "群聊消息入库成功");
+                                values.put("time", bundle.getString("sendTime"));
+                                writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
+                                Log.d("websocket", "入库成功");
                             }else{
-                                if(!message4Receive.getData().getSendUserId().isEmpty()){
-                                    String toID = message4Receive.getData().getSendUserId();
-                                    manRecords = LitePal.where("toID=? and selfID=?", toID, uid).find(recentMan.class);
-                                    if(manRecords.isEmpty()){
-                                        manRecord = new recentMan();
-                                        manRecord.setToID(toID);
-                                        manRecord.setSelfId(uid);
-                                        manRecord.setType("0");
-                                        manRecord.save();//最近单聊用户入库
-                                    }else {
-                                        manRecord = manRecords.get(0);
-                                    }
-                                    ContentValues values = new ContentValues();
-                                    values.put("toID", toID);
-                                    values.put("selfID", uid);
-                                    values.put("flag", 0);//别人发的是0
-                                    values.put("contentChat", message4Receive.getData().getSendText());
-                                    values.put("message_type", "text");
-                                    values.put("time", message4Receive.getData().getSendTime());
-                                    writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
-                                    Log.d("websocket", "入库成功");
-                                }else{
-                                    Log.d("zw", "onReceive: 此时收到的广播的消息，但是这条广播显示的发送人ID是空的，woc");
-                                }
+                                Log.d("zw", "onReceive: 此时收到的广播的消息，但是这条广播显示的发送人ID是空的，woc");
                             }
                         }
                         break;

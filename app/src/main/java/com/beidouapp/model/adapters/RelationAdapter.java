@@ -18,7 +18,7 @@ import java.util.List;
 
 public class RelationAdapter extends BaseTreeAdapter <RelationAdapter.RelationViewHolder, Relation>{
 
-    private final float fixLeft = 36;
+    private final float fixLeft = 30;
     private OnItemClickListener onItemClickListener;
 
     public RelationAdapter(List<Relation> list, Context context) {
