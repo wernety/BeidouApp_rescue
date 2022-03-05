@@ -3,6 +3,8 @@ package com.beidouapp.ui.fragment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +23,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.platform.comapi.basestruct.Point;
@@ -60,6 +65,7 @@ public class selfFragment extends Fragment {
     private starposDB starposDB;
     private OnFragmentLongClick onFragmentLongClick;
     private RefreshLayout rlForSlefLoc;
+    private Handler handlerUpload;
 
 
     @Nullable
@@ -96,6 +102,19 @@ public class selfFragment extends Fragment {
 
                 refreshLayout.finishRefresh(5);
                 refreshLayout.closeHeaderOrFooter();
+            }
+        });
+        handlerUpload = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                switch (msg.what){
+                    case  1:{
+                        Log.d("zw", "handleMessage: 此时msg自带的数据是" + msg.arg1);
+                        selfPosAdapter.uploadSuccess(msg.arg1);
+                        break;
+                    } default:break;
+                }
+                return false;
             }
         });
     }
@@ -143,29 +162,39 @@ public class selfFragment extends Fragment {
                 PopupMenu popupMenu = new PopupMenu(getActivity().getApplicationContext(), v);
                 popupMenu.getMenuInflater().inflate(R.menu.selfposconfig_menu,popupMenu.getMenu());
                 selfPos = list.get(pos);
+                Log.d("zw", "onItemLongClick: 此时的状态" + selfPos.getStatus());
+                if(selfPos.getStatus().equals("0")){
+                    popupMenu.getMenu().findItem(R.id.cancleUpLoad).setVisible(false);
+                    popupMenu.getMenu().findItem(R.id.uploadSelfPos).setVisible(true);
+                }else{
+                    popupMenu.getMenu().findItem(R.id.cancleUpLoad).setVisible(true);
+                    popupMenu.getMenu().findItem(R.id.uploadSelfPos).setVisible(false);
+                }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()){
                             case R.id.uploadSelfPos:{
-                                uploadSelfPos(selfPos);
+                                uploadSelfPos(selfPos, pos);
                                 break;
                             }
                             case R.id.deleteSelfPos:{
                                 //后面的数据记录删除后，前面的数据记录也得删除
-                                deleteDbRecord(selfPos);
+                                deleteDbRecord(selfPos, pos);
 //                                selfPosAdapter.notifyItemRemoved(pos);
 //                                selfPosAdapter.notifyItemRangeChanged(pos, selfPosAdapter.getItemCount());
                                 Log.d("zw", "onMenuItemClick: 此时删除的位置应该是:" + pos);
 //                                selfPosAdapter.notifyDataSetChanged();
                                 deleteMapMarker(selfPos);
-                                selfPosAdapter.deleteData(pos);
+
                                 break;
                             }
                             case R.id.watchLocInfo:{
                                 showInfo(selfPos);
                                 break;
                             }
+                            case R.id.cancleUpLoad:
+                                cancleUpload(selfPos, pos);
                             default:break;
                         }
                         return false;
@@ -177,9 +206,9 @@ public class selfFragment extends Fragment {
     }
 
     /**
-     * 上传自建点坐标
+     * 发布自建点坐标
      */
-    private void uploadSelfPos(starPos selfPos) {
+    private void uploadSelfPos(starPos selfPos, int pos) {
 //先查到这个数据，然后上传这个数据的所有，如果上传成功，我们就改变状态（tag标签），并且写库,此时写两个库，一个是自建点的库，需要将状态改成1；另一个是收藏点的库，将全部的信息写入进去
         selfPosRecords = LitePal.where("latitude=? and lontitude=? and uid=?",
                 selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID()).find(Pos.class);
@@ -226,11 +255,15 @@ public class selfFragment extends Fragment {
                             starposDB.setLocInfo(selfPosRecord.getLocInfo());
                             starposDB.save();
                         }
+                        Message message = new Message();
+                        message.what = 1;
+                        message.arg1 = pos;
+                        handlerUpload.sendMessage(message);
                     }
 
                     @Override
                     public void failed(IOException e) {
-
+                        Toast.makeText(getActivity().getApplicationContext(), "上传失败", Toast.LENGTH_LONG).show();
                     }
                 });
             }catch (Exception e){
@@ -243,11 +276,124 @@ public class selfFragment extends Fragment {
     /**
      * 删除该条记录
      */
-    private void deleteDbRecord(starPos selfPos) {
+    private void deleteDbRecord(starPos selfPos, int pos) {
         Log.d("zw", "deleteDbRecord: 开始删库");
-        LitePal.deleteAll(Pos.class, "latitude = ? and lontitude=?", selfPos.getLatitude(), selfPos.getLontitude());
+        selfPosRecords = LitePal.where("latitude=? and lontitude=? and uid=?",
+                selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID()).find(Pos.class);
+
+        if (!selfPosRecords.isEmpty()){
+            selfPosRecord = selfPosRecords.get(0);
+            //发送到亮哥那边去，然后记得在显示的时候要根据设计的图例来显示自建点，先留白
+            try {
+                selfPosJson selfPosJson = new selfPosJson(selfPosRecord.getUid(), selfPosRecord.getLontitude(),
+                        selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), selfPosRecord.getText(), selfPosRecord.getLocInfo(),1, selfPosRecord.getTag());
+                String json = JSONUtils.sendJson(selfPosJson);
+                Log.d("zw", "uploadSelfPos: 准备发给亮哥的格式是：" + json);
+                OkHttpUtils.getInstance(getActivity().getApplicationContext()).del("http://120.27.249.235:8081/deletePositionBySelfPosJson",
+                        json,
+                        new OkHttpUtils.MyCallback() {
+                            @Override
+                            public void success(Response response) throws IOException {
+                                //将数据库发送状态修改成已发送
+                                Log.d("zw", "success: 网络也删除成功");
+                                JSONObject object = JSON.parseObject(response.body().string());
+                                Integer code = object.getInteger("code");
+                                switch (code){
+                                    case 200:{
+                                        LitePal.deleteAll(Pos.class, "latitude = ? and lontitude=? and uid=?", selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID());
+                                        selfPosAdapter.deleteData(pos);
+                                        break;
+                                    } default:{
+                                        LitePal.deleteAll(Pos.class, "latitude = ? and lontitude=? and uid=?", selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID());
+                                        selfPosAdapter.deleteData(pos);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void failed(IOException e) {
+                                Toast.makeText(getActivity().getApplicationContext(), "没有网络，删除失败", Toast.LENGTH_LONG).show();
+                            }
+                        });
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.d("zw", "uploadSelfPos: 删除自建位置点失败");
+            }
+        }
+
+
         //设置回调，自动创建新的。。。但是recycleview里面写了刷新了的，并没有真正的执行
     }
+
+
+    /**
+     * @param
+     * @return null
+     * @Title
+     * @parameter
+     * @Description 取消上传，先查库，查库提交，然后改本地库
+     * @author chx
+     * @data 2022/3/4/004  18:21
+     */
+    private void cancleUpload(starPos selfPos, int pos) {
+        selfPosRecords = LitePal.where("latitude=? and lontitude=? and uid=?",
+                selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID()).find(Pos.class);
+        starPosRecords = LitePal.where("latitude=? and lontitude=? and selfID=?",
+                selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID()).find(starposDB.class);
+        if (!selfPosRecords.isEmpty()){
+            selfPosRecord = selfPosRecords.get(0);
+            selfPosJson selfPosJson = new selfPosJson(selfPosRecord.getUid(), selfPosRecord.getLontitude(),
+                    selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), selfPosRecord.getText(), selfPosRecord.getLocInfo(),0, selfPosRecord.getTag());
+            String json = JSONUtils.sendJson(selfPosJson);
+            Log.d("zw", "uploadSelfPos: 准备发给亮哥的格式是：" + json);
+            try {
+                OkHttpUtils.getInstance(getActivity().getApplicationContext()).put("http://120.27.249.235:8081/reclaimPosition", json, new OkHttpUtils.MyCallback() {
+                    @Override
+                    public void success(Response response) throws IOException {
+                        selfPosRecord.setStatus("1");
+                        selfPosRecord.save();
+                        if (starPosRecords.isEmpty()){
+                            starposDB = new starposDB();
+                            starposDB.setUid(application.getUserID());
+                            starposDB.setSelfID(application.getUserID());
+                            starposDB.setLontitude(selfPosRecord.getLontitude());
+                            starposDB.setTag(selfPosRecord.getTag());
+                            starposDB.setLegend(selfPosRecord.getLegend());
+                            starposDB.setText(selfPosRecord.getText());
+                            starposDB.setStatus("1");
+                            starposDB.setLatitude(selfPosRecord.getLatitude());
+                            starposDB.setLocInfo(selfPosRecord.getLocInfo());
+                            starposDB.save();
+                        }else{
+                            starposDB = starPosRecords.get(0);
+                            starposDB.setUid(application.getUserID());
+                            starposDB.setSelfID(application.getUserID());
+                            starposDB.setLontitude(selfPosRecord.getLontitude());
+                            starposDB.setTag(selfPosRecord.getTag());
+                            starposDB.setLegend(selfPosRecord.getLegend());
+                            starposDB.setText(selfPosRecord.getText());
+                            starposDB.setStatus("1");
+                            starposDB.setLatitude(selfPosRecord.getLatitude());
+                            starposDB.setLocInfo(selfPosRecord.getLocInfo());
+                            starposDB.save();
+                        }
+                        selfPosAdapter.cancelUpload(pos);
+                    }
+
+                    @Override
+                    public void failed(IOException e) {
+                        Toast.makeText(getActivity().getApplicationContext(), "修改失败", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }catch (Exception e){
+                Log.d("zw", "cancleUpload: 取消发布这个动作失败");
+            }
+
+        }
+
+    }
+
+
 
     /**
      * @return null
@@ -273,8 +419,8 @@ public class selfFragment extends Fragment {
         EditText content = v.findViewById(R.id.et_locInfo2);
         Button update = v.findViewById(R.id.btn_update);
         Button cancel = v.findViewById(R.id.btn_cancel_locInfo);
-        selfPosRecords = LitePal.where("latitude=? or lontitude=?",
-                selfPos.getLatitude(), selfPos.getLontitude()).find(Pos.class);
+        selfPosRecords = LitePal.where("latitude=? and lontitude=? and uid=?",
+                selfPos.getLatitude(), selfPos.getLontitude(), application.getUserID()).find(Pos.class);
         if (!selfPosRecords.isEmpty()){
             selfPosRecord = selfPosRecords.get(0);
             content.setText(selfPos.getLocInfo());

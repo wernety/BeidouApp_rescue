@@ -8,6 +8,8 @@
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/bodertext.xml" value="0.5901041666666667" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/divider_for_map.xml" value="0.5901041666666667" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/et_background.xml" value="0.5901041666666667" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/newloc_base.xml" value="0.3776041666666667" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/spinner_background.xml" value="0.3614583333333333" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/font/font.xml" value="0.39166666666666666" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_chat.xml" value="0.25" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_login.xml" value="0.21822916666666667" />
@@ -28,6 +30,7 @@
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_locsend.xml" value="0.24583333333333332" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_markerclick.xml" value="0.22135416666666666" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_other_star_activity.xml" value="0.22083333333333333" />
+        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_selffragment.xml" value="0.4601449275362319" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_starfragment.xml" value="0.2223731884057971" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_traceclick.xml" value="0.20052083333333334" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_tree.xml" value="0.24583333333333332" />

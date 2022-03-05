@@ -50,6 +50,11 @@ public class selfPosAdapter extends RecyclerView.Adapter<selfPosAdapter.selfView
         }else {
             holder.tv2_selfpos.setText(starPos.getText());
         }
+        if (starPos.getStatus().equals("1")){
+            holder.tv2_posStatus.setText("已发布");
+        }else {
+            holder.tv2_posStatus.setText("未发布");
+        }
         holder.tv2_selfpos.setTag(position);
         holder.tv2_selfpos.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,16 +127,29 @@ public class selfPosAdapter extends RecyclerView.Adapter<selfPosAdapter.selfView
         }
     }
 
+    public void uploadSuccess(int pos){
+        mlist.get(pos).setStatus("1");
+        notifyDataSetChanged();
+    }
+
+    public void cancelUpload(int pos){
+        mlist.get(pos).setStatus("0");
+        notifyDataSetChanged();
+    }
+
     public class selfViewHolder extends RecyclerView.ViewHolder{
         TextView tv2_selfpos;
         TextView tv2_postag;
         TextView tv2_uid;
+        TextView tv2_posStatus;
+
 
         public selfViewHolder(@NonNull View itemView) {
             super(itemView);
             tv2_selfpos = (TextView) itemView.findViewById(R.id.tv2_selfpos);
             tv2_postag = (TextView) itemView.findViewById(R.id.tv2_postag);
             tv2_uid = (TextView) itemView.findViewById(R.id.tv2_uid);
+            tv2_posStatus = (TextView) itemView.findViewById(R.id.tv2_posStatus);
         }
     }
 }

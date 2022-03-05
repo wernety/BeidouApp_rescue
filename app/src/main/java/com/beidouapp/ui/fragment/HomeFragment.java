@@ -1230,7 +1230,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                             posRecord = new Pos();
                             posRecord.setLatitude(String.valueOf(latLng.latitude));
                             posRecord.setLontitude(String.valueOf(latLng.longitude));
-                            posRecord.setStatus("离线");
+                            posRecord.setStatus("0"); //0是离线
                             posRecord.setUid(uid);
                             if (et_text.getText().toString().isEmpty()){
                                 posRecord.setText("没有设置");

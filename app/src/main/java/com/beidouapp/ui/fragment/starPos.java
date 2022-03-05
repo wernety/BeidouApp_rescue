@@ -63,6 +63,38 @@ public class starPos implements Serializable{
         return legend;
     }
 
+    public void setText(String text) {
+        Text = text;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLontitude(String lontitude) {
+        this.lontitude = lontitude;
+    }
+
+    public void setLocInfo(String locInfo) {
+        this.locInfo = locInfo;
+    }
+
+    public void setLegend(int legend) {
+        this.legend = legend;
+    }
+
     @Override
     public String toString() {
         return "starPos{" +

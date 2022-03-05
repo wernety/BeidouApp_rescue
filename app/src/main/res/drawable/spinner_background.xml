@@ -13,6 +13,6 @@
     <item>
         <bitmap
             android:gravity="end"
-            android:src="@drawable/spinner_down" />
+            android:src="@drawable/spinner_down_new" />
     </item>
 </layer-list>

@@ -13,4 +13,8 @@
         android:id="@+id/watchLocInfo"
         android:title="查看详细信息"/>
 
+    <item
+        android:id="@+id/cancleUpLoad"
+        android:title="取消发布"/>
+
 </menu>

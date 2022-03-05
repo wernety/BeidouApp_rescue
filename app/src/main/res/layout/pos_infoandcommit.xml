@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="254dp"
+    android:layout_width="220dp"
     android:layout_height="300dp"
-    android:alpha="40"
+    android:alpha="0.8"
+    android:background="@drawable/newloc_base"
     android:orientation="vertical">
 
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:alpha="1">
 
 
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -116,8 +118,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:scrollbarSize="5dp"
             android:background="@drawable/spinner_background"
             android:entries="@array/locInfo"
+
+            android:alpha="0.7"
             android:spinnerMode="dropdown" />
 
 
@@ -128,6 +133,7 @@
             android:layout_weight="1"
             android:background="@drawable/spinner_background"
             android:entries="@array/locLegend"
+            android:alpha="0.7"
             android:spinnerMode="dropdown"
             android:layout_marginLeft="10dp" />
 
@@ -160,8 +166,9 @@
         android:layout_marginEnd="30dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:layout_width="194dp"
+        android:layout_width="160dp"
         android:layout_height="1dp"
+        android:alpha="0.7"
         android:background="@drawable/divider_for_map"/>
 
     <LinearLayout
@@ -173,7 +180,7 @@
             android:id="@+id/btn_search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+
             android:textSize="15sp"
             android:text="@string/submit"
             android:layout_weight="1"
@@ -183,13 +190,14 @@
             android:layout_gravity="center"
             android:layout_width="1dp"
             android:layout_height="25dp"
+            android:alpha="0.7"
             android:background="@drawable/divider_for_map"/>
 
         <Button
             android:id="@+id/btn_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+
             android:textSize="15sp"
             android:layout_weight="1"
             android:text="@string/cancle"
