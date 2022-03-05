@@ -20,4 +20,5 @@
     <color name="btn_send_textcolor">@color/white</color>
     <color name="chat_text_color">#0B1816</color>
     <color name="info_text_color">#CC090505</color>
+    <color name="message_bg">#ffffff</color>
 </resources>
