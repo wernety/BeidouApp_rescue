@@ -331,12 +331,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         textView2 = view.findViewById(R.id.longitudeLatitude);
         textView3 = view.findViewById(R.id.altitude);
         textView4 = view.findViewById(R.id.velocity);
-        textView5 = view.findViewById(R.id.direction);
+//        textView5 = view.findViewById(R.id.direction);
         textView1.setTypeface(font);
         textView2.setTypeface(font);
         textView3.setTypeface(font);
         textView4.setTypeface(font);
-        textView5.setTypeface(font);
+//        textView5.setTypeface(font);
 
         compass = view.findViewById(R.id.imageViewCompass);
     }
@@ -1781,11 +1781,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
                             360-newDegree,
                             Animation.RELATIVE_TO_SELF, 0.5f,
                             Animation.RELATIVE_TO_SELF, 0.5f);
-                    ra.setDuration(100);
+                    ra.setDuration(25);
                     ra.setFillAfter(true);
                     compass.startAnimation(ra);
+                    mCurrentDir = newDegree;
                     lastDegree = newDegree;
-                    setTextView(newDegree);
+//                    setTextView(newDegree);
                 }
             }
             times++;

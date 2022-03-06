@@ -37,8 +37,8 @@ public class MyLocationListener extends BDAbstractLocationListener {
         this.time = bdLocation.getTime();
         this.direction = bdLocation.getDirection();
         this.district = bdLocation.getDistrict();
-        Log.d("zw", "onReceiveLocation: 此时的几个关键信息为" + this.latitude + "接下来： " + this.longitude +
-                "此时所处的区域为" + bdLocation.getDistrict() + "此时的时间为" + this.time + "此时所在的高度" + bdLocation.getAltitude());
+//        Log.d("zw", "onReceiveLocation: 此时的几个关键信息为" + this.latitude + "接下来： " + this.longitude +
+//                "此时所处的区域为" + bdLocation.getDistrict() + "此时的时间为" + this.time + "此时所在的高度" + bdLocation.getAltitude());
     }
 
     public List<String> getLatLng(){

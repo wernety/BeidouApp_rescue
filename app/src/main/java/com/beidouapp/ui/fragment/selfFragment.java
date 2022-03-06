@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
@@ -37,6 +39,7 @@ import com.beidouapp.model.utils.JSONUtils;
 import com.beidouapp.model.utils.OkHttpUtils;
 import com.beidouapp.model.utils.selfPosJson;
 import com.beidouapp.ui.DemoApplication;
+import com.beidouapp.ui.MainActivity;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 
@@ -468,11 +471,25 @@ public class selfFragment extends Fragment {
             alertDialog.show();
             alertDialog.getWindow().setContentView(v);
             alertDialog.getWindow().setGravity(Gravity.CENTER);
+            content.setFocusable(true);
+            content.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        //dialog弹出软键盘
+                        alertDialog.getWindow()
+                                .clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                    }
+                }
+            });
+//            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+//            imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
             update.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     selfPosJson selfPosJson = new selfPosJson(selfPosRecord.getUid(), selfPosRecord.getLontitude(),
                             selfPosRecord.getLatitude(), (int) selfPosRecord.getLegend(), content.getText().toString(), selfPosRecord.getLocInfo(),0, selfPosRecord.getTag());
+                    Log.d("zw", "onClick: 此时要改变的详细信息是" + content.getText().toString());
                     String json = JSONUtils.sendJson(selfPosJson);
                     OkHttpUtils.getInstance(getActivity().getApplicationContext()).put("http://120.27.249.235:8081/updatePosition", json, new OkHttpUtils.MyCallback() {
                         @Override

@@ -123,6 +123,7 @@ public class otherStarActivity extends AppCompatActivity {
                                     dialog.dismiss();
                                     intent = getIntent();
                                     setResult(1, intent);
+                                    finish();
                                 }
                             })
                             .setNegativeText("取消")
