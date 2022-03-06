@@ -213,10 +213,17 @@ public class MessageFragment extends Fragment {
                 }
                 transId = id2name.transform(writableDatabase, loginId, manRecord.getToID());
                 query.moveToFirst();
+
+                String type = query.getString(query.getColumnIndex("message_type"));
                 Map<String, Object> map = new HashMap<String, Object>();
                 Log.d("zzjyy", transId);
                 map.put("title", transId);
-                map.put("content", query.getString(query.getColumnIndex("contentChat")));
+                if (type.equals("text")) {
+                    map.put("content", query.getString(query.getColumnIndex("contentChat")));
+                } else if (type.equals("img")){
+                    map.put("content", "[图片]");
+                }
+
                 map.put("time", TimeUtils.diffTime(query.getString(query.getColumnIndex("time"))));
                 ContactList.add(map);
             }

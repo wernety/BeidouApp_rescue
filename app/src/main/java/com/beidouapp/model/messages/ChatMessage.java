@@ -4,6 +4,7 @@ public class ChatMessage {
     private String name;
     private String content;
     private String time;
+    private String type;
     private int isMeSend;//0是对方发送 1是自己发送
     //private int isRead;//是否已读（0未读 1已读）
 
@@ -11,11 +12,12 @@ public class ChatMessage {
         super();
     }
 
-    public ChatMessage(String name, String content, String time, int isMeSend){
+    public ChatMessage(String name, String content, String time, String type,int isMeSend){
         this.content = content;
         this.isMeSend = isMeSend;
         this.name = name;
         this.time = time;
+        this.type = type;
     }
 
     public String getContent() {
@@ -48,6 +50,14 @@ public class ChatMessage {
 
     public String getName() {
         return name;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
     }
     //    public int getIsRead() {
 //        return isRead;

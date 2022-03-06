@@ -1,11 +1,14 @@
 package com.beidouapp.model.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.beidouapp.R;
@@ -59,6 +62,7 @@ public class ChatAdapter extends BaseAdapter {
         ChatMessage chatMessage = chatMessageList.get(position);
         String content = chatMessage.getContent();
         String time = formatTime(chatMessage.getTime());
+        String type = chatMessage.getType();
         String nickname = chatMessage.getName();
         int isMeSend = chatMessage.getIsMeSend();
         //int isRead = chatMessage.getIsRead();
@@ -70,10 +74,12 @@ public class ChatAdapter extends BaseAdapter {
                 convertView = inflater.inflate(R.layout.item_chat_receive_text, parent, false);
                 holder.tv_content = convertView.findViewById(R.id.tv_content);
 //                holder.tv_sendtime = convertView.findViewById(R.id.tv_sendtime);
+                holder.iv_content = convertView.findViewById(R.id.iv_content);
                 holder.tv_display_name = convertView.findViewById(R.id.tv_display_name);
             } else {
                 convertView = inflater.inflate(R.layout.item_chat_send_text, parent, false);
                 holder.tv_content = convertView.findViewById(R.id.tv_content);
+                holder.iv_content = convertView.findViewById(R.id.iv_content);
 //                holder.tv_sendtime = convertView.findViewById(R.id.tv_sendtime);
                 //holder.tv_isRead = convertView.findViewById(R.id.tv_isRead);
             }
@@ -83,8 +89,19 @@ public class ChatAdapter extends BaseAdapter {
         }
 
 //        holder.tv_sendtime.setText(time);
-        holder.tv_content.setVisibility(View.VISIBLE);
-        holder.tv_content.setText(content);
+
+        if (type.equals("text")) {
+            holder.tv_content.setVisibility(View.VISIBLE);
+            holder.tv_content.setText(content);
+            holder.iv_content.setVisibility(View.GONE);
+        } else if (type.equals("img")) {
+            holder.tv_content.setVisibility(View.GONE);
+            Bitmap bitmap = BitmapFactory.decodeFile(content);
+            holder.iv_content.setImageBitmap(bitmap);
+            holder.iv_content.setVisibility(View.VISIBLE);
+        }
+
+
 
         if (isMeSend == 1) {
 
@@ -109,6 +126,7 @@ public class ChatAdapter extends BaseAdapter {
         private TextView tv_content;
         private TextView tv_sendtime;
         private TextView tv_display_name;
+        private ImageView iv_content;
         //private TextView tv_isRead;
     }
 

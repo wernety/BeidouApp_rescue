@@ -155,6 +155,8 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        Path path;
+
         if (resultCode == RESULT_CANCELED) {
             Toast.makeText(getApplication(), "取消", Toast.LENGTH_LONG).show();
         }
@@ -163,14 +165,94 @@ public class ChatActivity extends AppCompatActivity {
             case CODE_ALBUM_REQUEST:{
                String imgPath = handleImageOnKitKat(data);
                Log.d("IMG","PATH:" + imgPath);
-               Path path = Paths.get(imgPath);
-               Message4Send message = new Message4Send(toID, toType, "img", null);
-               msgService.sendMessage(message, path);
+               path = Paths.get(imgPath);
+//               Path path = Paths.get("/storage/emulated/0/DCIM/Camera/voc_weights_vgg.jpg");
                break;
             }
             case CODE_CAMERA_REQUEST:{
+                path = null;
                 break;
             }
+            default: path = null;
+        }
+
+        if (msgService.msgLink.webSocketClient != null
+                && msgService.msgLink.webSocketClient.isOpen()
+                && path != null) {
+
+            if (toType.equals("group")) {
+                Message4Send message = new Message4Send(toID, toType, "img", null);
+                timeMillis = System.currentTimeMillis();
+                boolean isSent = msgService.sendMessage(message, path);
+
+                ChatMessage chatMessage = new ChatMessage();
+                chatMessage.setType("img");
+                chatMessage.setContent(path.toString());
+                chatMessage.setIsMeSend(1);
+                chatMessage.setTime(timeMillis +"");
+                chatMessageList.add(chatMessage);
+
+                if (isSent) {
+                    ContentValues values = new ContentValues();
+                    values.put("groupID", toID);
+                    values.put("selfID", loginId);
+                    values.put("flag", "1");//自己发的是1
+                    values.put("contentChat", path.toString());
+                    values.put("message_type", "img");
+                    values.put("time", String.valueOf(timeMillis));
+                    writableDatabase.insert("chat_group", null, values);
+                }
+
+                manRecords = LitePal.where("toID=? and selfID=?", toID, loginId).find(recentMan.class);
+                if(manRecords.isEmpty()){
+                    manRecord = new recentMan();
+                    manRecord.setToID(toID);
+                    manRecord.setSelfId(loginId);
+                    manRecord.setType("1");
+                    manRecord.save();
+                }else {
+                    manRecord = manRecords.get(0);
+                }
+
+            } else {
+
+                Message4Send message = new Message4Send(toID, "single", "img", path.toString());
+                timeMillis = System.currentTimeMillis();
+                boolean isSent = msgService.sendMessage(message, path);
+
+                ChatMessage chatMessage = new ChatMessage();
+                chatMessage.setType("img");
+                chatMessage.setContent(path.toString());
+                chatMessage.setIsMeSend(1);
+                chatMessage.setTime(timeMillis +"");
+                chatMessageList.add(chatMessage);
+                //插入数据
+                if (isSent) {
+                    ContentValues values = new ContentValues();
+                    values.put("toID", toID);
+                    values.put("selfID", loginId);
+                    values.put("flag", 1);//自己发的是1
+                    values.put("contentChat", path.toString());
+                    values.put("message_type", "img");
+                    values.put("time", String.valueOf(timeMillis));
+                    writableDatabase.insert("chat", null, values);
+                }
+                //将最近的一次消息写入数据库
+                manRecords = LitePal.where("toID=? and selfID=?", toID, loginId).find(recentMan.class);
+                if(manRecords.isEmpty()){
+                    manRecord = new recentMan();
+                    manRecord.setToID(toID);
+                    manRecord.setSelfId(loginId);
+                    manRecord.setType("0");//0是单聊
+                    manRecord.save();
+                }else {
+                    manRecord = manRecords.get(0);
+                }
+
+            }
+            initChatMsgListView();
+        } else {
+            Toast.makeText(ChatActivity.this, "网络连接失败", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -230,24 +312,27 @@ public class ChatActivity extends AppCompatActivity {
 
                     if (toType.equals("group")) {
                         Message4Send message4Send = new Message4Send(toID,"group", "text", content);
-                        Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send,true);
-                        msgService.sendMessage(json);
+                        timeMillis = System.currentTimeMillis();
+                        boolean isSent = msgService.sendMessage(json);
                         ChatMessage chatMessage = new ChatMessage();
+                        chatMessage.setType("text");
                         chatMessage.setContent(content);
                         chatMessage.setIsMeSend(1);
-                        chatMessage.setTime(System.currentTimeMillis()+"");
+                        chatMessage.setTime(timeMillis +"");
                         chatMessageList.add(chatMessage);
-                        timeMillis = System.currentTimeMillis();
-                        Log.d("zw", "onClick: 群ID" + toID);
-                        ContentValues values = new ContentValues();
-                        values.put("groupID", toID);
-                        values.put("selfID", loginId);
-                        values.put("flag", "1");//自己发的是1
-                        values.put("contentChat", content);
-                        values.put("message_type", "text");
-                        values.put("time", String.valueOf(timeMillis));
-                        writableDatabase.insert("chat_group", null, values);
+
+                        if (isSent) {
+                            ContentValues values = new ContentValues();
+                            values.put("groupID", toID);
+                            values.put("selfID", loginId);
+                            values.put("flag", "1");//自己发的是1
+                            values.put("contentChat", content);
+                            values.put("message_type", "text");
+                            values.put("time", String.valueOf(timeMillis));
+                            writableDatabase.insert("chat_group", null, values);
+                        }
+
                         manRecords = LitePal.where("toID=? and selfID=?", toID, loginId).find(recentMan.class);
                         if(manRecords.isEmpty()){
                             manRecord = new recentMan();
@@ -258,19 +343,19 @@ public class ChatActivity extends AppCompatActivity {
                         }else {
                             manRecord = manRecords.get(0);
                         }
+
                     } else {
 
                         Message4Send message4Send = new Message4Send(toID, "single", "text", content);
                         Log.d("string", message4Send.toString());
                         String json = JSON.toJSONString(message4Send, true);
-
+                        timeMillis = System.currentTimeMillis();
                         boolean isSent = msgService.sendMessage(json);
-
                         ChatMessage chatMessage = new ChatMessage();
+                        chatMessage.setType("text");
                         chatMessage.setContent(content);
                         chatMessage.setIsMeSend(1);
-                        timeMillis = System.currentTimeMillis();
-                        chatMessage.setTime(String.valueOf(timeMillis)+"");
+                        chatMessage.setTime(timeMillis +"");
                         chatMessageList.add(chatMessage);
                         //插入数据
                         if (isSent) {
@@ -425,14 +510,9 @@ public class ChatActivity extends AppCompatActivity {
             String receiveType = bundle.getString("receiveType");
             String msgType = bundle.getString("msgType");
 
-
             ChatMessage chatMessage = new ChatMessage();
-
-            if (msgType.equals("text")) {
-                chatMessage.setContent(bundle.getString("sendText"));
-            } else if (msgType.equals("img")) {
-            }
-
+            chatMessage.setType(msgType);
+            chatMessage.setContent(bundle.getString("sendText"));
             chatMessage.setIsMeSend(0);
             chatMessage.setTime(bundle.getString("sendTime"));
 
@@ -489,9 +569,9 @@ public class ChatActivity extends AppCompatActivity {
                     time = query.getString(query.getColumnIndex("time"));
                     message_type = query.getString(query.getColumnIndex("message_type"));
                     if (flag.equals("0")){
-                        chatMessage = new ChatMessage(toNickname, contentChat, time, 0);
+                        chatMessage = new ChatMessage(toNickname, contentChat, time, message_type,0);
                     }else{
-                        chatMessage = new ChatMessage(loginId, contentChat, time, 1);
+                        chatMessage = new ChatMessage(loginId, contentChat, time, message_type,1);
                     }
                     templeList.add(chatMessage);
                     if (i == 11){break;}
@@ -531,12 +611,12 @@ public class ChatActivity extends AppCompatActivity {
                     time = query.getString(query.getColumnIndex("time"));
                     message_type = query.getString(query.getColumnIndex("message_type"));
                     if (flag.equals("1")){
-                        chatMessage = new ChatMessage(loginId, contentChat, time, 1);
+                        chatMessage = new ChatMessage(loginId, contentChat, time, message_type,1);
                     }else{
 //                        Cursor cursor = writableDatabase.query("friend",null,"friend_id=? AND selfID=?",
 //                                new String[]{flag, loginId}, null, null, null); //将电话转换成名字
                         transId = id2name.transform(writableDatabase,loginId,flag);
-                        chatMessage = new ChatMessage(transId, contentChat, time, 0);
+                        chatMessage = new ChatMessage(transId, contentChat, time, message_type,0);
                     }
                     templeList.add(chatMessage);
                     if (i == 11){break;}

@@ -56,6 +56,20 @@
             android:textColorLink="#157BFB"
             android:visibility="visible"/>
 
+        <ImageView
+            android:id="@+id/iv_content"
+            style="@style/jmui_msg_text_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="3dp"
+            android:autoLink="web"
+            android:background="@drawable/jmui_msg_send_bg"
+            android:paddingLeft="10dp"
+            android:paddingRight="18dp"
+            android:textColorLink="#157BFB"
+            android:visibility="gone"/>
+
+
         <LinearLayout
             android:id="@+id/ll_push"
             android:layout_width="wrap_content"

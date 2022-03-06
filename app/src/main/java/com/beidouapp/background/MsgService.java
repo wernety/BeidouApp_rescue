@@ -170,14 +170,18 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
      * @return
      */
     public boolean sendMessage(Message4Send message4Send, Path filePath) {
-        String fileName = filePath.getFileName().toString();
-        String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
-        FilePacket p = FilePacket.constructUpNewFilePacket(suffix);
-        msgLink.setUpFilePath(filePath);
-        msgLink.setUpFileMessage(message4Send);
-        msgLink.webSocketClient.send(p.getBuffer().array());
-
-        return false;
+        try {
+            String fileName = filePath.getFileName().toString();
+            String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+            FilePacket p = FilePacket.constructUpNewFilePacket(suffix);
+            msgLink.setUpFilePath(filePath);
+            msgLink.setUpFileMessage(message4Send);
+            msgLink.webSocketClient.send(p.getBuffer().array());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -215,7 +219,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         private Message4Send upFileMessage;
         private ByteChannel fileChannel;
         private MessageDigest md;
-        private Queue<String> downFilePathQueue = new LinkedList<>();
+        private Queue<Bundle> downFilePathQueue = new LinkedList<>();
 
 
 
@@ -238,9 +242,6 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
         public Link(String url, String id,int netStatus){
             this.url = url + id;
             this.netStatus = netStatus;
-
-//            filePacketQueue.offer() //ru
-//            filePacketQueue.poll() //chu
         }
 
         public void setNetStatus(int netStatus){
@@ -343,12 +344,29 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                                 webSocketClient.send(ackP.getBuffer());
                             } catch (Exception e) {
                                 e.printStackTrace();
+                            } finally {
+                                try {
+                                    fileChannel.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
 
-                            downFilePathQueue.poll();
+                            Intent intent = new Intent("com.beidouapp.callback.content");
+                            Bundle bundle = downFilePathQueue.poll();
+                            bundle.putString("sendText", downFilePath.toString());
+                            intent.putExtra("messageBundle", bundle);
+                            sendBroadcast(intent);
+
+                            Message message = new Message();
+                            message.setData(bundle);
+                            message.what = 1;
+                            write2DBHandler.sendMessage(message);
+
+                            Log.d("zzily", bundle.getString("sendText"));
 
                             if (!downFilePathQueue.isEmpty()) {
-                                requestFile(downFilePathQueue.peek());
+                                requestFile(downFilePathQueue.peek().getString("sendText"));
                             }
 
                             break;
@@ -386,19 +404,20 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                             }
                             intent.putExtra("messageBundle", bundle);
                             sendBroadcast(intent);
+
+                            Message message = new Message();
+                            message.setData(bundle);
+                            message.what = 1;
+                            write2DBHandler.sendMessage(message);
+
                         } else if (msgType.equals("img")) {
                             String path = bundle.getString("sendText");
 
                             if (downFilePathQueue.isEmpty()) {
                                 requestFile(path);
                             }
-                            downFilePathQueue.offer(path);
+                            downFilePathQueue.offer(bundle);
                         }
-
-                        Message message = new Message();
-                        message.setData(bundle);
-                        message.what = 1;
-                        write2DBHandler.sendMessage(message);
                     }
                     else if (message4Receive.getType().equals("ERR")) {
                         if (message4Receive.getMsg().equals("用户重复登陆")){
@@ -628,7 +647,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                             values.put("selfID", uid);
                             values.put("flag", bundle.getString("sendUserId"));//别人发的,flag设置为账号（手机号）
                             values.put("contentChat", bundle.getString("sendText"));
-                            values.put("message_type", "text");
+                            values.put("message_type", bundle.getString("msgType"));
                             values.put("time", bundle.getString("sendTime"));
                             writableDatabase.insert("chat_group", null, values);//最近获得的群聊消息入库
                             Log.d("websocket", "群聊消息入库成功");
@@ -650,7 +669,7 @@ public class MsgService extends Service implements NetworkChangeReceiver.NetStat
                                 values.put("selfID", uid);
                                 values.put("flag", 0);//别人发的是0
                                 values.put("contentChat", bundle.getString("sendText"));
-                                values.put("message_type", "text");
+                                values.put("message_type", bundle.getString("msgType"));
                                 values.put("time", bundle.getString("sendTime"));
                                 writableDatabase.insert("chat", null, values);//最近获得的单聊消息入库
                                 Log.d("websocket", "入库成功");

@@ -47,6 +47,23 @@
                 android:textColor="#363333"
                 android:textColorLink="#157BFB"
                 android:visibility="visible"/>
+
+            <ImageView
+                android:id="@+id/iv_content"
+                style="@style/jmui_msg_text_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_display_name"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="3dp"
+                android:layout_toRightOf="@id/jmui_avatar_iv"
+                android:autoLink="web"
+                android:background="@drawable/jmui_msg_receive_bg"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp"
+                android:textColor="#363333"
+                android:textColorLink="#157BFB"
+                android:visibility="gone"/>
         </LinearLayout>
 
         <LinearLayout
