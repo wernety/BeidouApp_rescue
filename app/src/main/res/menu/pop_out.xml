@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:title="添加好友"
+    <item
         android:id="@+id/add_friends"
-        android:icon="@drawable/setting"
-        android:enabled="true"/>
-    <item android:title="创建群聊"
+        android:icon="@mipmap/ic_add"
+        android:orderInCategory="99"
+        app:showAsAction="ifRoom"
+        android:title="添加朋友" />
+    <item
         android:id="@+id/add_group"
-        android:icon="@drawable/people2x"
-        android:enabled="true"/>
+        android:icon="@mipmap/ic_create_group_cheat"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"
+        android:title="创建群聊"
+        />
 </menu>

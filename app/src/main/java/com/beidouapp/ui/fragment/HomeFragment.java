@@ -835,8 +835,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
         super.onResume();
         mapView.onResume();
         //register listener
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mMagneticField, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, mMagneticField, SensorManager.SENSOR_DELAY_GAME);
 
     }
 
@@ -1764,33 +1764,34 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sens
             // 该值表示设备的 y 轴和磁北极之间的角度。 朝北时这个角度为0，朝南时这个角度为π。
               // 同样，面向东时，该角度为 π/2，面向西方时，该角度为 -π/2。 值的范围是 -π 到 π。
             if(values[0] <0){
-                values[0] = (360 - Math.abs(values[0])) + 180;
+                values[0] = (180 - Math.abs(values[0])) + 180;
             }
 //            Log.d("旋转矩阵", "onSensorChanged: " + times);
             degreeList.add(values[0]) ;
             if(times == (totalTimes-1)) {
                 Collections.sort(degreeList);
-               newDegree = degreeList.get((totalTimes-1)/2);
-//               Log.d("旋转矩阵", "onSensorChanged: " + newDegree);
+               newDegree = Math.round(degreeList.get((totalTimes-1)/2));
+               Log.d("旋转矩阵", "onSensorChanged: " + newDegree);
                 if (Math.abs(lastDegree-newDegree)>=1)
                 {
+                    Log.d("                                              ", "newDegree: " + newDegree);
+                    Log.d("旋转矩阵", "lastDegree: " + lastDegree);
                     RotateAnimation ra = new RotateAnimation(
-                            lastDegree,
-                            newDegree,
+                            360-lastDegree,
+                            360-newDegree,
                             Animation.RELATIVE_TO_SELF, 0.5f,
                             Animation.RELATIVE_TO_SELF, 0.5f);
                     ra.setDuration(100);
                     ra.setFillAfter(true);
                     compass.startAnimation(ra);
+                    lastDegree = newDegree;
+                    setTextView(newDegree);
                 }
-                lastDegree = newDegree;
-                setTextView(Math.round(newDegree));
             }
             times++;
         }else { //重置
             times = 0;
             degreeList = new ArrayList<Float>(totalTimes); //重置totalTimes次采样结果
-            lastDegree = newDegree;
         }
 
 

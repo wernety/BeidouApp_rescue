@@ -8,8 +8,6 @@
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/bodertext.xml" value="0.5901041666666667" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/divider_for_map.xml" value="0.5901041666666667" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/et_background.xml" value="0.5901041666666667" />
-        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/newloc_base.xml" value="0.3776041666666667" />
-        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/drawable/spinner_background.xml" value="0.3614583333333333" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/font/font.xml" value="0.39166666666666666" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_chat.xml" value="0.25" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/activity_login.xml" value="0.21822916666666667" />
@@ -30,7 +28,6 @@
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_locsend.xml" value="0.24583333333333332" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_markerclick.xml" value="0.22135416666666666" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_other_star_activity.xml" value="0.22083333333333333" />
-        <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_selffragment.xml" value="0.4601449275362319" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_starfragment.xml" value="0.2223731884057971" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_traceclick.xml" value="0.20052083333333334" />
         <entry key="..\:/Android-study/BeidouApp2/app/src/main/res/layout/item_tree.xml" value="0.24583333333333332" />
@@ -61,13 +58,21 @@
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/activity_register.xml" value="0.22" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/activity_safe.xml" value="0.30416666666666664" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/activity_shortmessage.xml" value="0.30416666666666664" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/activity_user.xml" value="0.22708333333333333" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/addstarloc.xml" value="0.22708333333333333" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/fragment_home.xml" value="0.30416666666666664" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/fragment_message.xml" value="0.22708333333333333" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/fragment_relation.xml" value="0.30416666666666664" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/fragment_selfloc.xml" value="0.30416666666666664" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/fragment_settings.xml" value="0.30416666666666664" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/item_add_group.xml" value="0.22708333333333333" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/locinfo.xml" value="0.22708333333333333" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/text_item.xml" value="0.22708333333333333" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/layout/view_keyboard_xhs.xml" value="0.22708333333333333" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/menu/main_activity_bottom.xml" value="0.30416666666666664" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/menu/menu_starfragment.xml" value="0.30416666666666664" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/menu/pop_out.xml" value="0.18489583333333334" />
+        <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/menu/relation.xml" value="0.30416666666666664" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/menu/selfposconfig_menu.xml" value="0.30416666666666664" />
         <entry key="..\:/HorizontalProject/AndroidProject/BeidouApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.3153846153846154" />
         <entry key="..\:/Project/BeiDou/BeidouApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.16666666666666666" />
